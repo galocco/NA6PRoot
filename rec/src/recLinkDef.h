@@ -22,6 +22,9 @@
 #pragma link C++ class NA6PVerTelReconstruction + ;
 #pragma link C++ class NA6PMuonSpecReconstruction + ;
 #pragma link C++ class NA6PMatching + ;
+#pragma link C++ class NA6PTOFCluster + ;
+#pragma link C++ class std::vector < NA6PTOFCluster> + ;
+#pragma link C++ class NA6PTOFMatching + ;
 #pragma link C++ class ExtTrackPar + ;
 #pragma link C++ class NA6PVertexerTracklets + ;
 #pragma link C++ class NA6PVertexerTracks + ;

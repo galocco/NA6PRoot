@@ -33,6 +33,7 @@ set(DICTIONARY_HEADERS
   NA6PGenCocktail.h
   NA6PBaseHit.h
   NA6PVerTelHit.h
+  NA6PTOFHit.h
   NA6PMuonSpecHit.h
   NA6PMuonSpecModularHit.h
   GenMUONLMR.h

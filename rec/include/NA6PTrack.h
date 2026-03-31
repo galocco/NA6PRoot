@@ -84,6 +84,9 @@ class NA6PTrack
   double getXLab() const { return mExtTrack.getY(); }
   double getYLab() const { return mExtTrack.getZ(); }
   double getZLab() const { return negDir() ? -mExtTrack.getX() : mExtTrack.getX(); }
+
+  double getXLabOuter() const { return mOuter.getY(); }
+  double getYLabOuter() const { return mOuter.getZ(); }
   double getZLabOuter() const { return negDir() ? -mOuter.getX() : mOuter.getX(); }
   double getZLabVertexConstrained() const { return negDir() ? -mConstrained.getX() : mConstrained.getX(); }
 
@@ -118,6 +121,8 @@ class NA6PTrack
   double getChi2MSRefit() const { return mChi2MSRefit; }
   double getNormChi2() const { return mNClusters < 3 ? 0 : (mChi2VT + mChi2MS) / ((mNClusters << 1) - kNDOF); }
   double getPredictedChi2(double* p, double* cov) const { return mExtTrack.getPredictedChi2(p, cov); }
+  double getTOF() const { return mTOF; }
+  void setTOF(double tof) { mTOF = tof; }
 
   void setMass(double m) { mMass = m; }
   void setMatchChi2(double chi2) { mMatchChi2 = chi2; }
@@ -166,6 +171,7 @@ class NA6PTrack
   double mChi2MSOuter = 0.f;                 // total chi2 MS outward fit
   double mChi2VTRefit = 0.f;                 // total chi2 VT inward refit
   double mChi2MSRefit = 0.f;                 // total chi2 MS inward refit
+  double mTOF = -1.f;                        // TOF signal
   uint32_t mClusterMap = 0;                  // pattern of clusters per layer
   int mNClusters = 0;                        // total hits
   int mNClustersVT = 0;                      // total VT hits

@@ -18,6 +18,8 @@
 #include "NA6PVerTelReconstruction.h"
 #include "NA6PMuonSpecReconstruction.h"
 #include "NA6PMatching.h"
+#include "NA6PTOFMatching.h"
+#include "NA6PTOFHit.h"
 
 double getPrimaryVertexZ(TTree* mcTree, std::vector<TParticle>* mcArr, int eventID)
 {
@@ -60,6 +62,8 @@ int main(int argc, char** argv)
     add_option("doVTTracking,vt", bpo::value<bool>()->default_value(true), "run VT tracker");
     add_option("doMSTracking,ms", bpo::value<bool>()->default_value(true), "run MS tracker");
     add_option("doMatching,mt", bpo::value<bool>()->default_value(true), "run matching between VT and MS");
+    add_option("doTOFHitsToRecPoints", bpo::value<bool>()->default_value(true), "run TOF hits->clusters");
+    add_option("doTOFMatching", bpo::value<bool>()->default_value(true), "run TOF matching to VT tracks");
     opt_all.add(opt_general).add(opt_hidden);
     bpo::store(bpo::command_line_parser(argc, argv).options(opt_all).positional(opt_pos).run(), vm);
 
@@ -96,6 +100,8 @@ int main(int argc, char** argv)
   const bool doVTTracking = vm["doVTTracking"].as<bool>();
   const bool doMSTracking = vm["doMSTracking"].as<bool>();
   const bool doMatching = vm["doMatching"].as<bool>();
+  const bool doTOFHitsToRecPoints = vm["doTOFHitsToRecPoints"].as<bool>();
+  const bool doTOFMatching = vm["doTOFMatching"].as<bool>();
 
   int firstEv = vm["firstevent"].as<int32_t>();
   int lastEv = vm["lastevent"].as<int32_t>();
@@ -108,6 +114,7 @@ int main(int argc, char** argv)
   vtrec->setGeometryFile("geometry.root");
   NA6PMuonSpecReconstruction* msrec = new NA6PMuonSpecReconstruction();
   NA6PMatching* matching = new NA6PMatching();
+  NA6PTOFMatching* tofMatching = new NA6PTOFMatching();
 
   if (doHitsToRecPoints) {
     TFile* fhVT = TFile::Open("HitsVerTel.root");
@@ -172,6 +179,39 @@ int main(int argc, char** argv)
     msrec->closeClustersOutput();
     fhMS->Close();
     delete fhMS;
+
+    // ── TOF hits → clusters ──────────────────────────────────────
+    if (doTOFHitsToRecPoints) {
+      TFile* fhTOF = TFile::Open("HitsTOF.root");
+      if (!fhTOF || fhTOF->IsZombie()) {
+        LOGP(error, "Cannot open HitsTOF.root");
+        if (fhTOF)
+          delete fhTOF;
+        return -1;
+      }
+      TTree* thTOF = (TTree*)fhTOF->Get("hitsTOF");
+      if (!thTOF) {
+        LOGP(error, "Cannot find tree 'hitsTOF' in HitsTOF.root");
+        fhTOF->Close();
+        delete fhTOF;
+        return -1;
+      }
+      std::vector<NA6PTOFHit> tofHits, *tofHitsPtr = &tofHits;
+      thTOF->SetBranchAddress("TOF", &tofHitsPtr);
+      int nEvTOF = thTOF->GetEntriesFast();
+
+      tofMatching->createClustersOutput();
+      for (int jEv = 0; jEv < nEvTOF; jEv++) {
+        thTOF->GetEvent(jEv);
+        LOGP(info, "TOF Event {} nHits= {}", jEv, (int)tofHits.size());
+        tofMatching->clearClusters();
+        tofMatching->hitsToRecPoints(tofHits);
+        tofMatching->writeClusters();
+      }
+      tofMatching->closeClustersOutput();
+      fhTOF->Close();
+      delete fhTOF;
+    }
   } else {
     LOGP(info, "Hits -> Recpoints disabled from input options");
   }
@@ -430,6 +470,76 @@ int main(int argc, char** argv)
     delete fmc;
   }
 
+  // ── TOF matching ────────────────────────────────────────────────
+  if (doTOFMatching) {
+    tofMatching->initTOFMatching();
+
+    TFile* ftVT = TFile::Open("TracksVerTel.root");
+    if (!ftVT || ftVT->IsZombie()) {
+      LOGP(error, "Cannot open TracksVerTel.root for TOF matching");
+      if (ftVT)
+        delete ftVT;
+      return -1;
+    }
+    TTree* ttVT = (TTree*)ftVT->Get("tracksVerTel");
+    if (!ttVT) {
+      LOGP(error, "Cannot find tree 'tracksVerTel' in TracksVerTel.root");
+      ftVT->Close();
+      delete ftVT;
+      return -1;
+    }
+    std::vector<NA6PTrack> vtTracksTOF, *vtTracksTOFPtr = &vtTracksTOF;
+    ttVT->SetBranchAddress("VerTel", &vtTracksTOFPtr);
+
+    TFile* fcTOF = TFile::Open("ClustersTOF.root");
+    if (!fcTOF || fcTOF->IsZombie()) {
+      LOGP(error, "Cannot open ClustersTOF.root");
+      if (fcTOF)
+        delete fcTOF;
+      return -1;
+    }
+    TTree* tcTOF = (TTree*)fcTOF->Get("clustersTOF");
+    if (!tcTOF) {
+      LOGP(error, "Cannot find tree 'clustersTOF' in ClustersTOF.root");
+      fcTOF->Close();
+      delete fcTOF;
+      return -1;
+    }
+    std::vector<NA6PTOFCluster> tofClus, *tofClusPtr = &tofClus;
+    tcTOF->SetBranchAddress("TOF", &tofClusPtr);
+
+    int nEvVTtof = ttVT->GetEntries();
+    int nEvTOFc  = tcTOF->GetEntries();
+    int nEvTOF   = std::min(nEvVTtof, nEvTOFc);
+    int firstEvTOF = (firstEv < 0) ? 0 : firstEv;
+    int lastEvTOF  = (lastEv > nEvTOF || lastEv < 0) ? nEvTOF : lastEv;
+
+    TStopwatch timerTOF;
+    timerTOF.Start();
+
+    for (int jEv = firstEvTOF; jEv < lastEvTOF; jEv++) {
+      LOGP(info, "TOF matching event {}", jEv);
+      ttVT->GetEvent(jEv);
+      tcTOF->GetEvent(jEv);
+
+      tofMatching->clearTracks();
+      tofMatching->setVerTelTracks(vtTracksTOF);
+      tofMatching->setClusters(tofClus);
+      tofMatching->runTOFMatching();
+    }
+    tofMatching->closeTracksOutput();
+
+    timerTOF.Stop();
+    LOGP(info, "------ TOF Matching time ------");
+    timerTOF.Print();
+    LOGP(info, "------------------------------");
+
+    ftVT->Close();
+    delete ftVT;
+    fcTOF->Close();
+    delete fcTOF;
+  }
+
   if (fcVT) {
     fcVT->Close();
     delete fcVT;
@@ -459,5 +569,6 @@ int main(int argc, char** argv)
   delete vtrec;
   delete msrec;
   delete matching;
+  delete tofMatching;
   return 0;
 }
