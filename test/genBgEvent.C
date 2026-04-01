@@ -5,7 +5,6 @@
 #include <TMath.h>
 #include <fairlogger/Logger.h>
 #endif
-
 bool getParams(float& T_piM, float& y0_piM, float& ysig_piM, float& dNdY_piM,
                float& T_piP, float& y0_piP, float& ysig_piP, float& dNdY_piP,
                float& T_KM, float& y0_KM, float& ysig_KM, float& dNdY_KM,
@@ -15,7 +14,26 @@ bool getParams(float& T_piM, float& y0_piM, float& ysig_piM, float& dNdY_piM,
   float en = NA6PBeamParam::Instance().energyPerNucleon;
   // pions and Kaons from  NA49 nucl-ex/0205002
 
-  if (std::abs(en - 40.) < 3) {
+  if (std::abs(en - 20.) < 3) {
+    LOGP(info, "Setting hadronic event parameters for PbPb at 20. GeV/c");
+    T_piM = T_piP = 0.17;
+    T_KM = T_KP = 0.22;
+    T_Prot = 0.26;
+
+    y0_piM = y0_piP = 0.;   // not available, single gaussian
+    y0_KM = y0_KP = 0.;     // not available, single gaussian
+    y0_Prot = 0.;            // not available, single gaussian
+
+    ysig_piM = ysig_piP = 1.2;
+    ysig_KM = ysig_KP = 1.2;
+    ysig_Prot = 1.2;
+
+    dNdY_piM = 106.1;
+    dNdY_piP = 96.6;
+    dNdY_KM = 7.58;
+    dNdY_KP = 20.1;
+    dNdY_Prot = 39.9;
+  } else if (std::abs(en - 40.) < 3) {
     LOGP(info, "Setting hadronic event parameters for PbPb at 40. GeV/c");
     T_piM = T_piP = 0.169;
     T_KM = 0.232;
@@ -25,7 +43,7 @@ bool getParams(float& T_piM, float& y0_piM, float& ysig_piM, float& dNdY_piM,
     y0_piM = y0_piP = 0.666; // pions 2-gaussian poles half distance
     y0_KM = 0.694;           // K- 2-gaussian poles half distance
     y0_KP = 0.694;           // K+ 2-gaussian poles half distance
-    y0_Prot = 0.907;         // ???
+    y0_Prot = 0.907;
 
     ysig_piM = ysig_piP = 0.872;
     ysig_KM = 0.635;
@@ -47,7 +65,7 @@ bool getParams(float& T_piM, float& y0_piM, float& ysig_piM, float& dNdY_piM,
     y0_piM = y0_piP = 0.72; // pions 2-gaussian poles half distance
     y0_KM = 0.727;          // K- 2-gaussian poles half distance
     y0_KP = 0.839;          // K+ 2-gaussian poles half distance
-    y0_Prot = 39.8;         // ???
+    y0_Prot = 39.8;
 
     ysig_piM = ysig_piP = 1.18;
     ysig_KM = 0.81;
@@ -117,7 +135,7 @@ NA6PGenerator* addBgEventGenerator(NA6PGenCocktail* genCocktail, float ptMin, fl
   return genCocktail;
 }
 
-NA6PGenerator* genBgEvent(float ptMin = 0., float ptMax = 10., float yMin = 0.5, float yMax = 4.5)
+NA6PGenerator* genBgEvent(float ptMin = 0., float ptMax = 10., float yMin = -2, float yMax = 6)
 {
   NA6PGenCocktail* genCockt = new NA6PGenCocktail("cocktail");
   return addBgEventGenerator(genCockt, ptMin, ptMax, yMin, yMax);
