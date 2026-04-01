@@ -55,6 +55,10 @@ struct NA6PLayoutParam : public na6p::conf::ConfigurableParamHelper<NA6PLayoutPa
   float posVerTelPlaneY[MaxVTPlanes] = {};
   float posVerTelPlaneZ[MaxVTPlanes] = {7.1175f, 15.1175f, 20.1175f, 25.1175f, 38.1175f};
 
+  // TOF
+  float shiftTOF[3] = {0.f, 0.f, 0.f}; // TOF box global shift
+  float posTOFPlaneZ = 40.f;            // Z position of the single TOF plane
+
   // Muon Stations
   int nMSPlanes = 6;                  // number of stations
   float shiftMS[3] = {0.f, 0.f, 0.f}; // MS global shift, added to posMSPlaneX,Y,Z

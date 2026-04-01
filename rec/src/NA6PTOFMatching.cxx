@@ -221,6 +221,11 @@ void NA6PTOFMatching::runTOFMatching()
     double bestDist = std::sqrt(bestDist2);
     if (bestIdx >= 0 && bestDist < mMaxMatchDist) {
       vtTrack.setTOF((*hClusPtr)[bestIdx].getTime());
+      int tofpid = (*hClusPtr)[bestIdx].getParticleID();
+      int trkpid = vtTrack.getParticleID();
+      if (tofpid != trkpid && trkpid >= 0){
+        vtTrack.setParticleID(-trkpid);
+      }
       ++nMatched;
     }
     mTracks.push_back(vtTrack);
