@@ -12,6 +12,7 @@
 #include "MagneticField.h"
 #include "Propagator.h"
 #include "NA6PVerTelHit.h"
+#include "NA6PMCComposedLabel.h"
 #endif
 
 void fillMeanAndRms(TH2F* h2d, TH1F* hMean, TH1F* hRms, TH1F* hSig)
@@ -98,7 +99,9 @@ void plotTracks(const char* dirSimu = ".")
     return;
   TTree* trTree = (TTree*)ft->Get("tracksVerTel");
   std::vector<NA6PTrack>* trArr = nullptr;
+  std::vector<NA6PMCComposedLabel>* labArr = nullptr;
   trTree->SetBranchAddress("VerTel", &trArr);
+  trTree->SetBranchAddress("VerTelMCTruth", &labArr);
 
   TFile* fk = new TFile(Form("%s/MCKine.root", dirSimu));
   TTree* mcTree = (TTree*)fk->Get("mckine");
@@ -194,6 +197,7 @@ void plotTracks(const char* dirSimu = ".")
       Propagator::PropOpt propOpt;
       propOpt.matCorr = Propagator::MatCorrType::USEMatCorrNONE;
       Propagator::Instance()->propagateToZ(tr, zvert, propOpt);
+      NA6PMCComposedLabel mcCompLabel = labArr->at(jTr);
       int nClusters = tr.getNHits();
       hNclu->Fill(nClusters);
       if (nClusters < 5)
@@ -212,8 +216,8 @@ void plotTracks(const char* dirSimu = ".")
       hImpParYVsP->Fill(momReco, impparY * 1e4);
       hMomAllReco->Fill(momReco);
       hEtaAllReco->Fill(etaReco);
-      int mcLabel = tr.getParticleID();
-      if (mcLabel >= 0) {
+      int mcLabel = mcCompLabel.getTrackID();
+      if (!mcCompLabel.isFake()) {
         hMomGoodReco->Fill(momReco);
         hEtaGoodReco->Fill(etaReco);
       } else {
@@ -221,7 +225,7 @@ void plotTracks(const char* dirSimu = ".")
         hEtaFakeReco->Fill(etaReco);
       }
 
-      TParticle part = mcArr->at(std::abs(mcLabel));
+      TParticle part = mcArr->at(mcLabel);
       double pxPart = part.Px();
       double pyPart = part.Py();
       double pzPart = part.Pz();
@@ -467,8 +471,8 @@ void plotTracks(const char* dirSimu = ".")
   hRelDeltaPzSig->SetMaximum(0.05);
   hRelDeltaPzSig->Draw("P");
 
-  TCanvas* c2d = new TCanvas("c2d","",1500,500);
-  c2d->Divide(3,1);
+  TCanvas* c2d = new TCanvas("c2d", "", 1500, 500);
+  c2d->Divide(3, 1);
   c2d->cd(1);
   hDeltaPxVsP->Draw("colz");
   c2d->cd(2);

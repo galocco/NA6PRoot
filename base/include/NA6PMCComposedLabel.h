@@ -21,7 +21,6 @@
 // Composed Label to encode MC track id, event it comes from and the source (file)
 // Ported from ALICEO2
 
-
 class NA6PMCComposedLabel
 {
  private:
@@ -32,7 +31,7 @@ class NA6PMCComposedLabel
   static constexpr int NReservedBits = 1;
 
   uint64_t mLabel = NotSet; ///< MC label encoding MCtrack ID and MCevent origin
-  
+
  public:
   // number of bits reserved for MC track ID, DON'T modify this, since the
   // track ID might be negative
@@ -44,7 +43,7 @@ class NA6PMCComposedLabel
   // check if the fields are defined consistently
   static_assert(nbitsTrackID + nbitsEvID + nbitsSrcID <= sizeof(uint64_t) * 8 - NReservedBits,
                 "Fields cannot be stored in 64 bits");
-  
+
   // mask to extract MC track ID
   static constexpr uint64_t maskTrackID = (ul0x1 << nbitsTrackID) - 1;
   // mask to extract MC track ID
@@ -145,8 +144,20 @@ class NA6PMCComposedLabel
 
   void print() const;
   std::string asString() const;
-  
+
   ClassDefNV(NA6PMCComposedLabel, 1);
 };
 
+namespace std
+{
+// defining std::hash for NA6PMCComposedLabel to be used with unordered map in the track matching
+template <>
+struct hash<NA6PMCComposedLabel> {
+ public:
+  size_t operator()(const NA6PMCComposedLabel& lab) const noexcept
+  {
+    return lab.getTrackEventSourceID();
+  }
+};
+} // namespace std
 #endif

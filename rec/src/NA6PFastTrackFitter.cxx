@@ -131,8 +131,8 @@ bool NA6PFastTrackFitter::computeSeed(int dir, std::array<int, 3>& layForSeed, N
   const auto& xyz2 = mClusters[layForSeed[2]]->getXYZ();
 
 #ifdef _LOG_MC_TRUTH_MODE_
-  auto mcTruth = getMCTruthStatus(); // RSREM
-  LOGP(info, "seed Dir{} L:{}/{}/{} MC status: TSame={} TPID={}", dir, layForSeed[0], layForSeed[1], layForSeed[2], mcTruth.second, mcTruth.first);
+  auto mcLab = getMCTruthStatus(); // RSREM
+  LOGP(info, "seed Dir{} L:{}/{}/{} MCComposedLabel:{}", dir, layForSeed[0], layForSeed[1], layForSeed[2], mcLab.asString());
 #endif //_LOG_MC_TRUTH_MODE_
   return Seeder::create(*seed, dir > 0, xyz0, xyz1, xyz2, mSeedImprovePrec, mPID);
 }
@@ -194,8 +194,8 @@ float NA6PFastTrackFitter::fitSeed(NA6PTrackParCov& seed, bool resetCovMat, int 
   mPropOpt.linRef = useLinRef ? &linRefLoc : nullptr;
 
 #ifdef _LOG_MC_TRUTH_MODE_
-  auto mcTruth = getMCTruthStatus(); // RSREM
-#endif                               //_LOG_MC_TRUTH_MODE_
+  auto mcLab = getMCTruthStatus(); // RSREM
+#endif                             //_LOG_MC_TRUTH_MODE_
 
   int cntCl = 0;
   for (int il = startL; il != stopL; il += step) {
@@ -206,20 +206,20 @@ float NA6PFastTrackFitter::fitSeed(NA6PTrackParCov& seed, bool resetCovMat, int 
     float chi2 = 0;
     if (!prop->propagateToZ(seed, cl.getZ(), mPropOpt)) {
 #ifdef _LOG_MC_TRUTH_MODE_
-      LOGP(info, "DBG fitSeed fail: propagate il={} z={} truthSame={} truthPID={} state={}", il, cl.getZ(), mcTruth.second, mcTruth.first, seed.asString());
+      LOGP(info, "DBG fitSeed fail: propagate il={} z={} MCComposedLabel={} state={}", il, cl.getZ(), mcLab.asString(), seed.asString());
 #endif //_LOG_MC_TRUTH_MODE_
       chi2Tot = -1;
       break;
     }
 #ifdef _LOG_MC_TRUTH_MODE_
-    if (mcTruth.second) {
+    if (mcLab.isSet()) {
       LOGP(info, "DBGR Before update {}/{}: {}", cntCl, mNClusters, seed.asString());
     }
 #endif //_LOG_MC_TRUTH_MODE_
     chi2 = seed.getPredictedChi2(cl);
     mChi2Buffer.push_back(chi2);
 #ifdef _LOG_MC_TRUTH_MODE_
-    if (mcTruth.second) {
+    if (mcLab.isSet()) {
       LOGP(info, "DBGR chi2={} for cluster {}", chi2, cl.asString());
     }
 #endif //_LOG_MC_TRUTH_MODE_
@@ -231,29 +231,29 @@ float NA6PFastTrackFitter::fitSeed(NA6PTrackParCov& seed, bool resetCovMat, int 
       const auto eyx = seed.getSigmaYX() + cl.getSigYX();
       const auto eyy = seed.getSigmaY2() + cl.getSigYY();
       const auto det = exx * eyy - eyx * eyx;
-      LOGP(info, "DBG fitSeed fail chi2 at {}/{} il={} chi2={:.3f} max={} truthSame={} truthPID={} clPID={} clXYZ=({:.3e},{:.3e},{:.3e}) state={}", cntCl, mNClusters,
-           il, chi2, mMaxChi2Cl, mcTruth.second, mcTruth.first, cl.getParticleID(), cl.getX(), cl.getY(), cl.getZ(), seed.asString());
-      LOGP(info, "DBG predChi2 new: frame=labXY il={} truthSame={} truthPID={} clPID={} dx={} dy={} trXY=({},{}) clXY=({},{}) trCov=({:.3e},{:.3e},{:.3e}) clCov=({:.3e},{:.3e},{:.3e}) sumcov=({:.3e},{:.3e},{:.3e}) det={} chi2={}",
-           il, mcTruth.second, mcTruth.first, cl.getParticleID(), dx, dy, seed.getX(), seed.getY(), cl.getX(), cl.getY(), seed.getSigmaX2(), seed.getSigmaYX(), seed.getSigmaY2(),
+      LOGP(info, "DBG fitSeed fail chi2 at {}/{} il={} chi2={:.3f} max={} TrackMCLabel={} cluLabs={} clXYZ=({:.3e},{:.3e},{:.3e}) state={}", cntCl, mNClusters,
+           il, chi2, mMaxChi2Cl, mcLab.asString(), clusterLabelsAsString(cl), cl.getX(), cl.getY(), cl.getZ(), seed.asString());
+      LOGP(info, "DBG predChi2 new: frame=labXY il={} TrackMCLabel={} cluLabs={} dx={} dy={} trXY=({},{}) clXY=({},{}) trCov=({:.3e},{:.3e},{:.3e}) clCov=({:.3e},{:.3e},{:.3e}) sumcov=({:.3e},{:.3e},{:.3e}) det={} chi2={}",
+           il, mcLab.asString(), clusterLabelsAsString(cl), dx, dy, seed.getX(), seed.getY(), cl.getX(), cl.getY(), seed.getSigmaX2(), seed.getSigmaYX(), seed.getSigmaY2(),
            cl.getSigXX(), cl.getSigYX(), cl.getSigYY(), exx, eyx, eyy, det, chi2);
 #endif //_LOG_MC_TRUTH_MODE_
       chi2Tot = -1;
       break;
     } else if (!seed.update(cl)) {
 #ifdef _LOG_MC_TRUTH_MODE_
-      LOGP(info, "DBG fitSeed fail: update il={} chi2={:.3f} truthSame={} truthPID={} clPID={} clXYZ=({:.3e},{:.3e},{:.3e}) state={}",
-           il, chi2, mcTruth.second, mcTruth.first, cl.getParticleID(), cl.getX(), cl.getY(), cl.getZ(), seed.asString());
+      LOGP(info, "DBG fitSeed fail: update il={} chi2={:.3f} TrackMCLabel={} cluLabs={} clXYZ=({:.3e},{:.3e},{:.3e}) state={}",
+           il, chi2, mcLab.asString(), clusterLabelsAsString(cl), cl.getX(), cl.getY(), cl.getZ(), seed.asString());
 #endif //_LOG_MC_TRUTH_MODE_
       chi2Tot = -1;
       break;
 #ifdef _LOG_MC_TRUTH_MODE_
-    } else if (mcTruth.second) {
-      LOGP(info, "DBG fitSeed OK chi2 at {}/{} il={} chi2={:.3f}/{:.3f} max={} truthSame={} truthPID={} clPID={} clXYZ=({:.3e},{:.3e},{:.3e}) state={}", cntCl, mNClusters,
-           il, chi2, chi2 + chi2Tot, mMaxChi2Cl, mcTruth.second, mcTruth.first, cl.getParticleID(), cl.getX(), cl.getY(), cl.getZ(), seed.asString());
+    } else if (mcLab.isSet()) {
+      LOGP(info, "DBG fitSeed OK chi2 at {}/{} il={} chi2={:.3f}/{:.3f} max={} TrackMCLabel={} cluLabs={} clXYZ=({:.3e},{:.3e},{:.3e}) state={}", cntCl, mNClusters,
+           il, chi2, chi2 + chi2Tot, mMaxChi2Cl, mcLab.asString(), clusterLabelsAsString(cl), cl.getX(), cl.getY(), cl.getZ(), seed.asString());
 #endif //_LOG_MC_TRUTH_MODE_
     }
 #ifdef _LOG_MC_TRUTH_MODE_
-    if (mcTruth.second) {
+    if (mcLab.isSet()) {
       LOGP(debug, "DBGR After update {}/{}: {}", cntCl, mNClusters, seed.asString());
     }
 #endif //_LOG_MC_TRUTH_MODE_
@@ -279,26 +279,63 @@ void NA6PFastTrackFitter::addClustersToTrack(NA6PTrack& tr)
   }
 }
 
-std::pair<int, bool> NA6PFastTrackFitter::getMCTruthStatus()
+NA6PMCComposedLabel NA6PFastTrackFitter::getMCTruthStatus()
 {
-  std::vector<std::pair<int, int>> occurrences;
+  NA6PMCComposedLabel lbl;
+  if (!mCluMCLabels) {
+    return lbl;
+  }
+  std::vector<std::pair<NA6PMCComposedLabel, int>> occurrences;
   for (int jl = mMinLayerWithCl; jl <= mMaxLayerWithCl; ++jl) {
     if (!mClusters[jl]) {
       continue;
     }
-    const int pid = mClusters[jl]->getParticleID();
-    bool found{false};
-    for (int i = 0; i < (int)occurrences.size(); i++) {
-      if (pid == occurrences[i].first) {
-        occurrences[i].second++;
-        found = true;
-        break;
+    const int cluID = mClusters[jl]->getClusterIndex();
+    std::span labels = mCluMCLabels->getLabels(cluID);
+    for (const auto currLbl : labels) {
+      bool found{false};
+      for (auto& occ : occurrences) {
+        if (currLbl == occ.first) {
+          occ.second++;
+          found = true;
+          break;
+        }
+      }
+      if (!found) {
+        occurrences.emplace_back(currLbl, 1);
       }
     }
-    if (!found) {
-      occurrences.emplace_back(pid, 1);
+  }
+  if (occurrences.empty()) {
+    return lbl;
+  }
+  auto occIter = occurrences.begin();
+  auto occWin = occIter;
+  while (++occIter != occurrences.end()) {
+    if (occWin->second < occIter->second) {
+      occWin = occIter;
     }
   }
-  std::sort(std::begin(occurrences), std::end(occurrences), [](auto e1, auto e2) { return e1.second > e2.second; });
-  return {occurrences.front().second == mNClusters, occurrences.front().first};
+  lbl = occWin->first;
+  lbl.setFakeFlag(occWin->second < mNClusters);
+  return lbl;
+}
+
+std::string NA6PFastTrackFitter::clusterLabelsAsString(const NA6PBaseCluster& cl) const
+{
+  std::string allLabels = "";
+  if (mCluMCLabels) {
+    const int cluID = cl.getClusterIndex();
+    std::span labels = mCluMCLabels->getLabels(cluID);
+    int nLabels = labels.size();
+    for (int jLab = 0; jLab < nLabels; jLab++) {
+      if (nLabels > 1)
+        allLabels.append(fmt::format("({})", jLab));
+      NA6PMCComposedLabel lbl = labels[jLab];
+      allLabels.append(lbl.asString());
+      if (nLabels > 1)
+        allLabels.append(",");
+    }
+  }
+  return allLabels;
 }

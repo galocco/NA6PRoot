@@ -18,6 +18,7 @@
 #include "NA6PVerTelReconstruction.h"
 #include "NA6PMuonSpecReconstruction.h"
 #include "NA6PMatching.h"
+#include "NA6PMCTruthContainer.h"
 
 class TreeFromFile
 {
@@ -85,7 +86,9 @@ int main(int argc, char** argv)
     add_option("geometry,g", bpo::value<std::string>()->default_value("geometry.root"), "geometry file name");
     add_option("firstevent,f", bpo::value<int32_t>()->default_value(0), "first event");
     add_option("lastevent,l", bpo::value<int32_t>()->default_value(-1), "last event");
-    add_option("doHitsToRecPoints,cl", bpo::value<bool>()->default_value(true), "run hits->clusters");
+    add_option("readMC", bpo::value<bool>()->default_value(true)->implicit_value(true), "read MC truth info");
+    add_option("doHitsToRecPoints,hitcl", bpo::value<bool>()->default_value(true), "run hits->clusters");
+    add_option("doDigitsToRecPoints,cl", bpo::value<bool>()->default_value(false), "run digits->clusters");
     add_option("doTrackletVertex,vert", bpo::value<bool>()->default_value(true), "run tracklet vertexer");
     add_option("doVTTracking,vt", bpo::value<bool>()->default_value(true), "run VT tracker");
     add_option("doMSTracking,ms", bpo::value<bool>()->default_value(true), "run MS tracker");
@@ -122,10 +125,12 @@ int main(int argc, char** argv)
   na6p::conf::ConfigurableParam::printAllKeyValuePairs();
 
   const bool doHitsToRecPoints = vm["doHitsToRecPoints"].as<bool>();
+  const bool doDigitsToRecPoints = vm["doDigitsToRecPoints"].as<bool>();
   const bool doTrackletVertex = vm["doTrackletVertex"].as<bool>();
   const bool doVTTracking = vm["doVTTracking"].as<bool>();
   const bool doMSTracking = vm["doMSTracking"].as<bool>();
   const bool doMatching = vm["doMatching"].as<bool>();
+  const bool readMC = vm["readMC"].as<bool>();
 
   int firstEv = vm["firstevent"].as<int32_t>();
   int lastEv = vm["lastevent"].as<int32_t>();
@@ -134,27 +139,35 @@ int main(int argc, char** argv)
     return -1;
   }
 
+  if (doHitsToRecPoints && doDigitsToRecPoints) {
+    LOGP(info, "Will do digits to recpoints for VT instead of hits to recpoints");
+  }
+
   std::unique_ptr<NA6PVerTelReconstruction> vtrec = std::make_unique<NA6PVerTelReconstruction>();
+  vtrec->setReadMCTruth(readMC);
   std::unique_ptr<NA6PMuonSpecReconstruction> msrec = std::make_unique<NA6PMuonSpecReconstruction>();
+  msrec->setReadMCTruth(readMC);
   std::unique_ptr<NA6PMatching> matching = std::make_unique<NA6PMatching>();
 
   if (doHitsToRecPoints) {
-    { // VTHist
-      TreeFromFile tfVT("HitsVerTel.root", "hitsVerTel");
-      std::vector<NA6PVerTelHit> vtHits, *vtHitsPtr = &vtHits;
-      tfVT.getTree()->SetBranchAddress("VerTel", &vtHitsPtr);
-      int nEvVT = tfVT.getTree()->GetEntriesFast();
+    { // VTHits
+      if (!doDigitsToRecPoints) {
+        TreeFromFile tfVT("HitsVerTel.root", "hitsVerTel");
+        std::vector<NA6PVerTelHit> vtHits, *vtHitsPtr = &vtHits;
+        tfVT.getTree()->SetBranchAddress("VerTel", &vtHitsPtr);
+        int nEvVT = tfVT.getTree()->GetEntriesFast();
 
-      vtrec->createClustersOutput();
-      for (int jEv = 0; jEv < nEvVT; jEv++) {
-        tfVT.getTree()->GetEvent(jEv);
-        int nHits = vtHits.size();
-        LOGP(info, "VerTel Event {} nHits= {}", jEv, nHits);
-        vtrec->clearClusters();
-        vtrec->hitsToRecPoints(vtHits);
-        vtrec->writeClusters();
+        vtrec->createClustersOutput();
+        for (int jEv = 0; jEv < nEvVT; jEv++) {
+          tfVT.getTree()->GetEvent(jEv);
+          int nHits = vtHits.size();
+          LOGP(info, "VerTel Event {} nHits= {}", jEv, nHits);
+          vtrec->clearClusters();
+          vtrec->hitsToRecPoints(vtHits, jEv);
+          vtrec->writeClusters();
+        }
+        vtrec->closeClustersOutput();
       }
-      vtrec->closeClustersOutput();
     }
     { // Muon Spectrometer hits -> clusters
       TreeFromFile tfMS("HitsMuonSpecModular.root", "hitsMuonSpecModular");
@@ -168,7 +181,7 @@ int main(int argc, char** argv)
         int nHits = msHits.size();
         LOGP(info, "MuonSpec Event {} nHits= {}", jEv, nHits);
         msrec->clearClusters();
-        msrec->hitsToRecPoints(msHits);
+        msrec->hitsToRecPoints(msHits, jEv);
         msrec->writeClusters();
       }
       msrec->closeClustersOutput();
@@ -176,6 +189,26 @@ int main(int argc, char** argv)
   } else {
     LOGP(info, "Hits -> Recpoints disabled from input options");
   }
+  if (doDigitsToRecPoints) {
+    TreeFromFile tfVT("DigitsVerTel.root", "digitsVerTel");
+    std::vector<NA6PVerTelDigit> vtDigits, *vtDigitsPtr = &vtDigits;
+    NA6PMCTruthContainer vtDigMCLabels, *vtDigMCLabelsPtr = &vtDigMCLabels;
+    tfVT.getTree()->SetBranchAddress("VerTel", &vtDigitsPtr);
+    tfVT.getTree()->SetBranchAddress("VerTelMCTruth", &vtDigMCLabelsPtr);
+    int nEvVT = tfVT.getTree()->GetEntriesFast();
+    vtrec->createClustersOutput();
+    for (int jEv = 0; jEv < nEvVT; jEv++) {
+      tfVT.getTree()->GetEvent(jEv);
+      int nDigits = vtDigits.size();
+      int nMClabels = vtDigMCLabels.getNElements();
+      LOGP(info, "VerTel Event {} nDigits = {} nDigMClabels = {}", jEv, nDigits, nMClabels);
+      vtrec->clearClusters();
+      vtrec->digitsToRecPoints(vtDigits, vtDigMCLabels);
+      vtrec->writeClusters();
+    }
+    vtrec->closeClustersOutput();
+  }
+
   const bool needsMCKine = doTrackletVertex || doVTTracking || doMSTracking || doMatching;
   std::unique_ptr<TreeFromFile> tfKine;
   std::vector<TParticle>* mcArr = nullptr;
@@ -186,14 +219,18 @@ int main(int argc, char** argv)
 
   std::unique_ptr<TreeFromFile> tfCVT, tfCMS;
   std::vector<NA6PVerTelCluster> vtClus, *vtClusPtr = &vtClus;
+  NA6PMCTruthContainer vtCluMCLabels, *vtCluMCLabelsPtr = &vtCluMCLabels;
   if (doTrackletVertex || doVTTracking) {
     tfCVT = std::make_unique<TreeFromFile>("ClustersVerTel.root", "clustersVerTel");
     tfCVT->getTree()->SetBranchAddress("VerTel", &vtClusPtr);
+    tfCVT->getTree()->SetBranchAddress("VerTelMCTruth", &vtCluMCLabelsPtr);
   }
   std::vector<NA6PMuonSpecCluster> msClus, *msClusPtr = &msClus;
+  NA6PMCTruthContainer msCluMCLabels, *msCluMCLabelsPtr = &msCluMCLabels;
   if (doMSTracking) {
     tfCMS = std::make_unique<TreeFromFile>("ClustersMuonSpec.root", "clustersMuonSpec");
     tfCMS->getTree()->SetBranchAddress("MuonSpec", &msClusPtr);
+    tfCMS->getTree()->SetBranchAddress("MuonSpecMCTruth", &msCluMCLabelsPtr);
   }
 
   if (doTrackletVertex || doVTTracking || doMSTracking) {
@@ -236,6 +273,7 @@ int main(int argc, char** argv)
         tfCVT->getTree()->GetEvent(jEv);
         vtrec->setPrimaryVertex(&pvert);
         vtrec->setClusters(vtClus);
+        vtrec->setClustersMCLabels(vtCluMCLabels);
         if (doTrackletVertex)
           vtrec->runVertexerTracklets();
         if (doVTTracking)
@@ -248,6 +286,7 @@ int main(int argc, char** argv)
         tfCMS->getTree()->GetEvent(jEv);
         msrec->setPrimaryVertex(&pvert);
         msrec->setClusters(msClus);
+        msrec->setClustersMCLabels(msCluMCLabels);
         msrec->runTracking();
       }
     }
@@ -271,11 +310,15 @@ int main(int argc, char** argv)
 
     TreeFromFile tfTVT("TracksVerTel.root", "tracksVerTel");
     std::vector<NA6PTrack> vtTracks, *vtTracksPtr = &vtTracks;
+    std::vector<NA6PMCComposedLabel> vtTrMCLabs, *vtTrMCLabsPtr = &vtTrMCLabs;
     tfTVT.getTree()->SetBranchAddress("VerTel", &vtTracksPtr);
+    tfTVT.getTree()->SetBranchAddress("VerTelMCTruth", &vtTrMCLabsPtr);
 
     TreeFromFile tfTMS("TracksMuonSpec.root", "tracksMuonSpec");
     std::vector<NA6PTrack> msTracks, *msTracksPtr = &msTracks;
+    std::vector<NA6PMCComposedLabel> msTrMCLabs, *msTrMCLabsPtr = &msTrMCLabs;
     tfTMS.getTree()->SetBranchAddress("MuonSpec", &msTracksPtr);
+    tfTMS.getTree()->SetBranchAddress("MuonSpecMCTruth", &msTrMCLabsPtr);
 
     TreeFromFile tfCVT("ClustersVerTel.root", "clustersVerTel");
     std::vector<NA6PVerTelCluster> vtClusMatch, *vtClusMatchPtr = &vtClusMatch;
@@ -311,7 +354,9 @@ int main(int argc, char** argv)
       matching->setVerTelClusters(vtClusMatch);
       matching->setMuonSpecClusters(msClusMatch);
       matching->setVerTelTracks(vtTracks);
+      matching->setVerTelTrackMCLabels(vtTrMCLabs);
       matching->setMuonSpecTracks(msTracks);
+      matching->setMuonSpecTrackMCLabels(msTrMCLabs);
 
       matching->runMatching();
     }

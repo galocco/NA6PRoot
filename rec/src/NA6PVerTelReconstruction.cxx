@@ -5,6 +5,7 @@
 #include <TRandom3.h>
 #include <fairlogger/Logger.h>
 #include "NA6PVerTelHit.h"
+#include "NA6PVerTelDigit.h"
 #include "NA6PTrackerCA.h"
 #include "NA6PVertexerTracklets.h"
 #include "NA6PVerTelReconstruction.h"
@@ -13,6 +14,7 @@ NA6PVerTelReconstruction::NA6PVerTelReconstruction() : NA6PReconstruction("VerTe
 {
   initAll();
   mDigitizer.initGeometry();
+  mClusterizer.initGeometry();
 }
 
 NA6PVerTelReconstruction::~NA6PVerTelReconstruction()
@@ -55,6 +57,7 @@ void NA6PVerTelReconstruction::createClustersOutput()
   mClusFile = TFile::Open(nm.c_str(), "recreate");
   mClusTree = new TTree(fmt::format("clusters{}", getName()).c_str(), fmt::format("{} Clusters", getName()).c_str());
   mClusTree->Branch(getName().c_str(), &hClusPtr);
+  mClusTree->Branch(fmt::format("{}MCTruth", getName()).c_str(), &hCluMCLabelsPtr);
   LOGP(info, "Will store {} clusters in {}", getName(), nm);
 }
 
@@ -89,10 +92,9 @@ void NA6PVerTelReconstruction::setClusters(std::vector<NA6PVerTelCluster>& clust
   }
 }
 
-void NA6PVerTelReconstruction::hitsToRecPoints(const std::vector<NA6PVerTelHit>& hits)
+void NA6PVerTelReconstruction::hitsToRecPoints(const std::vector<NA6PVerTelHit>& hits, int evID)
 {
   int nHits = hits.size();
-
   for (int jHit = 0; jHit < nHits; ++jHit) {
     const auto& hit = hits[jHit];
     double x = hit.getX();
@@ -120,13 +122,27 @@ void NA6PVerTelReconstruction::hitsToRecPoints(const std::vector<NA6PVerTelHit>&
     int nDet = hit.getDetectorID();
     int idPart = hit.getTrackID();
     int layer = nDet / 4;
+    int cluID = mClusters.size();
     mClusters.emplace_back(x, y, z, clusiz, layer);
     auto& clu = mClusters.back();
     clu.setErr(ex2clu, 0., ey2clu);
     clu.setDetectorID(nDet);
-    clu.setParticleID(idPart);
     clu.setHitID(jHit);
+    clu.setClusterIndex(cluID);
+    NA6PMCComposedLabel lbl(hit.getTrackID(), evID, 0);
+    mCluMCLabels.addElement(cluID, lbl);
   }
+}
+
+//____________________________________________________________________________________
+void NA6PVerTelReconstruction::digitsToRecPoints(const std::vector<NA6PVerTelDigit>& vtDigits, const NA6PMCTruthContainer& digMCLabels)
+{
+  int nDigits = vtDigits.size();
+  int nMClabels = digMCLabels.getNElements();
+  mClusterizer.process(vtDigits, digMCLabels, mClusters, mCluMCLabels);
+  int nCluMClabels = mCluMCLabels.getNElements();
+  int nClusters = mClusters.size();
+  LOGP(info, " --> nClusters = {} nCluMCLabels = {}", nClusters, nCluMClabels);
 }
 
 //____________________________________________________________________________________
@@ -168,6 +184,8 @@ void NA6PVerTelReconstruction::runVertexerTracklets()
     initVertexer();
   }
   clearVertices();
+  if (mReadMCTruth)
+    mVTTrackletVertexer->setClusterMCTruth(hCluMCLabelsPtr);
   mVTTrackletVertexer->findVertices(*hClusPtr, mVertices);
   writeVertices();
 }
@@ -179,6 +197,8 @@ void NA6PVerTelReconstruction::createTracksOutput()
   mTrackFile = TFile::Open(nm.c_str(), "recreate");
   mTrackTree = new TTree(fmt::format("tracks{}", getName()).c_str(), fmt::format("{} Tracks", getName()).c_str());
   mTrackTree->Branch(getName().c_str(), &hTrackPtr);
+  if (mReadMCTruth)
+    mTrackTree->Branch(fmt::format("{}MCTruth", getName()).c_str(), &hTrkMCLabelsPtr);
   LOGP(info, "Will store {} tracks in {}", getName(), nm);
 }
 
@@ -206,7 +226,11 @@ void NA6PVerTelReconstruction::closeTracksOutput()
 void NA6PVerTelReconstruction::runTracking()
 {
   clearTracks();
+  if (mReadMCTruth)
+    mVTTracker->setClusterMCTruth(hCluMCLabelsPtr);
   mVTTracker->findTracks(*hClusPtr, mPrimaryVertex);
   mTracks = mVTTracker->getTracks();
+  if (mReadMCTruth)
+    assignMCLabels(mTracks, *hTrkMCLabelsPtr, *hCluMCLabelsPtr);
   writeTracks();
 }

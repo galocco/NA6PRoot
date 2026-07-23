@@ -129,7 +129,7 @@ void NA6PVerTelDigitizer::processHit(const NA6PVerTelHit& hit)
     bool digOk = mSegmentation.localToIndices(x, y, rsu, tile, row, col);
     if (digOk) {
       auto key = mod.getOrderingKey(rsu, tile, row, col);
-      NA6PMCComposedLabel lbl(hit.getTrackID(), 0, 0);
+      NA6PMCComposedLabel lbl(hit.getTrackID(), mEventID, 0);
       PreDigit* pd = mod.findDigit(key);
       if (!pd) {
         mod.addDigit(key, rsu, tile, row, col, chargePerStep, lbl);

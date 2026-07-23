@@ -60,6 +60,11 @@ struct NA6PRecoParam : public na6p::conf::ConfigurableParamHelper<NA6PRecoParam>
   int vtMinNClusTracksCA[MaxIterationsTrackerCA] = {5, 3, 0, 0, 0, 0, 0, 0, 0, 0};
   // MuonSpec CA tracker
   int msNLayers = 6;
+  bool msDoTrackMSTrackletMID = false;
+  float msZForMSMIDmatch = 810.f;
+  float msMaxDistTrackMSTrackletMID = 7.5f;
+  float msMinCosThetaTrackMSTrackletMID = 0.999f;
+
   int msNIterationsTrackerCA = 2;
   bool useLinRefMS = false;
   float seedImprovePrecMS = 0.02;

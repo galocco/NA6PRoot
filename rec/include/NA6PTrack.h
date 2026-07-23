@@ -25,6 +25,13 @@ class NA6PTrack : public NA6PTrackParCov
 {
  public:
   static constexpr int kMaxLr = 16;
+  enum MuonSpecTrackCase {
+    kNotMS = 0,
+    kFullMSMID = 1,
+    kMSNotMatchedToMID = 2,
+    kMSMatchedToMIDnotRefitted = 3,
+    kMSMatchedToMIDRefitted = 4
+  };
 
   NA6PTrack();
   NA6PTrack(const float* xyz, const float* pxyz, int sign, float errLoose = -2);
@@ -33,6 +40,7 @@ class NA6PTrack : public NA6PTrackParCov
   ~NA6PTrack() = default;
 
   void reset();
+  void resetClusters();
   void setInwardParam(const NA6PTrackParCov& p) { (*(NA6PTrackParCov*)this) = p; }
   void setOuterParam(const NA6PTrackParCov& p) { mOuter = p; }
   void setVertexConstrainedParam(const NA6PTrackParCov& p) { mConstrained = p; }
@@ -61,22 +69,17 @@ class NA6PTrack : public NA6PTrackParCov
 
   uint32_t getClusterMap() const { return mClusterMap; }
   int getClusterIndex(int lr) const { return lr < kMaxLr ? mClusterIndices[lr] : -1; }
-  int getParticleLabel(int lr) const { return lr < kMaxLr ? mClusterPartID[lr] : -2; }
-  int getParticleID() const { return mParticleID; }
   int getCAIteration() const { return mCAIteration; }
 
-  void setParticleLabel(int idx, int lr)
-  {
-    if (lr < kMaxLr)
-      mClusterPartID[lr] = idx;
-  }
   void setClusterIndex(int idx, int lr)
   {
     if (lr < kMaxLr)
       mClusterIndices[lr] = idx;
   }
-  void setParticleID(int idx) { mParticleID = idx; }
   void setCAIteration(int iter) { mCAIteration = iter; }
+
+  void setStatusMS(int val) { mStatusMS = val; }
+  short getStatusMS() const { return mStatusMS; }
 
   template <typename ClusterType>
   void addCluster(const ClusterType* clu);
@@ -88,17 +91,15 @@ class NA6PTrack : public NA6PTrackParCov
   NA6PTrackParCov mOuter{};                  // parametrization for outward fit
   NA6PTrackParCov mConstrained{};            // parametrization with vertex constrain
   std::array<int, kMaxLr> mClusterIndices{}; // cluster indices
-  std::array<int, kMaxLr> mClusterPartID{};  // particle ID (per cluster) // RSTOD why this is needed? This info must be available from the cluster indices
-
   float mChi2 = 0.f;                         // total chi2
   float mChi2Outer = 0.f;                    // total chi2 outward fit
   uint32_t mClusterMap = 0;                  // pattern of clusters per layer
   int mNClusters = 0;                        // total hits
-  int mParticleID = -1;                      // particle ID (MC truth)
   int mCAIteration = -1;                     //! CA iteration (for debug)
+  short mStatusMS = kNotMS;                  // status of MS track
 
  private:
-  ClassDefNV(NA6PTrack, 2)
+  ClassDefNV(NA6PTrack, 3)
 };
 
 #endif

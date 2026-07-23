@@ -20,6 +20,7 @@
 #include "NA6PBaseCluster.h"
 #include "NA6PVerTelCluster.h"
 #include "NA6PVertex.h"
+#include "NA6PMCTruthContainer.h"
 #include "NA6PVertexerTracklets.h"
 #endif
 
@@ -39,7 +40,9 @@ void inspectVertexerTracklets(int firstEv = 0,
   printf("Open cluster file: %s\n", fc->GetName());
   TTree* tc = (TTree*)fc->Get("clustersVerTel");
   std::vector<NA6PVerTelCluster> vtClus, *vtClusPtr = &vtClus;
+  NA6PMCTruthContainer vtCluMCLabels, *vtCluMCLabelsPtr = &vtCluMCLabels;
   tc->SetBranchAddress("VerTel", &vtClusPtr);
+  tc->SetBranchAddress("VerTelMCTruth", &vtCluMCLabelsPtr);
 
   if (lastEv > nEv || lastEv < 0)
     lastEv = nEv;
@@ -68,6 +71,11 @@ void inspectVertexerTracklets(int firstEv = 0,
   for (int jEv = firstEv; jEv < lastEv; jEv++) {
     mcTree->GetEvent(jEv);
     tc->GetEvent(jEv);
+    // set cluster indices
+    for (size_t i = 0; i < vtClus.size(); ++i) {
+      vtClus[i].setClusterIndex(static_cast<int>(i));
+    }
+
     int nPart = mcArr->size();
     double xVertGen = 0;
     double yVertGen = 0;
@@ -88,6 +96,7 @@ void inspectVertexerTracklets(int firstEv = 0,
     vertxr->setBeamX(xVertGen);
     vertxr->setBeamY(yVertGen);
     vertxr->resetClusters(nClus);
+    vertxr->setClusterMCTruth(&vtCluMCLabels);
     std::vector<int> firstCluPerLay;
     std::vector<int> lastCluPerLay;
     vertxr->sortClustersByLayerAndEta(vtClus, firstCluPerLay, lastCluPerLay);
@@ -98,7 +107,7 @@ void inspectVertexerTracklets(int firstEv = 0,
     std::vector<int> lastTrklPerLay;
     vertxr->sortTrackletsByLayerAndIndex(allTracklets, firstTrklPerLay, lastTrklPerLay);
     vertxr->printStats(allTracklets, vtClus, "tracklets");
-    vertxr->selectTracklets(allTracklets, firstTrklPerLay, lastTrklPerLay, vtClus, selTracklets);
+    vertxr->selectTracklets(allTracklets, firstTrklPerLay, lastTrklPerLay, selTracklets);
     vertxr->printStats(selTracklets, vtClus, "selected tracklets");
     //
     std::vector<NA6PVertex> zVertices;

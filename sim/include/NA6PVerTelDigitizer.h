@@ -49,6 +49,7 @@ class NA6PVerTelDigitizer
   void initGeometry(const char* filename = "geometry.root", const char* geoname = "NA6P");
   void process(const std::vector<NA6PVerTelHit>& hits, int layer = -1);
   void processHit(const NA6PVerTelHit& hit);
+  void setEventMetaData(int evID) { mEventID = evID; }
   void finalizeDigits();
 
   size_t getNDigits() const { return mDigits.size(); }
@@ -84,6 +85,8 @@ class NA6PVerTelDigitizer
   NA6PMCTruthContainer mMCLabels, *hMCLabelsPtr = &mMCLabels;
   TFile* mDigitsFile = nullptr;
   TTree* mDigitsTree = nullptr;
+  // info about event beint digitized
+  int mEventID = 0; // at the moment only event ID, later need at least timestamp for the pile-up
 
   ClassDefNV(NA6PVerTelDigitizer, 1);
 };

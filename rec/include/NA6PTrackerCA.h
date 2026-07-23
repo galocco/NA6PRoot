@@ -22,6 +22,7 @@
 #include "NA6PFastTrackFitter.h"
 #include "NA6PTrack.h"
 #include "NA6PTreeStreamRedirector.h"
+#include "NA6PMCTruthContainer.h"
 
 // Cellular Automaton track finder
 
@@ -113,21 +114,30 @@ class NA6PTrackerCA
                           float maxChi2ndfCells,
                           float maxChi2ndfTracks,
                           int minNClusTracks);
+  void setMinimumNumberOfClusters(int iter, int minNClusTracks) { mMinNClusTracksCA[iter] = minNClusTracks; }
   void setPID(PID pid) { mPID = pid; }
 
   void setMaxPropagationStep(float step) { mTrackFitter->setMaxPropagationStep(step); }
   void configureFromRecoParamVT();
   void configureFromRecoParamMS();
   void setVerbosity(bool opt = true) { mVerbose = opt; }
+  void setClusterMCTruth(NA6PMCTruthContainer* cont)
+  {
+    mCluMCLabels = cont;
+    mTrackFitter->setClusterMCTruth(cont);
+  }
   void setUseLinRef(bool v) { mUseLinRef = v; }
 
   void printConfiguration() const;
   int getNIterations() const { return mNIterationsCA; }
+  int getMinimumNumberOfClusters(int iter) { return mMinNClusTracksCA[iter]; }
   bool loadGeometry(const char* filename, const char* geoname = "NA6P");
 
   template <typename ClusterType>
   void findTracks(std::vector<ClusterType>& cluArr, const NA6PVertex* primVert);
+  const auto& getFinalTracks() const { return mFinalTracks; }
   std::vector<NA6PTrack> getTracks();
+
   template <typename ClusterType>
   std::vector<std::pair<ClusterType, ClusterType>> findTracklets(int jFirstLay, int jLastLay, std::vector<ClusterType>& cluArr, const NA6PVertex* primVert);
   NA6PFastTrackFitter* getTrackFitter() { return mTrackFitter.get(); }
@@ -212,7 +222,9 @@ class NA6PTrackerCA
                   int requiredClus = -1);
 
   template <typename T, typename ClusterType>
-  std::pair<int, bool> getTrackMCTruthStatus(const T& clIDs, const std::vector<ClusterType>& cluArr) const;
+  NA6PMCComposedLabel getTrackMCTruthStatus(const T& clIDs, const std::vector<ClusterType>& cluArr) const;
+  template <typename ClusterType>
+  bool clusterMCTruthMatch(const ClusterType& clu, const NA6PMCComposedLabel lblToMatch) const;
 
  private:
   static constexpr std::array<std::string_view, RecoType::NRecoType> mRecoTypeNames{"NONE", "VerTel", "MS"};
@@ -245,6 +257,7 @@ class NA6PTrackerCA
   float mMaxChi2ndfCellsCA[kMaxIterationsCA] = {100., 500., 999.0, 999.0, 999.0, 999.0, 999.0, 999.0, 999.0, 999.0};
   float mMaxChi2ndfTracksCA[kMaxIterationsCA] = {100., 500., 999.0, 999.0, 999.0, 999.0, 999.0, 999.0, 999.0, 999.0};
   int mMinNClusTracksCA[kMaxIterationsCA] = {5, 3, 0, 0, 0, 0, 0, 0, 0, 0};
+  NA6PMCTruthContainer* mCluMCLabels = nullptr;
 
   std::unique_ptr<NA6PTreeStreamRedirector> dbgStream;
 
@@ -252,30 +265,65 @@ class NA6PTrackerCA
 };
 
 template <typename T, typename ClusterType>
-std::pair<int, bool> NA6PTrackerCA::getTrackMCTruthStatus(const T& clIDs, const std::vector<ClusterType>& cluArr) const
+NA6PMCComposedLabel NA6PTrackerCA::getTrackMCTruthStatus(const T& clIDs, const std::vector<ClusterType>& cluArr) const
 {
-  std::vector<std::pair<int, int>> occurrences;
+  NA6PMCComposedLabel lbl;
+  if (!mCluMCLabels) {
+    return lbl;
+  }
+  std::vector<std::pair<NA6PMCComposedLabel, int>> occurrences;
   int ncl = 0;
   for (auto id : clIDs) {
     if (id < 0) {
       continue;
     }
     ncl++;
-    const int pid = cluArr[id].getParticleID();
-    bool found{false};
-    for (int i = 0; i < (int)occurrences.size(); i++) {
-      if (pid == occurrences[i].first) {
-        occurrences[i].second++;
-        found = true;
-        break;
+    int cluID = cluArr[id].getClusterIndex();
+    std::span labels = mCluMCLabels->getLabels(cluID);
+    for (const auto currLbl : labels) {
+      bool found{false};
+      for (auto& occ : occurrences) {
+        if (currLbl == occ.first) {
+          occ.second++;
+          found = true;
+          break;
+        }
+      }
+      if (!found) {
+        occurrences.emplace_back(currLbl, 1);
       }
     }
-    if (!found) {
-      occurrences.emplace_back(pid, 1);
+  }
+  if (occurrences.empty()) {
+    return lbl;
+  }
+  auto occIter = occurrences.begin();
+  auto occWin = occIter;
+  while (++occIter != occurrences.end()) {
+    if (occWin->second < occIter->second) {
+      occWin = occIter;
     }
   }
-  std::sort(std::begin(occurrences), std::end(occurrences), [](auto e1, auto e2) { return e1.second > e2.second; });
-  return {occurrences.front().second == ncl, occurrences.front().first};
+  lbl = occWin->first;
+  lbl.setFakeFlag(occWin->second < ncl);
+  return lbl;
+}
+
+template <typename ClusterType>
+bool NA6PTrackerCA::clusterMCTruthMatch(const ClusterType& clu, const NA6PMCComposedLabel lblToMatch) const
+{
+  if (!mCluMCLabels)
+    return false;
+
+  int cluID = clu.getClusterIndex();
+  std::span labels = mCluMCLabels->getLabels(cluID);
+  int nLabels = labels.size();
+  for (int jLab = 0; jLab < nLabels; jLab++) {
+    NA6PMCComposedLabel lbl = labels[jLab];
+    if (lblToMatch == lbl)
+      return true;
+  }
+  return false;
 }
 
 #endif

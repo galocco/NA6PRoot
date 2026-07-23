@@ -23,7 +23,9 @@ void runMSTracking(int firstEv = 0,
   printf("Open cluster file: %s\n", fc->GetName());
   TTree* tc = (TTree*)fc->Get("clustersMuonSpec");
   std::vector<NA6PMuonSpecCluster> msClus, *msClusPtr = &msClus;
+  NA6PMCTruthContainer msCluMCLabels, *msCluMCLabelsPtr = &msCluMCLabels;
   tc->SetBranchAddress("MuonSpec", &msClusPtr);
+  tc->SetBranchAddress("MuonSpecMCTruth", &msCluMCLabelsPtr);
 
   if (!Propagator::loadField() || !Propagator::loadGeometry(Form("%s/geometry.root", dirSimu))) {
     return;
@@ -61,6 +63,7 @@ void runMSTracking(int firstEv = 0,
     pvert.setXYZ(0., 0., zvert);
     msrec->setPrimaryVertex(&pvert);
     msrec->setClusters(msClus);
+    msrec->setClustersMCLabels(msCluMCLabels);
     msrec->runTracking();
   }
   msrec->closeTracksOutput();

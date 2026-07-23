@@ -13,13 +13,14 @@
 #include <TParticle.h>
 #include "NA6PTrack.h"
 #include "NA6PMCEventHeader.h"
+#include "NA6PMCComposedLabel.h"
 #include "NA6PDCAFitterN.h"
 #include "Propagator.h"
 #include "MagneticField.h"
 #include "ConfigurableParam.h"
 #endif
 
-void FillMeanAndRms(TH2F* h2D, TH1F* hMean, TH1F* hRms, TH1F* hSig)
+void fillMeanAndRms(TH2F* h2D, TH1F* hMean, TH1F* hRms, TH1F* hSig)
 {
   if (!h2D || !hMean || !hRms || !hSig) {
     printf("One of pointers is not set: h2D=%p hMean=%p hRms=%p hSig=%p\n", h2D, hMean, hRms, hSig);
@@ -78,11 +79,11 @@ void printDecay(TParticle& mothPart,
   }
 }
 
-bool CheckDecay(TParticle& mothPart,
-                     std::vector<TParticle>* mcArr,
-                     int pdgProngs[5],
-                     int idDau[5],
-                     float decvert[3])
+bool checkDecay(TParticle& mothPart,
+                std::vector<TParticle>* mcArr,
+                int pdgProngs[5],
+                int idDau[5],
+                float decvert[3])
 {
 
   bool okDau[5] = {false, false, false, false, false};
@@ -171,11 +172,11 @@ bool CheckDecay(TParticle& mothPart,
   return true;
 }
 
-void CheckDecayVertices(const char* part = "Lambda0",
-                           const char* dirSimu = ".",
-                           bool useFullFieldPropagator = true)
+void checkDecayVertices(const char* part = "Lambda0",
+                        const char* dirSimu = ".",
+                        bool useFullFieldPropagator = true)
 {
-  na6p::conf::ConfigurableParam::updateFromFile(Form("%s/na6pLayout.ini",dirSimu), "", true);
+  na6p::conf::ConfigurableParam::updateFromFile(Form("%s/na6pLayout.ini", dirSimu), "", true);
   if (!Propagator::loadGeometry(Form("%s/geometry.root", dirSimu)) || !Propagator::loadField()) {
     return;
   }
@@ -313,7 +314,10 @@ void CheckDecayVertices(const char* part = "Lambda0",
     return;
   TTree* trTree = (TTree*)ft->Get("tracksVerTel");
   std::vector<NA6PTrack>* trArr = nullptr;
+  std::vector<NA6PMCComposedLabel>* labArr = nullptr;
   trTree->SetBranchAddress("VerTel", &trArr);
+  trTree->SetBranchAddress("VerTelMCTruth", &labArr);
+
   TFile* fk = new TFile(Form("%s/MCKine.root", dirSimu));
   TTree* mcTree = (TTree*)fk->Get("mckine");
   std::vector<TParticle>* mcArr = nullptr;
@@ -342,8 +346,8 @@ void CheckDecayVertices(const char* part = "Lambda0",
   TH1F* hGenVsPt = new TH1F("hGenVsPt", ";p_{T} (GeV/c);entries", 20, 0., 5.);
   TH1F* hRecoVsRap = new TH1F("hRecoVsRap", ";y;entries", 20, 1., 5.);
   TH1F* hRecoVsPt = new TH1F("hRecoVsPt", ";p_{T} (GeV/c);entries", 20, 0., 5.);
-  TH1F* hDecLen = new TH1F("hDecLen", "; decay length L_{xyz} (#mum); entries", 100, 0., 10000*maxDecLen);
-  TH1F* hPseudoPropDecLen = new TH1F("hPseudoPropDecLen", "; L_{xyz} M / p (#mum); entries", 100, 0., 10000*maxDecLen);
+  TH1F* hDecLen = new TH1F("hDecLen", "; decay length L_{xyz} (#mum); entries", 100, 0., 10000 * maxDecLen);
+  TH1F* hPseudoPropDecLen = new TH1F("hPseudoPropDecLen", "; L_{xyz} M / p (#mum); entries", 100, 0., 10000 * maxDecLen);
   TH1F* hInvMass = new TH1F("hInvMass", ";M (GeV/c^{2});entries", 200, invMassMin, invMassMax);
   TH2F* hInvMassVsRap = new TH2F("hInvMassVsRap", ";y;M (GeV/c^{2});entries", 20, 1., 5., 200, invMassMin, invMassMax);
   TH2F* hInvMassVsDecLen = new TH2F("hInvMassVsDecLen", ";L_{xyz} (cm);M (GeV/c^{2});entries", 100, 0., maxDecLen, 200, invMassMin, invMassMax);
@@ -364,7 +368,7 @@ void CheckDecayVertices(const char* part = "Lambda0",
   TH2F* hPullVxVsDecLen = new TH2F("hPullVxVsDecLen", ";L_{xyz} (cm);x pull;entries", 20, 0., maxDecLen, 120, -5., 5.);
   TH2F* hPullVyVsDecLen = new TH2F("hPullVyVsDecLen", ";L_{xyz} (cm);y pull;entries", 20, 0., maxDecLen, 120, -5., 5.);
   TH2F* hPullVzVsDecLen = new TH2F("hPullVzVsDecLen", ";L_{xyz} (cm);z pull;entries", 20, 0., maxDecLen, 120, -5., 5.);
-  int nGenerated = 0, nGoodNdau = 0, nGoodDecay = 0, nReconstructed = 0;
+  int nGenerated = 0, nGoodNdau = 0, nGoodDecay = 0, nReconstructed = 0, nRecoDecVert = 0;
 
   int nEv = trTree->GetEntries();
   printf("Number of events = %d\n", nEv);
@@ -400,7 +404,7 @@ void CheckDecayVertices(const char* part = "Lambda0",
       }
       int idDau[5] = {-1, -1, -1, -1, -1};
       float decvert[3] = {0., 0., -9999.};
-      bool decOk = CheckDecay(curPart, mcArr, pdgProngs, idDau, decvert);
+      bool decOk = checkDecay(curPart, mcArr, pdgProngs, idDau, decvert);
       if (!decOk) {
         // printf(" Decay not ok\n");
         // printDecay(curPart, mcArr);
@@ -419,20 +423,24 @@ void CheckDecayVertices(const char* part = "Lambda0",
       hPseudoPropDecLen->Fill(ppdl);
 
       std::vector<NA6PTrack> prongs;
+      std::vector<NA6PMCComposedLabel> prongLabs;
       int nRecoDau = 0;
       for (int kd = 0; kd < nProngs; ++kd) {
         for (int jTr = 0; jTr < nTracks; ++jTr) {
           NA6PTrack tr = trArr->at(jTr);
           uint32_t clumap = tr.getClusterMap();
           int nVTClusters = 0;
-          for (int j = 0 ; j < 5; j++) {
-            if (clumap & (1 << j)) ++nVTClusters;
+          for (int j = 0; j < 5; j++) {
+            if (clumap & (1 << j))
+              ++nVTClusters;
           }
-          int mcLabel = tr.getParticleID();
+          NA6PMCComposedLabel mcCompLabel = labArr->at(jTr);
+          int mcLabel = mcCompLabel.getTrackID();
           if (mcLabel == idDau[kd]) {
             if (nVTClusters < 5)
               continue;
             prongs.push_back(tr);
+            prongLabs.push_back(mcCompLabel);
             ++nRecoDau;
           }
         }
@@ -450,9 +458,8 @@ void CheckDecayVertices(const char* part = "Lambda0",
       }
       if (n == 0)
         continue;
-      const bool fitConverged = nProngs == 2 ?
-                                  df2.getFitStatus() == NA6PDCAFitterN<2>::FitStatus::Converged :
-                                  df3.getFitStatus() == NA6PDCAFitterN<3>::FitStatus::Converged;
+      ++nRecoDecVert;
+      const bool fitConverged = nProngs == 2 ? df2.getFitStatus() == NA6PDCAFitterN<2>::FitStatus::Converged : df3.getFitStatus() == NA6PDCAFitterN<3>::FitStatus::Converged;
       const auto& secondaryVertex = (nProngs == 2) ? df2.getPCACandidate() : df3.getPCACandidate();
       float dvx = (secondaryVertex[0] - decvert[0]) * 1e4;
       float dvy = (secondaryVertex[1] - decvert[1]) * 1e4;
@@ -495,7 +502,7 @@ void CheckDecayVertices(const char* part = "Lambda0",
         // propagating each reconstructed track back to the decay-vertex Z.
         NA6PTrackPar prongAtVertex = prongs[kd];
         prongAtVertex.setPID(PID::PDG2PID(pdgProngs[kd]));
-        
+
         if (!propagator->propagateToZ(prongAtVertex, secondaryVertex[2], massPropOpt)) {
           massPropagationOK = false;
           break;
@@ -504,7 +511,7 @@ void CheckDecayVertices(const char* part = "Lambda0",
         sumPy += prongAtVertex.getPy();
         sumPz += prongAtVertex.getPz();
         float mom = prongAtVertex.getP();
-        auto mcPart = mcArr->at(prongs[kd].getParticleID());
+        auto mcPart = mcArr->at(prongLabs[kd].getTrackID());
         float mass = mcPart.GetMass();
         float energy = std::sqrt(mass * mass + mom * mom);
         sumE += energy;
@@ -532,6 +539,7 @@ void CheckDecayVertices(const char* part = "Lambda0",
   printf("Number of %s with %d daughters = %d\n", part, nProngs, nGoodNdau);
   printf("Number of %s with selected decay = %d\n", part, nGoodDecay);
   printf("Number of %s with reconstructed daughters = %d\n", part, nReconstructed);
+  printf("Number of %s with reconstructed decay vertex = %d\n", part, nRecoDecVert);
 
   TH1F* hEffVsRap = (TH1F*)hRecoVsRap->Clone("hEffVsRap");
   hEffVsRap->Divide(hRecoVsRap, hGenVsRap, 1., 1., "B");
@@ -545,12 +553,12 @@ void CheckDecayVertices(const char* part = "Lambda0",
   TH1F* hInvMassMean = new TH1F("hInvMassMean", ";y;<M> (GeV/c^{2})", hInvMassVsRap->GetNbinsX(), hInvMassVsRap->GetXaxis()->GetXmin(), hInvMassVsRap->GetXaxis()->GetXmax());
   TH1F* hInvMassRms = new TH1F("hInvMassRms", ";y;rms (M) (GeV/c^{2})", hInvMassVsRap->GetNbinsX(), hInvMassVsRap->GetXaxis()->GetXmin(), hInvMassVsRap->GetXaxis()->GetXmax());
   TH1F* hInvMassSig = new TH1F("hInvMassSig", ";y;#sigma(M) (GeV/c^{2})", hInvMassVsRap->GetNbinsX(), hInvMassVsRap->GetXaxis()->GetXmin(), hInvMassVsRap->GetXaxis()->GetXmax());
-  FillMeanAndRms(hInvMassVsRap, hInvMassMean, hInvMassRms, hInvMassSig);
+  fillMeanAndRms(hInvMassVsRap, hInvMassMean, hInvMassRms, hInvMassSig);
 
   TH1F* hInvMassMeanVsDecLen = new TH1F("hInvMassMeanVsDecLen", ";L_{xyz} (cm);<M> (GeV/c^{2})", hInvMassVsDecLen->GetNbinsX(), hInvMassVsDecLen->GetXaxis()->GetXmin(), hInvMassVsDecLen->GetXaxis()->GetXmax());
   TH1F* hInvMassRmsVsDecLen = new TH1F("hInvMassRmsVsDecLen", ";L_{xyz} (cm);rms (M) (GeV/c^{2})", hInvMassVsDecLen->GetNbinsX(), hInvMassVsDecLen->GetXaxis()->GetXmin(), hInvMassVsDecLen->GetXaxis()->GetXmax());
   TH1F* hInvMassSigVsDecLen = new TH1F("hInvMassSigVsDecLen", ";L_{xyz} (cm);#sigma(M) (GeV/c^{2})", hInvMassVsDecLen->GetNbinsX(), hInvMassVsDecLen->GetXaxis()->GetXmin(), hInvMassVsDecLen->GetXaxis()->GetXmax());
-  FillMeanAndRms(hInvMassVsDecLen, hInvMassMeanVsDecLen, hInvMassRmsVsDecLen, hInvMassSigVsDecLen);
+  fillMeanAndRms(hInvMassVsDecLen, hInvMassMeanVsDecLen, hInvMassRmsVsDecLen, hInvMassSigVsDecLen);
 
   TH1F* hDeltaVxMean = new TH1F("hDeltaVxMean", ";y;<x_{reco} - x_{gen}> (#mum)", hDeltaVxVsRap->GetNbinsX(), hDeltaVxVsRap->GetXaxis()->GetXmin(), hDeltaVxVsRap->GetXaxis()->GetXmax());
   TH1F* hDeltaVxRms = new TH1F("hDeltaVxRms", ";y;rms (x_{reco} - x_{gen}) (#mum)", hDeltaVxVsRap->GetNbinsX(), hDeltaVxVsRap->GetXaxis()->GetXmin(), hDeltaVxVsRap->GetXaxis()->GetXmax());
@@ -561,9 +569,9 @@ void CheckDecayVertices(const char* part = "Lambda0",
   TH1F* hDeltaVzMean = new TH1F("hDeltaVzMean", ";y;<z_{reco} - z_{gen}> (#mum)", hDeltaVzVsRap->GetNbinsX(), hDeltaVzVsRap->GetXaxis()->GetXmin(), hDeltaVzVsRap->GetXaxis()->GetXmax());
   TH1F* hDeltaVzRms = new TH1F("hDeltaVzRms", ";y;rms (z_{reco} - z_{gen}) (#mum)", hDeltaVzVsRap->GetNbinsX(), hDeltaVzVsRap->GetXaxis()->GetXmin(), hDeltaVzVsRap->GetXaxis()->GetXmax());
   TH1F* hDeltaVzSig = new TH1F("hDeltaVzSig", ";y;#sigma(z_{reco} - z_{gen}) (#mum)", hDeltaVzVsRap->GetNbinsX(), hDeltaVzVsRap->GetXaxis()->GetXmin(), hDeltaVzVsRap->GetXaxis()->GetXmax());
-  FillMeanAndRms(hDeltaVxVsRap, hDeltaVxMean, hDeltaVxRms, hDeltaVxSig);
-  FillMeanAndRms(hDeltaVyVsRap, hDeltaVyMean, hDeltaVyRms, hDeltaVySig);
-  FillMeanAndRms(hDeltaVzVsRap, hDeltaVzMean, hDeltaVzRms, hDeltaVzSig);
+  fillMeanAndRms(hDeltaVxVsRap, hDeltaVxMean, hDeltaVxRms, hDeltaVxSig);
+  fillMeanAndRms(hDeltaVyVsRap, hDeltaVyMean, hDeltaVyRms, hDeltaVySig);
+  fillMeanAndRms(hDeltaVzVsRap, hDeltaVzMean, hDeltaVzRms, hDeltaVzSig);
 
   TH1F* hPullVxMeanVsDecLen = new TH1F("hPullVxMeanVsDecLen", ";L_{xyz} (cm);mean x pull", 20, 0., maxDecLen);
   TH1F* hPullVxRmsVsDecLen = new TH1F("hPullVxRmsVsDecLen", ";L_{xyz} (cm);RMS x pull", 20, 0., maxDecLen);
@@ -574,9 +582,9 @@ void CheckDecayVertices(const char* part = "Lambda0",
   TH1F* hPullVzMeanVsDecLen = new TH1F("hPullVzMeanVsDecLen", ";L_{xyz} (cm);mean z pull", 20, 0., maxDecLen);
   TH1F* hPullVzRmsVsDecLen = new TH1F("hPullVzRmsVsDecLen", ";L_{xyz} (cm);RMS z pull", 20, 0., maxDecLen);
   TH1F* hPullVzSigVsDecLen = new TH1F("hPullVzSigVsDecLen", ";L_{xyz} (cm);#sigma z pull", 20, 0., maxDecLen);
-  FillMeanAndRms(hPullVxVsDecLen, hPullVxMeanVsDecLen, hPullVxRmsVsDecLen, hPullVxSigVsDecLen);
-  FillMeanAndRms(hPullVyVsDecLen, hPullVyMeanVsDecLen, hPullVyRmsVsDecLen, hPullVySigVsDecLen);
-  FillMeanAndRms(hPullVzVsDecLen, hPullVzMeanVsDecLen, hPullVzRmsVsDecLen, hPullVzSigVsDecLen);
+  fillMeanAndRms(hPullVxVsDecLen, hPullVxMeanVsDecLen, hPullVxRmsVsDecLen, hPullVxSigVsDecLen);
+  fillMeanAndRms(hPullVyVsDecLen, hPullVyMeanVsDecLen, hPullVyRmsVsDecLen, hPullVySigVsDecLen);
+  fillMeanAndRms(hPullVzVsDecLen, hPullVzMeanVsDecLen, hPullVzRmsVsDecLen, hPullVzSigVsDecLen);
 
   TLatex* tdec = new TLatex(0.45, 0.76, decay.data());
   tdec->SetNDC();

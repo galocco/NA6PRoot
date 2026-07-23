@@ -23,7 +23,9 @@ void runVTTracking(int firstEv = 0,
   printf("Open cluster file: %s\n", fc->GetName());
   TTree* tc = (TTree*)fc->Get("clustersVerTel");
   std::vector<NA6PVerTelCluster> vtClus, *vtClusPtr = &vtClus;
+  NA6PMCTruthContainer vtCluMCLabels, *vtCluMCLabelsPtr = &vtCluMCLabels;
   tc->SetBranchAddress("VerTel", &vtClusPtr);
+  tc->SetBranchAddress("VerTelMCTruth", &vtCluMCLabelsPtr);
 
   if (!Propagator::loadField() || !Propagator::loadGeometry(Form("%s/geometry.root", dirSimu))) {
     return;
@@ -61,6 +63,7 @@ void runVTTracking(int firstEv = 0,
     pvert.setXYZ(0., 0., zvert);
     vtrec->setPrimaryVertex(&pvert);
     vtrec->setClusters(vtClus);
+    vtrec->setClustersMCLabels(vtCluMCLabels);
     vtrec->runTracking();
   }
   vtrec->closeTracksOutput();

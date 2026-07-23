@@ -6,11 +6,14 @@
 #include "NA6PVerTelCluster.h"
 #include "NA6PMuonSpecCluster.h"
 #include "NA6PMuonSpecModularHit.h"
+#include "NA6PMCComposedLabel.h"
+#include "NA6PMCTruthContainer.h"
 #include "Propagator.h"
 #include "NA6PMatch.h"
 #include "NA6PTrack.h"
 #include "NA6PTreeStreamRedirector.h"
 #include "HistoManager.h"
+#include <unordered_map>
 #include <TDatabasePDG.h>
 #include <TParticlePDG.h>
 #include <TLorentzVector.h>
@@ -45,7 +48,7 @@ struct MCTrackInfo {
   int bestVTTrack = -1;
   int bestMSTrack = -1;
   int bestMatch = -1;
-  int parent = -1;
+  NA6PMCComposedLabel parent;
   std::vector<int> vtClID;
   std::vector<int> msClID;
   std::array<float, 3> momMS{}, posMS{};
@@ -74,7 +77,7 @@ const int nBinsMassRes = 50;
 
 na6p::HistoManager* hm = nullptr;
 
-std::unordered_map<int, MCTrackInfo> mcTruth;
+std::unordered_map<NA6PMCComposedLabel, MCTrackInfo> mcTruth;
 std::unique_ptr<NA6PTreeStreamRedirector> outPerf;
 
 TTree *mcTree = nullptr, *vtClTree = nullptr, *vtTrTree = nullptr, *msClTree = nullptr, *msTrTree = nullptr, *matchTree = nullptr;
@@ -83,6 +86,11 @@ std::vector<TParticle>* mcArr = nullptr;
 std::vector<NA6PVerTelCluster>* vtClVec = nullptr;
 std::vector<NA6PTrack>* vtTrVec = nullptr;
 std::vector<NA6PMuonSpecCluster>* msClVec = nullptr;
+NA6PMCTruthContainer* vtCluMCLabels = nullptr;
+NA6PMCTruthContainer* msCluMCLabels = nullptr;
+std::vector<NA6PMCComposedLabel>* vtTrkLabels = nullptr;
+std::vector<NA6PMCComposedLabel>* msTrkLabels = nullptr;
+std::vector<NA6PMCComposedLabel>* matchTrkLabels = nullptr;
 std::vector<NA6PTrack>* msTrVec = nullptr;
 std::vector<NA6PMatch>* matchVec = nullptr;
 std::vector<NA6PMuonSpecModularHit>* msHitsVec = nullptr;
@@ -381,7 +389,7 @@ void createOutput(bool checkVTTracks, bool checkMSTracks, bool checkMatches, boo
     if (mcTrackInfo.status != MCTrackInfo::Accept || !(mcTrackInfo.isReconstructableVT() || mcTrackInfo.isReconstructableMS()))
       continue;
 
-    const auto& partMC = (*mcArr)[mcInfoPair.first];
+    const auto& partMC = (*mcArr)[mcInfoPair.first.getTrackID()];
     // convert to TrackParam
     float mom[3] = {(float)partMC.Px(), (float)partMC.Py(), (float)partMC.Pz()}, pos[3] = {(float)partMC.Vx(), (float)partMC.Vy(), (float)partMC.Vz()};
     NA6PTrackPar trMC(pos, mom, mcTrackInfo.charge);
@@ -391,14 +399,15 @@ void createOutput(bool checkVTTracks, bool checkMSTracks, bool checkMatches, boo
       hm->getHisto(HMOffsets[0] + 0 * 100 + 0)->Fill(pInvMC); // reconstructable
       hm->getHisto(HMOffsets[0] + 1 * 100 + 0)->Fill(rapidityMC);
       NA6PTrackParCov trCopy;
-      int nVTHits = 0, nClones = 0, partID = -1;
+      int nVTHits = 0, nClones = 0;
+      NA6PMCComposedLabel lblTr;
       float chi2 = -1.f;
       if (mcTrackInfo.bestVTTrack >= 0) {
         const auto& vtTr = (*vtTrVec)[mcTrackInfo.bestVTTrack];
         trCopy = vtTr;
         nVTHits = vtTr.getNHits();
         nClones = mcTrackInfo.nVTTracks;
-        partID = vtTr.getParticleID();
+        lblTr = (*vtTrkLabels)[mcTrackInfo.bestVTTrack];
         chi2 = vtTr.getChi2();
         if (!prop->propagateToZ(trCopy, pos[2])) {
           trCopy.invalidate();
@@ -406,7 +415,7 @@ void createOutput(bool checkVTTracks, bool checkMSTracks, bool checkMatches, boo
         hm->getHisto(HMOffsets[0] + 0 * 100 + 1)->Fill(pInvMC); // reconstructed
         hm->getHisto(HMOffsets[0] + 1 * 100 + 1)->Fill(rapidityMC);
         //
-        if (partID >= 0) {
+        if (!lblTr.isFake()) {
           hm->getHisto(HMOffsets[0] + 0 * 100 + 2)->Fill(pInvMC); // reconstructed correctly
           hm->getHisto(HMOffsets[0] + 1 * 100 + 2)->Fill(rapidityMC);
         }
@@ -421,7 +430,7 @@ void createOutput(bool checkVTTracks, bool checkMSTracks, bool checkMatches, boo
       }
       (*outPerf) << "perfVT" << "evID=" << int(mcTree->GetReadEntry()) << "mcTrID=" << mcInfoPair.first << "pdg=" << partMC.GetPdgCode() << "mcTr=" << trMC
                  << "nvtLr=" << mcTrackInfo.nvtLr << "nmsLr=" << mcTrackInfo.nmsLr
-                 << "vtTr=" << trCopy << "nVTCl=" << nVTHits << "chi2vt=" << chi2 << "nClones=" << nClones << "mcID=" << partID << "\n";
+                 << "vtTr=" << trCopy << "nVTCl=" << nVTHits << "chi2vt=" << chi2 << "nClones=" << nClones << "mcID=" << lblTr << "\n";
     }
     //-----------------------
 
@@ -431,14 +440,15 @@ void createOutput(bool checkVTTracks, bool checkMSTracks, bool checkMatches, boo
       hm->getHisto(HMOffsets[1] + 0 * 100 + 0)->Fill(pInvMC); // reconstructable
       hm->getHisto(HMOffsets[1] + 1 * 100 + 0)->Fill(rapidityMC);
 
-      int nMSHits = 0, nClones = 0, partID = -1;
+      int nMSHits = 0, nClones = 0;
+      NA6PMCComposedLabel lblTr;
       float chi2 = -1.f;
       if (mcTrackInfo.bestMSTrack >= 0) {
         const auto& msTr = (*msTrVec)[mcTrackInfo.bestMSTrack];
         trCopy = msTr;
         nMSHits = msTr.getNHits();
         nClones = mcTrackInfo.nMSTracks;
-        partID = msTr.getParticleID();
+        lblTr = (*msTrkLabels)[mcTrackInfo.bestMSTrack];
         chi2 = msTr.getChi2();
         if (!prop->propagateToZ(trCopy, msMCTr.getZ())) {
           trCopy.invalidate();
@@ -446,7 +456,7 @@ void createOutput(bool checkVTTracks, bool checkMSTracks, bool checkMatches, boo
         hm->getHisto(HMOffsets[1] + 0 * 100 + 1)->Fill(pInvMC); // reconstructed
         hm->getHisto(HMOffsets[1] + 1 * 100 + 1)->Fill(rapidityMC);
         //
-        if (partID >= 0) {
+        if (!lblTr.isFake()) {
           hm->getHisto(HMOffsets[1] + 0 * 100 + 2)->Fill(pInvMC); // reconstructed correctly
           hm->getHisto(HMOffsets[1] + 1 * 100 + 2)->Fill(rapidityMC);
         }
@@ -461,12 +471,13 @@ void createOutput(bool checkVTTracks, bool checkMSTracks, bool checkMatches, boo
       }
       (*outPerf) << "perfMS" << "evID=" << int(mcTree->GetReadEntry()) << "mcTrID=" << mcInfoPair.first << "pdg=" << partMC.GetPdgCode()
                  << "mcTrMS0=" << msMCTr << "nvtLr=" << mcTrackInfo.nvtLr << "nmsLr=" << mcTrackInfo.nmsLr
-                 << "msTr=" << trCopy << "nMSCl=" << nMSHits << "chi2ms=" << chi2 << "nClones=" << nClones << "mcID=" << partID << "\n";
+                 << "msTr=" << trCopy << "nMSCl=" << nMSHits << "chi2ms=" << chi2 << "nClones=" << nClones << "mcID=" << lblTr << "\n";
     }
     //-----------------------
     if (checkMatches && mcTrackInfo.isReconstructableVT() && mcTrackInfo.isReconstructableMS()) { // output generated info at the vertex
       NA6PTrackParCov trCopy;
-      int nClones = 0, partID = -1;
+      int nClones = 0;
+      NA6PMCComposedLabel lblTr;
       float chi2refit = -1.f, chi2match = -1.f;
       hm->getHisto(HMOffsets[2] + 0 * 100 + 0)->Fill(pInvMC); // matchable
       hm->getHisto(HMOffsets[2] + 1 * 100 + 0)->Fill(rapidityMC);
@@ -474,7 +485,7 @@ void createOutput(bool checkVTTracks, bool checkMSTracks, bool checkMatches, boo
         const auto& mtcTr = (*matchVec)[mcTrackInfo.bestMatch];
         trCopy = mtcTr;
         nClones = mcTrackInfo.nMatches;
-        partID = mtcTr.getParticleID();
+        lblTr = (*matchTrkLabels)[mcTrackInfo.bestMatch];
         chi2refit = mtcTr.getChi2Refit();
         chi2match = mtcTr.getChi2Match();
         if (!prop->propagateToZ(trCopy, pos[2])) {
@@ -483,7 +494,7 @@ void createOutput(bool checkVTTracks, bool checkMSTracks, bool checkMatches, boo
         hm->getHisto(HMOffsets[2] + 0 * 100 + 1)->Fill(pInvMC); // matched
         hm->getHisto(HMOffsets[2] + 1 * 100 + 1)->Fill(rapidityMC);
         //
-        if (partID >= 0) {
+        if (!lblTr.isFake()) {
           hm->getHisto(HMOffsets[2] + 0 * 100 + 2)->Fill(pInvMC); // matched correctly
           hm->getHisto(HMOffsets[2] + 1 * 100 + 2)->Fill(rapidityMC);
         }
@@ -497,7 +508,7 @@ void createOutput(bool checkVTTracks, bool checkMSTracks, bool checkMatches, boo
         trCopy = dummy;
       }
       (*outPerf) << "perfMatch" << "evID=" << int(mcTree->GetReadEntry()) << "mcTrID=" << mcInfoPair.first << "pdg=" << partMC.GetPdgCode() << "mcTr=" << trMC
-                 << "mtcTr=" << trCopy << "chi2refit=" << chi2refit << "chi2match=" << chi2match << "nClones=" << nClones << "mcID=" << partID << "\n";
+                 << "mtcTr=" << trCopy << "chi2refit=" << chi2refit << "chi2match=" << chi2match << "nClones=" << nClones << "mcID=" << lblTr << "\n";
     }
     //-----------------------
   }
@@ -505,22 +516,21 @@ void createOutput(bool checkVTTracks, bool checkMSTracks, bool checkMatches, boo
   // dimuons
   if (checkDimu) {
     auto it0 = mcTruth.begin();
-    const int dummyID = -999999;
     while (it0 != mcTruth.end()) {
       const auto& mcTrackInfo0 = it0->second;
       if (!mcTrackInfo0.isReconstructableMS()) {
         it0++;
         continue;
       }
-      const auto& partMC0 = (*mcArr)[it0->first];
+      const auto& partMC0 = (*mcArr)[it0->first.getTrackID()];
       TLorentzVector muG0;
       float mom0[3] = {(float)partMC0.Px(), (float)partMC0.Py(), (float)partMC0.Pz()}, pos0[3] = {(float)partMC0.Vx(), (float)partMC0.Vy(), (float)partMC0.Vz()};
       NA6PTrackPar muG0Tr(pos0, mom0, mcTrackInfo0.charge);
       muG0Tr.setPID(PID::Muon);
       muG0.SetXYZM(partMC0.Px(), partMC0.Py(), partMC0.Pz(), 0.105658369);
       TLorentzVector muMS0, muMatch0;
-      int muMSRec0ID = dummyID, muMatchRec0ID = dummyID;
-      if (std::abs(partMC0.GetPdgCode()) != 13 || mcTrackInfo0.parent < 0) {
+      NA6PMCComposedLabel muMSRec0ID, muMatchRec0ID;
+      if (std::abs(partMC0.GetPdgCode()) != 13 || !mcTrackInfo0.parent.isSet()) {
         it0++;
         continue;
       }
@@ -529,7 +539,7 @@ void createOutput(bool checkVTTracks, bool checkMSTracks, bool checkMatches, boo
         muMSRec0Par = (*msTrVec)[mcTrackInfo0.bestMSTrack];
         if (prop->propagateToZ(muMSRec0Par, partMC0.Vz())) {
           muMS0.SetXYZM(muMSRec0Par.getPx(), muMSRec0Par.getPy(), muMSRec0Par.getPz(), 0.105658369);
-          muMSRec0ID = (*msTrVec)[mcTrackInfo0.bestMSTrack].getParticleID();
+          muMSRec0ID = (*msTrkLabels)[mcTrackInfo0.bestMSTrack];
         }
       }
       bool matchable0 = false;
@@ -540,7 +550,7 @@ void createOutput(bool checkVTTracks, bool checkMSTracks, bool checkMatches, boo
           muMatchRec0Par = (*matchVec)[mcTrackInfo0.bestMatch];
           if (prop->propagateToZ(muMatchRec0Par, partMC0.Vz())) {
             muMatch0.SetXYZM(muMatchRec0Par.getPx(), muMatchRec0Par.getPy(), muMatchRec0Par.getPz(), 0.105658369);
-            muMatchRec0ID = (*matchVec)[mcTrackInfo0.bestMatch].getParticleID();
+            muMatchRec0ID = (*matchTrkLabels)[mcTrackInfo0.bestMatch];
           }
         }
       }
@@ -551,10 +561,10 @@ void createOutput(bool checkVTTracks, bool checkMSTracks, bool checkMatches, boo
         if (!mcTrackInfo1.isReconstructableMS()) {
           continue;
         }
-        if (mcTrackInfo0.parent != mcTrackInfo1.parent) {
+        if (mcTrackInfo0.parent != mcTrackInfo1.parent || !mcTrackInfo0.parent.isSet()) {
           continue;
         }
-        const auto& partMC1 = (*mcArr)[it1->first];
+        const auto& partMC1 = (*mcArr)[it1->first.getTrackID()];
         if (std::abs(partMC1.GetPdgCode()) != 13 || partMC0.GetPdgCode() * partMC1.GetPdgCode() > 0) {
           continue;
         }
@@ -564,13 +574,13 @@ void createOutput(bool checkVTTracks, bool checkMSTracks, bool checkMatches, boo
         muG1Tr.setPID(PID::Muon);
         muG1.SetXYZM(partMC1.Px(), partMC1.Py(), partMC1.Pz(), 0.105658369);
         TLorentzVector muMS1, muMatch1;
-        int muMSRec1ID = dummyID, muMatchRec1ID = dummyID;
+        NA6PMCComposedLabel muMSRec1ID, muMatchRec1ID;
         NA6PTrackPar muMSRec1Par;
         if (mcTrackInfo1.bestMSTrack >= 0) {
           muMSRec1Par = (*msTrVec)[mcTrackInfo1.bestMSTrack];
           if (prop->propagateToZ(muMSRec1Par, partMC1.Vz())) {
             muMS1.SetXYZM(muMSRec1Par.getPx(), muMSRec1Par.getPy(), muMSRec1Par.getPz(), 0.105658369);
-            muMSRec1ID = (*msTrVec)[mcTrackInfo1.bestMSTrack].getParticleID();
+            muMSRec1ID = (*msTrkLabels)[mcTrackInfo1.bestMSTrack];
           }
         }
         bool matchable1 = false;
@@ -581,18 +591,18 @@ void createOutput(bool checkVTTracks, bool checkMSTracks, bool checkMatches, boo
             muMatchRec1Par = (*matchVec)[mcTrackInfo1.bestMatch];
             if (prop->propagateToZ(muMatchRec1Par, partMC1.Vz())) {
               muMatch1.SetXYZM(muMatchRec1Par.getPx(), muMatchRec1Par.getPy(), muMatchRec1Par.getPz(), 0.105658369);
-              muMatchRec1ID = (*matchVec)[mcTrackInfo1.bestMatch].getParticleID();
+              muMatchRec1ID = (*matchTrkLabels)[mcTrackInfo1.bestMatch];
             }
           }
         }
 
         TLorentzVector muParentG = muG0, muParentMSRec, muParentMatchRec;
         muParentG += muG1;
-        if (muMSRec0ID != dummyID && muMSRec1ID != dummyID) {
+        if (muMSRec0ID.isSet() && muMSRec1ID.isSet()) {
           muParentMSRec = muMS0;
           muParentMSRec += muMS1;
         }
-        if (matchable0 && matchable1 && muMatchRec0ID != dummyID && muMatchRec1ID != dummyID) {
+        if (matchable0 && matchable1 && muMatchRec0ID.isSet() && muMatchRec1ID.isSet()) {
           muParentMatchRec = muMatch0;
           muParentMatchRec += muMatch1;
         }
@@ -600,7 +610,7 @@ void createOutput(bool checkVTTracks, bool checkMSTracks, bool checkMatches, boo
         int offset = HMOffsets[3];
         auto dimuRapidityMC = muParentG.Rapidity(), dimuMMC = muParentG.M();
         hm->getHisto(offset + 0)->Fill(dimuRapidityMC);
-        if (muMSRec0ID != dummyID && muMSRec1ID != dummyID) {
+        if (muMSRec0ID.isSet() && muMSRec1ID.isSet()) {
           hm->getHisto(offset + 1)->Fill(dimuRapidityMC);
           hm->getHisto(offset + 100)->Fill(muParentMSRec.M() - dimuMMC);
           if (muMSRec0ID == it0->first && muMSRec1ID == it1->first) {
@@ -611,7 +621,7 @@ void createOutput(bool checkVTTracks, bool checkMSTracks, bool checkMatches, boo
 
         if (matchable0 && matchable1) {
           hm->getHisto(offset + 10)->Fill(dimuRapidityMC);
-          if (muMatchRec0ID != dummyID && muMatchRec1ID != dummyID) {
+          if (muMatchRec0ID.isSet() && muMatchRec1ID.isSet()) {
             hm->getHisto(offset + 11)->Fill(dimuRapidityMC);
             hm->getHisto(offset + 110)->Fill(muParentMatchRec.M() - dimuMMC);
             if (muMatchRec0ID == it0->first && muMatchRec1ID == it1->first) {
@@ -644,8 +654,8 @@ void checkVTTracking()
   int ntr = vtTrVec->size();
   for (int itr = 0; itr < ntr; itr++) {
     const auto& tr = (*vtTrVec)[itr];
-    int trMCID = tr.getParticleID();
-    auto& mcInfo = mcTruth[std::abs(trMCID)];
+    auto trMCID = (*vtTrkLabels)[itr];
+    auto& mcInfo = mcTruth[trMCID];
     mcInfo.nVTTracks++;
     if (mcInfo.bestVTTrack < 0) {
       mcInfo.bestVTTrack = itr;
@@ -664,8 +674,8 @@ void checkMSTracking()
   int ntr = msTrVec->size();
   for (int itr = 0; itr < ntr; itr++) {
     const auto& tr = (*msTrVec)[itr];
-    int trMCID = tr.getParticleID();
-    auto& mcInfo = mcTruth[std::abs(trMCID)];
+    auto trMCID = (*msTrkLabels)[itr];
+    auto& mcInfo = mcTruth[trMCID];
     mcInfo.nMSTracks++;
     if (mcInfo.bestMSTrack < 0) {
       mcInfo.bestMSTrack = itr;
@@ -684,8 +694,8 @@ void checkMatching()
   int ntr = matchVec->size();
   for (int itr = 0; itr < ntr; itr++) {
     const auto& tr = (*matchVec)[itr];
-    int trMCID = tr.getParticleID();
-    auto& mcInfo = mcTruth[std::abs(trMCID)];
+    auto trMCID = (*matchTrkLabels)[itr];
+    auto& mcInfo = mcTruth[trMCID];
     mcInfo.nMatches++;
     if (mcInfo.bestMatch < 0) {
       mcInfo.bestMatch = itr;
@@ -715,17 +725,20 @@ void setupInputs(bool checkVTTracks, bool checkMSTracks, bool checkMatches, cons
   if (checkVTTracks || checkMatches) {
     fetchTree(Form("%s/ClustersVerTel.root", dirSimu), "clustersVerTel", vtClTree);
     vtClTree->SetBranchAddress("VerTel", &vtClVec);
-
+    vtClTree->SetBranchAddress("VerTelMCTruth", &vtCluMCLabels);
     fetchTree(Form("%s/TracksVerTel.root", dirSimu), "tracksVerTel", vtTrTree);
     vtTrTree->SetBranchAddress("VerTel", &vtTrVec);
+    vtTrTree->SetBranchAddress("VerTelMCTruth", &vtTrkLabels);
   }
 
   if (checkMSTracks || checkMatches) {
     fetchTree(Form("%s/ClustersMuonSpec.root", dirSimu), "clustersMuonSpec", msClTree);
     msClTree->SetBranchAddress("MuonSpec", &msClVec);
+    msClTree->SetBranchAddress("MuonSpecMCTruth", &msCluMCLabels);
 
     fetchTree(Form("%s/TracksMuonSpec.root", dirSimu), "tracksMuonSpec", msTrTree);
     msTrTree->SetBranchAddress("MuonSpec", &msTrVec);
+    msTrTree->SetBranchAddress("MuonSpecMCTruth", &msTrkLabels);
 
     fetchTree(Form("%s/HitsMuonSpecModular.root", dirSimu), "hitsMuonSpecModular", msHitsTree);
     msHitsTree->SetBranchAddress("MuonSpecModular", &msHitsVec);
@@ -734,6 +747,7 @@ void setupInputs(bool checkVTTracks, bool checkMSTracks, bool checkMatches, cons
   if (checkMatches) {
     fetchTree(Form("%s/TracksMatching.root", dirSimu), "tracksMatching", matchTree);
     matchTree->SetBranchAddress("Matching", &matchVec);
+    matchTree->SetBranchAddress("MatchingMCTruth", &matchTrkLabels);
   }
 }
 
@@ -757,11 +771,11 @@ void loadEventData(int i)
 
 void buildReconstuctableMCInfo()
 {
-  auto consideMCPart = [&](int partID) {
-    auto ent0 = mcTruth.emplace(partID, MCTrackInfo{});
+  auto consideMCPart = [&](NA6PMCComposedLabel lbl) {
+    auto ent0 = mcTruth.emplace(lbl, MCTrackInfo{});
     auto& ent = ent0.first->second;
     if (ent.status == MCTrackInfo::New) {
-      const auto& part = (*mcArr)[partID];
+      const auto& part = (*mcArr)[lbl.getTrackID()]; // RS: here we assume that the lbl.getEventID is already loaded
       while (true) {
         ent.status = MCTrackInfo::Discard;
         auto ppdg = TDatabasePDG::Instance()->GetParticle(part.GetPdgCode());
@@ -777,10 +791,11 @@ void buildReconstuctableMCInfo()
           break;
         }
         // all checks passed
-        // RS printf("Accept track:%d/ev:%d from Z=%.3f time %.3f\n", partID, int(mcTree->GetReadEntry()), part.Vz(), part.T());
         ent.status = MCTrackInfo::Accept;
         ent.charge = ppdg->Charge() / 3;
-        ent.parent = part.GetFirstMother();
+        if (part.GetFirstMother() >= 0) {
+          ent.parent = NA6PMCComposedLabel(part.GetFirstMother(), mcTree->GetReadEntry(), 0);
+        }
         break;
       }
     }
@@ -790,19 +805,23 @@ void buildReconstuctableMCInfo()
   mcTruth.clear();
   if (vtClVec) {
     for (int i = 0; i < (int)vtClVec->size(); i++) {
-      auto mcID = (*vtClVec)[i].getParticleID();
-      auto ent = consideMCPart(mcID);
-      if (ent != mcTruth.end()) {
-        ent->second.vtClID.push_back(i);
+      auto labels = vtCluMCLabels->getLabels(i);
+      for (const auto currLbl : labels) {
+        auto ent = consideMCPart(currLbl);
+        if (ent != mcTruth.end()) {
+          ent->second.vtClID.push_back(i);
+        }
       }
     }
   }
   if (msClVec) {
     for (int i = 0; i < (int)msClVec->size(); i++) {
-      auto mcID = (*msClVec)[i].getParticleID();
-      auto ent = consideMCPart(mcID);
-      if (ent != mcTruth.end()) {
-        ent->second.msClID.push_back(i);
+      auto labels = msCluMCLabels->getLabels(i);
+      for (const auto currLbl : labels) {
+        auto ent = consideMCPart(currLbl);
+        if (ent != mcTruth.end()) {
+          ent->second.msClID.push_back(i);
+        }
       }
     }
   }

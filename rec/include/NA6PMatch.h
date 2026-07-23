@@ -39,15 +39,6 @@ class NA6PMatch : public NA6PTrackParCov
   void setIndexVT(int i) { mIndexVT = i; }
   void setIndexMS(int i) { mIndexMS = i; }
 
-  int getParticleID() const { return mParticleID; }
-  void setParticleID(int idx) { mParticleID = idx; }
-
-  // temporary
-  int getParticleIDMS() const { return mParticleIDMS; }
-  void setParticleIDMS(int idx) { mParticleIDMS = idx; }
-  int getParticleIDVT() const { return mParticleIDVT; }
-  void setParticleIDVT(int idx) { mParticleIDVT = idx; }
-
   void print() const;
   std::string asString() const;
 
@@ -56,12 +47,9 @@ class NA6PMatch : public NA6PTrackParCov
   float mChi2Refit = 0.f; // total chi2 of refit
   int mIndexVT = -1;      // index of the VT Track
   int mIndexMS = -1;      // index of the MS Track
-  int mParticleID = -1;   // particle ID (MC truth) = |particleIDMS| * (|particleIDMS|==|particleIDVT| ? 1 : -1)
-  int mParticleIDMS = -1; // temporary
-  int mParticleIDVT = -1; // temporary
   int8_t mNClusters = 0;  // total number of clusters
 
-  ClassDefNV(NA6PMatch, 1)
+  ClassDefNV(NA6PMatch, 2)
 };
 
 #endif

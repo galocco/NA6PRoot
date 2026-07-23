@@ -156,7 +156,6 @@ void plotVerTelDigits(const char* dirSimu = ".")
         const auto& dig = vtDigits.at(jDig);
         int sensD = dig.getDetectorID();
         if (sensH == sensD) {
-          //          int idPartD = dig.getParticleID();
           std::span labels = vtMCLabels.getLabels(jDig);
           int nLabels = labels.size();
           for (int jLab = 0; jLab < nLabels; jLab++) {

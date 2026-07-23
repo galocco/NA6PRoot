@@ -9,6 +9,7 @@
 #include "NA6PVertex.h"
 #include "NA6PRecoParam.h"
 #include "NA6PLayoutParam.h"
+#include "NA6PMCComposedLabel.h"
 #include "NA6PVertexerTracklets.h"
 
 NA6PVertexerTracklets::NA6PVertexerTracklets()
@@ -331,10 +332,7 @@ void NA6PVertexerTracklets::computeLayerTracklets(const std::vector<NA6PVerTelCl
           float tanL = (z2 - z1) / (r2 - r1);
           float pxpz = (x2 - x1) / (z2 - z1);
           float pypz = (y2 - y1) / (z2 - z1);
-          bool signal = false;
-          if (clu1.getParticleID() == clu2.getParticleID())
-            signal = true;
-          tracklets.emplace_back(iLayer, jClu1, jClu2, tanL, phi, pxpz, pypz, signal);
+          tracklets.emplace_back(iLayer, jClu1, jClu2, tanL, phi, pxpz, pypz);
         }
       }
     }
@@ -1000,7 +998,7 @@ void NA6PVertexerTracklets::findVertices(std::vector<NA6PVerTelCluster>& cluArr,
     LOGP(info, "Number of reconstructed vertices = {}", nVertices);
     int jv = 0;
     for (auto vert : vertices)
-      LOGP(info, "Vertex %d, z = %f nContrib = %d\n", jv++, vert.getZ(), vert.getNContributors());
+      LOGP(info, "Vertex {}, z = {} nContrib = {}", jv++, vert.getZ(), vert.getNContributors());
   }
 }
 
@@ -1012,37 +1010,60 @@ void NA6PVertexerTracklets::printStats(const std::vector<TrackletForVertex>& can
 
   int nFound = candidates.size();
   LOGP(info, "Number of {} = {}", label.c_str(), nFound);
+
   int nGood = 0;
-  int nSelected = 0;
+  float aveClus = 0;
   for (int j = 0; j < nFound; ++j) {
     const auto& tr = candidates[j];
     int nClus = 2;
     int idClus[2] = {tr.firstClusterIndex, tr.secondClusterIndex};
     int startLay = tr.startingLayer;
-    int idPartTrack = -9999999;
+    std::vector<NA6PMCComposedLabel> commonLbl;
+    bool isFake = false;
     int nTrueClus = 0;
     for (int jClu = 0; jClu < nClus; jClu++) {
       int cluID = idClus[jClu];
-      if (cluID >= 0) {
-        ++nTrueClus;
-        const auto& clu = cluArr[cluID];
-        int jLay = clu.getLayer();
-        if (jClu == 0 && jLay != startLay)
-          LOGP(error, "mismatch in {} layers: {} {}", label.c_str(), jLay, startLay);
-        int idPartClu = clu.getParticleID();
-        if (jClu == 0)
-          idPartTrack = idPartClu;
-        else if (idPartClu != idPartTrack && idPartTrack > 0)
-          idPartTrack *= (-1);
+      if (cluID < 0) {
+        isFake = true;
+        continue;
+      }
+      ++nTrueClus;
+      const auto& clu = cluArr[cluID];
+      int jLay = clu.getLayer();
+      if (jClu == 0 && jLay != startLay)
+        LOGP(error, "mismatch in {} layers: {} {}", label.c_str(), jLay, startLay);
+      if (mCluMCLabels) {
+        int cluInd = clu.getClusterIndex();
+        std::span labels = mCluMCLabels->getLabels(cluInd);
+        if (jClu == 0) {
+          commonLbl.assign(labels.begin(), labels.end());
+        } else {
+          std::vector<NA6PMCComposedLabel> next;
+          for (const auto& lbl : labels) {
+            if (std::find(commonLbl.begin(), commonLbl.end(), lbl) != commonLbl.end()) {
+              next.push_back(lbl);
+            }
+          }
+          commonLbl.swap(next);
+        }
+        if (commonLbl.empty()) {
+          isFake = true;
+        }
       }
     }
-    nSelected++;
-    if (idPartTrack > 0)
+    if (!isFake)
       nGood++;
+    aveClus += nTrueClus;
   }
-  if (nFound > 0)
-    LOGP(info, "Fraction of good {} = {} / {} = {}",
-         label.c_str(), nGood, nFound, (float)nGood / (float)nFound);
+
+  if (nFound > 0) {
+    LOGP(info, "Average clus = {}",
+         aveClus / static_cast<float>(nFound));
+    if (mCluMCLabels) {
+      LOGP(info, "Fraction of good {} = {} / {} = {}",
+           label.c_str(), nGood, nFound, (float)nGood / (float)nFound);
+    }
+  }
 }
 
 //_______________________________________________________________________

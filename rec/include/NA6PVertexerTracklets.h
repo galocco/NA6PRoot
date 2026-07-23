@@ -21,6 +21,7 @@
 #include "NA6PLayoutParam.h"
 #include "NA6PLine.h"
 #include "NA6PRecoParam.h"
+#include "NA6PMCTruthContainer.h"
 
 class NA6PVertex;
 class NA6PVerTelCluster;
@@ -37,7 +38,6 @@ struct TrackletForVertex {
   float phi;
   float pxpz;
   float pypz;
-  bool isSignal;
 };
 
 struct TracklIntersection {
@@ -120,6 +120,8 @@ class NA6PVertexerTracklets
   void setMultiVertexInOneGo() { mMultiVertexMode = kAllVerticesInOneGo; }
   void setMultiVertexIterative() { mMultiVertexMode = kMultiVertIterative; }
   void setVerbosity(bool opt = true) { mVerbose = opt; }
+  void setClusterMCTruth(NA6PMCTruthContainer* cont) { mCluMCLabels = cont; }
+
   void configureFromRecoParam();
   void printConfiguration() const;
 
@@ -175,23 +177,24 @@ class NA6PVertexerTracklets
   short getMultiVertexMode() const { return mMultiVertexMode; }
 
  private:
-  int mNLayersVT = 5;                           // number of layers in the VT
-  int mLayerToStart = 0;                        // innermost layer used in tracklets
-  std::vector<bool> mIsClusterUsed = {};        // flag for used clusters
-  float mBeamX = 0.;                            // beam transverse coordindates
-  float mBeamY = 0.;                            // beam transverse coordindates
-  short mRecoType = kYZ;                        // method to compute tracklet intersections with beam axis
-  short mMethod = kKDE;                         // method for peak finding (KDE vs histo)
-  int mWeightedMeanOption = kNoWeight;          // option for weighted mean
-  float mZBinWidth = 0.1;                       // bin width (recalculated from n bins)
-  std::vector<int> mHistIntersec;               // histogram for the peak finding method
-  int mKDEOption = kStandardKDE;                // option for using uncertainties in KDE sigma
-  short mMultiVertexMode = kMultiVertIterative; // method for multiple vertices
-  bool mVerbose = false;
+  int mNLayersVT = 5;                                  // number of layers in the VT
+  int mLayerToStart = 0;                               // innermost layer used in tracklets
+  std::vector<bool> mIsClusterUsed = {};               // flag for used clusters
+  float mBeamX = 0.;                                   // beam transverse coordindates
+  float mBeamY = 0.;                                   // beam transverse coordindates
+  short mRecoType = kYZ;                               // method to compute tracklet intersections with beam axis
+  short mMethod = kKDE;                                // method for peak finding (KDE vs histo)
+  int mWeightedMeanOption = kNoWeight;                 // option for weighted mean
+  float mZBinWidth = 0.1;                              // bin width (recalculated from n bins)
+  std::vector<int> mHistIntersec;                      // histogram for the peak finding method
+  int mKDEOption = kStandardKDE;                       // option for using uncertainties in KDE sigma
+  short mMultiVertexMode = kMultiVertIterative;        // method for multiple vertices
+  bool mVerbose = false;                               // flag for verbosity
   int mNTargets = 0;                                   // number of targets
   float mZPosTarg[NA6PLayoutParam::MaxTargets] = {};   // target positions
   float mZThickTarg[NA6PLayoutParam::MaxTargets] = {}; // target thickesses
-  const NA6PRecoParam* mRecoParam = nullptr;
+  const NA6PRecoParam* mRecoParam = nullptr;           // reconstruction parameters
+  NA6PMCTruthContainer* mCluMCLabels = nullptr;        // MC truth for clusters
 
   ClassDefNV(NA6PVertexerTracklets, 1);
 };

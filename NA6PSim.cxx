@@ -148,6 +148,7 @@ int main(int argc, char** argv)
       thVT->GetEvent(jEv);
       int nHits = vtHits.size();
       LOGP(info, "Digitize VerTel Event {} nHits = {}", jEv, nHits);
+      dig.setEventMetaData(jEv);
       dig.process(vtHits);
     }
     dig.closeDigitsOutput();

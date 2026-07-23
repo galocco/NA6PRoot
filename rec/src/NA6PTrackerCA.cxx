@@ -477,8 +477,9 @@ void NA6PTrackerCA::computeLayerCells(const std::vector<TrackletCandidate>& trac
           if (chi >= 0) {
 #ifdef _CHI2_TUNING_MODE_
             auto mcTruth = mTrackFitter->getMCTruthStatus();
-            if (mcTruth.second) {
-              (*dbgStream) << "chiCells" << "iter=" << mCurIteration << "trc=" << ((NA6PTrackParCov&)fitTrackFast) << "chi2vec=" << mTrackFitter->getChi2Buffer() << "chi2Tot=" << chi << "\n";
+            if (mcTruth.isSet() && !mcTruth.isFake()) {
+              (*dbgStream) << "chiCells"
+                           << "iter=" << mCurIteration << "trc=" << ((NA6PTrackParCov&)fitTrackFast) << "chi2vec=" << mTrackFitter->getChi2Buffer() << "chi2Tot=" << chi << "\n";
             }
 #endif
             if (mVerbose) {
@@ -598,8 +599,9 @@ void NA6PTrackerCA::findCellsNeighbours(const std::vector<CellCandidate>& cells,
         float cluchi2b = computeTrackToClusterChi2(cell2.trackFitFast, clu0);
 #ifdef _CHI2_TUNING_MODE_
         auto mcTruth = getTrackMCTruthStatus(cell2.cluIDs, cluArr);
-        if (mcTruth.second && mcTruth.first == clu0.getParticleID()) {
-          (*dbgStream) << "chiNb" << "iter=" << mCurIteration << "trc=" << ((NA6PTrackParCov&)cell2.trackFitFast) << "trackNcl=" << cell2.trackFitFast.getNHits() << "trackChi2=" << cell2.trackFitFast.getChi2() << "chi2cl=" << cluchi2b << "\n";
+        if (mcTruth.isSet() && !mcTruth.isFake()) {
+          (*dbgStream) << "chiNb"
+                       << "iter=" << mCurIteration << "trc=" << ((NA6PTrackParCov&)cell2.trackFitFast) << "trackNcl=" << cell2.trackFitFast.getNHits() << "trackChi2=" << cell2.trackFitFast.getChi2() << "chi2cl=" << cluchi2b << "\n";
         }
 #endif
         if (cluchi2b > maxChi2TrClu) {
@@ -674,8 +676,9 @@ std::vector<TrackCandidate> NA6PTrackerCA::prolongSeed(const TrackCandidate& see
         float chi2 = computeTrackToClusterChi2(fitCurr, cluToAdd);
 #ifdef _CHI2_TUNING_MODE_
         auto mcTruth = getTrackMCTruthStatus(cellTst.cluIDs, cluArr);
-        if (mcTruth.second && mcTruth.first == cluToAdd.getParticleID()) {
-          (*dbgStream) << "chiProl" << "iter=" << mCurIteration << "trc=" << ((NA6PTrackParCov&)fitCurr) << "trackNcl=" << fitCurr.getNHits() << "trackChi2=" << fitCurr.getChi2() << "chi2cl=" << chi2 << "\n";
+        if (mcTruth.isSet() && !mcTruth.isFake()) {
+          (*dbgStream) << "chiProl"
+                       << "iter=" << mCurIteration << "trc=" << ((NA6PTrackParCov&)fitCurr) << "trackNcl=" << fitCurr.getNHits() << "trackChi2=" << fitCurr.getChi2() << "chi2cl=" << chi2 << "\n";
         }
 #endif
         if (chi2 > maxChi2TrClu) {
@@ -827,8 +830,9 @@ void NA6PTrackerCA::fitAndSelectTracks(const std::vector<TrackCandidate>& trackC
     float chi2Inw = fitTrackPointsFast(cluIDsForfit, cluArr, fitTrackFast, maxChi2TrClu, maxChi2NDF);
 #ifdef _CHI2_TUNING_MODE_
     auto mcTruth = mTrackFitter->getMCTruthStatus();
-    if (mcTruth.second) {
-      (*dbgStream) << "chiTracks" << "iter=" << mCurIteration << "trc=" << ((NA6PTrackParCov&)fitTrackFast) << "chi2vec=" << mTrackFitter->getChi2Buffer() << "chi2Tot=" << chi2Inw << "\n";
+    if (mcTruth.isSet() && !mcTruth.isFake()) {
+      (*dbgStream) << "chiTracks"
+                   << "iter=" << mCurIteration << "trc=" << ((NA6PTrackParCov&)fitTrackFast) << "chi2vec=" << mTrackFitter->getChi2Buffer() << "chi2Tot=" << chi2Inw << "\n";
     }
 #endif
     if (chi2Inw < 0.f) {
@@ -902,40 +906,6 @@ void NA6PTrackerCA::fitAndSelectTracks(const std::vector<TrackCandidate>& trackC
         track.trackFitFast.addCluster(&cluArr[cluID]);
       }
     }
-    // assign overall MC label to the track
-    int nClus = track.cluIDs.size();
-    std::vector<std::pair<int, int>> counts;
-    for (int jClu = 0; jClu < nClus; jClu++) {
-      int cluID = track.cluIDs[jClu];
-      if (cluID >= 0) {
-        const auto& clu = cluArr[cluID];
-        int idPartClu = clu.getParticleID();
-        bool found = false;
-        for (auto& p : counts) {
-          if (p.first == idPartClu) {
-            ++p.second;
-            found = true;
-            break;
-          }
-        }
-        if (!found) {
-          counts.push_back({idPartClu, 1});
-        }
-      }
-    }
-    int idPartTrack = -9999999;
-    int maxCount = 0;
-    for (const auto& p : counts) {
-      if (p.second > maxCount) {
-        maxCount = p.second;
-        idPartTrack = p.first;
-      }
-    }
-    // assign negative label to tracks with misassociations
-    if (counts.size() > 1 && idPartTrack > 0) {
-      idPartTrack *= -1;
-    }
-    track.trackFitFast.setParticleID(idPartTrack);
     tracks.push_back(std::move(track));
   }
 }
@@ -943,7 +913,8 @@ void NA6PTrackerCA::fitAndSelectTracks(const std::vector<TrackCandidate>& trackC
 //______________________________________________________________________
 
 template <typename ClusterType>
-void NA6PTrackerCA::findTracks(std::vector<ClusterType>& cluArr, const NA6PVertex* primVert)
+void NA6PTrackerCA::findTracks(std::vector<ClusterType>& cluArr,
+                               const NA6PVertex* primVert)
 {
   mNDOF = Propagator::Instance()->getNDOFTrack();
   mFinalTracks.clear();
@@ -1036,8 +1007,9 @@ std::vector<NA6PTrack> NA6PTrackerCA::getTracks()
 {
   std::vector<NA6PTrack> trackArr;
   trackArr.reserve(mFinalTracks.size());
-  for (auto& track : mFinalTracks)
+  for (auto& track : mFinalTracks) {
     trackArr.push_back(std::move(track.trackFitFast));
+  }
   return trackArr;
 }
 
@@ -1131,27 +1103,43 @@ void NA6PTrackerCA::printStats(const std::vector<T>& candidates,
         idClus[jClu] = tr.cluIDs[jClu];
       startLay = tr.startingLayer;
     }
-    int idPartTrack = -9999999;
     int nTrueClus = 0;
+    bool isFake = false;
+    std::vector<NA6PMCComposedLabel> commonLbl;
     for (int jClu = 0; jClu < nClus; jClu++) {
       int cluID = idClus[jClu];
-      if (cluID >= 0) {
-        ++nTrueClus;
-        const auto& clu = cluArr[cluID];
-        int jLay = clu.getLayer() - mLayerStart;
-        if (jClu == 0 && jLay != startLay)
-          LOGP(error, "mismatch in {} layers: {} {}", label.c_str(), jLay, startLay);
-        int idPartClu = clu.getParticleID();
-        if (jClu == 0)
-          idPartTrack = idPartClu;
-        else if (idPartClu != idPartTrack && idPartTrack > 0)
-          idPartTrack *= (-1);
+      if (cluID < 0) {
+        isFake = true;
+        continue;
+      }
+      ++nTrueClus;
+      const auto& clu = cluArr[cluID];
+      int jLay = clu.getLayer() - mLayerStart;
+      if (jClu == 0 && jLay != startLay)
+        LOGP(error, "mismatch in {} layers: {} {}", label.c_str(), jLay, startLay);
+      if (mCluMCLabels) {
+        int cluInd = clu.getClusterIndex();
+        std::span labels = mCluMCLabels->getLabels(cluInd);
+        if (jClu == 0) {
+          commonLbl.assign(labels.begin(), labels.end());
+        } else {
+          std::vector<NA6PMCComposedLabel> next;
+          for (const auto& lbl : labels) {
+            if (std::find(commonLbl.begin(), commonLbl.end(), lbl) != commonLbl.end()) {
+              next.push_back(lbl);
+            }
+          }
+          commonLbl.swap(next);
+        }
+        if (commonLbl.empty()) {
+          isFake = true;
+        }
       }
     }
     if (requiredClus > 0 && nTrueClus != requiredClus)
       continue;
     nSelected++;
-    if (idPartTrack > 0)
+    if (!isFake)
       nGood++;
     aveClus += nTrueClus;
   }

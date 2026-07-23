@@ -161,6 +161,12 @@ class NA6PTrackPar
     auto pxz = getPxz();
     return {getTx() * pxz, getTy() * pxz, getCosPsi() * pxz};
   }
+  template <typename T = float>
+  std::array<T, 3> getDirCos() const
+  {
+    auto pxz2p = 1.f / getP2Pxz();
+    return {getTx() * pxz2p, getTy() * pxz2p, getCosPsi() * pxz2p};
+  }
 
   bool getPosDirGlo(std::array<float, 7>& posdirp) const;
 

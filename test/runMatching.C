@@ -50,13 +50,17 @@ void runMatching(bool useMC = false,
   printf("Open track file: %s\n", fvttracks->GetName());
   TTree* tvttracks = (TTree*)fvttracks->Get("tracksVerTel");
   std::vector<NA6PTrack> vtTracks, *vtTrackPtr = &vtTracks;
+  std::vector<NA6PMCComposedLabel> vtTrMCLabs, *vtTrMCLabsPtr = &vtTrMCLabs;
   tvttracks->SetBranchAddress("VerTel", &vtTrackPtr);
+  tvttracks->SetBranchAddress("VerTelMCTruth", &vtTrMCLabsPtr);
   // io track file for MuonSpec
   TFile* fmstracks = new TFile(Form("%s/TracksMuonSpec.root", dirRec), "READ");
   printf("Open track file: %s\n", fmstracks->GetName());
   TTree* tmstracks = (TTree*)fmstracks->Get("tracksMuonSpec");
   std::vector<NA6PTrack> msTracks, *msTrackPtr = &msTracks;
+  std::vector<NA6PMCComposedLabel> msTrMCLabs, *msTrMCLabsPtr = &msTrMCLabs;
   tmstracks->SetBranchAddress("MuonSpec", &msTrackPtr);
+  tmstracks->SetBranchAddress("MuonSpecMCTruth", &msTrMCLabsPtr);
 
   int nEv = tmstracks->GetEntries();
   if (lastEv > nEv || lastEv < 0)
@@ -92,7 +96,9 @@ void runMatching(bool useMC = false,
     matching->setVerTelClusters(vtClus);
     matching->setMuonSpecClusters(msClus);
     matching->setVerTelTracks(vtTracks);
+    matching->setVerTelTrackMCLabels(vtTrMCLabs);
     matching->setMuonSpecTracks(msTracks);
+    matching->setMuonSpecTrackMCLabels(msTrMCLabs);
 
     matching->runMatching();
   }

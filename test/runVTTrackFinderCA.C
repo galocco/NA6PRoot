@@ -25,6 +25,7 @@
 #include "NA6PTrackerCA.h"
 #include "MagneticField.h"
 #include "NA6PVerTelHit.h"
+#include "NA6PMCTruthContainer.h"
 #endif
 
 const int maxIterationsCA = NA6PTrackerCA::kMaxIterationsCA;
@@ -72,7 +73,9 @@ void runVTTrackFinderCA(int firstEv = 0,
   printf("Open cluster file: %s\n", fc->GetName());
   TTree* tc = (TTree*)fc->Get("clustersVerTel");
   std::vector<NA6PVerTelCluster> vtClus, *vtClusPtr = &vtClus;
+  NA6PMCTruthContainer vtCluMCLabels, *vtCluMCLabelsPtr = &vtCluMCLabels;
   tc->SetBranchAddress("VerTel", &vtClusPtr);
+  tc->SetBranchAddress("VerTelMCTruth", &vtCluMCLabelsPtr);
   int nEv = tc->GetEntries();
   if (lastEv > nEv || lastEv < 0)
     lastEv = nEv;
@@ -122,14 +125,17 @@ void runVTTrackFinderCA(int firstEv = 0,
     }
     tc->GetEvent(jEv);
     tracker->findTracks(vtClus, &primVert);
-    std::vector<NA6PTrack> trks = tracker->getTracks();
+    tracker->assignMCLabels(vtCluMCLabels);
+    std::vector<NA6PMCComposedLabel> trkLabels;
+    std::vector<NA6PTrack> trks = tracker->getTracks(&trkLabels);
     int nTrks = trks.size();
     for (int jT = 0; jT < nTrks; jT++) {
       NA6PTrack tr = trks[jT];
-      int idPartTrack = tr.getParticleID();
+      NA6PMCComposedLabel mcCompLabel = trkLabels[jT];
+      int idPartTrack = mcCompLabel.getTrackID();
       int jIteration = tr.getCAIteration();
       if (tr.getNHits() == 5) {
-        auto curPart = mcArr->at(std::abs(idPartTrack));
+        auto curPart = mcArr->at(idPartTrack);
         double pxPart = curPart.Px();
         double pyPart = curPart.Py();
         double pzPart = curPart.Pz();
@@ -143,7 +149,7 @@ void runVTTrackFinderCA(int firstEv = 0,
           hMomRecoIterCA[jIteration]->Fill(momPart);
           hEtaRecoIterCA[jIteration]->Fill(etaPart);
         }
-        if (idPartTrack > 0) {
+        if (!mcCompLabel.isFake()) {
           hMomGoodReco->Fill(momPart);
           hEtaGoodReco->Fill(etaPart);
         }

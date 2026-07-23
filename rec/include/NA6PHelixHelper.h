@@ -188,7 +188,7 @@ struct NA6PHelixHelper {
     float det = bB * bB - aA * cC;
     if (det > 0.f) {
       float t1 = -bB / aA;
-      float t2 = -std::sqrt(det) / aA;
+      float t2 = std::sqrt(det) / aA;
       int nCand = (t2 < 1e-6f * std::abs(t1)) ? 1 : 2;
       float t[2] = {t1 - t2, t1 + t2};
       for (int i = 0; i < nCand; i++) {

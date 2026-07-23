@@ -20,6 +20,9 @@
 
 // Class to steer the reconstruction
 class NA6PVertex;
+class NA6PTrack;
+class NA6PMCTruthContainer;
+class NA6PMCComposedLabel;
 
 class NA6PReconstruction
 {
@@ -59,9 +62,13 @@ class NA6PReconstruction
 
   void setPrimaryVertex(const NA6PVertex* v) { mPrimaryVertex = v; }
   virtual void clearEvent() { mPrimaryVertex = nullptr; }
+  void setReadMCTruth(bool val = true) { mReadMCTruth = val; }
+  void assignMCLabels(std::vector<NA6PTrack>& trk,
+                      std::vector<NA6PMCComposedLabel>& mcTrkLabels,
+                      const NA6PMCTruthContainer& mcCluLabels);
 
  protected:
-  std::string mName{"MothClass"};             // detector name
+  std::string mName{"MothClass"}; // detector name
   /*
   // RSREM : see comment above for getters
   std::string mGeoFilName{"geometry.root"};   // name of geometry file
@@ -70,6 +77,7 @@ class NA6PReconstruction
   bool mIsInitialized = false;                // flag for initialization
   */
   const NA6PVertex* mPrimaryVertex = nullptr; // primary vertex
+  bool mReadMCTruth = true;                   // flag to enable/disable the MC info
 
   ClassDefNV(NA6PReconstruction, 1);
 };

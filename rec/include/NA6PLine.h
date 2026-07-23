@@ -148,7 +148,10 @@ template <typename T>
 inline NA6PLine NA6PLine::fromPointAndDirection(const std::array<T, 3>& xyz, const std::array<T, 3>& dir)
 {
   T norm = std::hypot(dir[0], dir[1], dir[2]), inv = (norm > T(1e-12)) ? T(1) / norm : T(0);
-  return {{xyz[0], xyz[1], xyz[2]}, getScaled(dir, inv)};
+  NA6PLine l;
+  l.mOriginPoint = xyz;
+  l.mCosinesDirector = getScaled(dir, inv);
+  return std::move(l);
 }
 
 template <typename T>

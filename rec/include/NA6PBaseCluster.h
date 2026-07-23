@@ -44,12 +44,10 @@ class NA6PBaseCluster
   auto& getCov() { return mCov; }
 
   auto getDetectorID() const { return mDetectorID; }
-  auto getParticleID() const { return mParticleID; }
   auto getHitID() const { return mHitID; }
   int getClusterIndex() const { return mClusterIndex; }
 
   void setDetectorID(int id) { mDetectorID = id; }
-  void setParticleID(int id) { mParticleID = id; }
   void setHitID(int id) { mHitID = id; }
   void setPos(float x, float y, float z) { mXYZ = {x, y, z}; }
   void setX(float v) { mXYZ[0] = v; }
@@ -66,13 +64,12 @@ class NA6PBaseCluster
   std::array<float, 3> mCov{};
 
   int mCluSiz = 0;       // cluster size
-  int mParticleID = 0;   // particle ID in Kine tree (MC truth)
   int mHitID = -1;       // hit ID (for test of hitsToRecPoints)
   short mDetectorID = 0; // the detector/sensor id
   int8_t mLayer = -1;
-  int mClusterIndex; //! Transient index for track-cluster association
+  int mClusterIndex = -1; //! Transient index for track-cluster association
 
-  ClassDefNV(NA6PBaseCluster, 2);
+  ClassDefNV(NA6PBaseCluster, 3);
 };
 
 #endif

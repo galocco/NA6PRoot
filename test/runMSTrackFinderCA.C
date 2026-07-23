@@ -28,6 +28,7 @@
 #include "NA6PRecoParam.h"
 #include <TDatabasePDG.h>
 #include <TParticlePDG.h>
+#include "NA6PMCTruthContainer.h"
 #endif
 
 const int maxIterationsCA = NA6PTrackerCA::kMaxIterationsCA;
@@ -77,7 +78,9 @@ void runMSTrackFinderCA(int firstEv = 0,
   printf("Open cluster file: %s\n", fc->GetName());
   TTree* tc = (TTree*)fc->Get("clustersMuonSpec");
   std::vector<NA6PMuonSpecCluster> msClus, *msClusPtr = &msClus;
+  NA6PMCTruthContainer msCluMCLabels, *msCluMCLabelsPtr = &msCluMCLabels;
   tc->SetBranchAddress("MuonSpec", &msClusPtr);
+  tc->SetBranchAddress("MuonSpecMCTruth", &msCluMCLabelsPtr);
   int nEv = tc->GetEntries();
   if (lastEv > nEv || lastEv < 0)
     lastEv = nEv;
@@ -141,14 +144,17 @@ void runMSTrackFinderCA(int firstEv = 0,
     }
     tc->GetEvent(jEv);
     tracker->findTracks(msClus, &primVert);
-    std::vector<NA6PTrack> trks = tracker->getTracks();
+    tracker->assignMCLabels(msCluMCLabels);
+    std::vector<NA6PMCComposedLabel> trkLabels;
+    std::vector<NA6PTrack> trks = tracker->getTracks(&trkLabels);
     int nTrks = trks.size();
     for (int jT = 0; jT < nTrks; jT++) {
       const NA6PTrack& tr = trks[jT];
-      int idPartTrack = tr.getParticleID();
+      NA6PMCComposedLabel mcCompLabel = trkLabels[jT];
+      int idPartTrack = mcCompLabel.getTrackID();
       int jIteration = tr.getCAIteration();
       if (tr.getNHits() == 6) {
-        auto curPart = mcArr->at(std::abs(idPartTrack));
+        auto curPart = mcArr->at(idPartTrack);
         double pxPart = curPart.Px();
         double pyPart = curPart.Py();
         double pzPart = curPart.Pz();
@@ -163,7 +169,7 @@ void runMSTrackFinderCA(int firstEv = 0,
           hMomRecoIterCA[jIteration]->Fill(momPart);
           hEtaRecoIterCA[jIteration]->Fill(etaPart);
         }
-        if (idPartTrack > 0) {
+        if (!mcCompLabel.isFake()) {
           hMomGoodReco->Fill(momPart);
           hEtaGoodReco->Fill(etaPart);
         }

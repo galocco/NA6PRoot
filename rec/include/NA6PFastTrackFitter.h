@@ -15,7 +15,7 @@
 #ifndef NA6P_FAST_TRACK_FITTER_H
 #define NA6P_FAST_TRACK_FITTER_H
 
-// #ifdef _LOG_MC_TRUTH_MODE_
+// #define _LOG_MC_TRUTH_MODE_
 
 #include <string>
 #include <utility>
@@ -23,6 +23,7 @@
 #include "NA6PBaseCluster.h"
 #include "NA6PTrack.h"
 #include "Propagator.h"
+#include "NA6PMCTruthContainer.h"
 
 // Fast track fit based on Kalman filter
 
@@ -61,6 +62,8 @@ class NA6PFastTrackFitter
   void unsetSeed() { mSeed.invalidate(); }
   void setSeedOptionEdge() { mSeedOption = kEdgeClusters; }
   void setSeedOptionMaxLeverArm() { mSeedOption = kInMidOutAsSeed; }
+  void setClusterMCTruth(NA6PMCTruthContainer* cont) { mCluMCLabels = cont; }
+
   int getLayersForSeed(int dir, std::array<int, 3>& layForSeed);
   int countLayerWithClusters();
   bool computeSeed(int dir, std::array<int, 3>& layForSeed, NA6PTrackPar* seed = nullptr);
@@ -114,7 +117,8 @@ class NA6PFastTrackFitter
   float getSeedImprovePrec() const { return mSeedImprovePrec; }
   void setSeedImprovePrec(float v) { mSeedImprovePrec = v; }
 
-  std::pair<int, bool> getMCTruthStatus();
+  NA6PMCComposedLabel getMCTruthStatus();
+  std::string clusterLabelsAsString(const NA6PBaseCluster& cl) const;
 
  protected:
   float mMostProbableP = 5.f;        // most probable momentum to set at 0 field
@@ -124,9 +128,9 @@ class NA6PFastTrackFitter
 
   NA6PTrackPar mSeed{};
 
-  bool mPropagateToPrimVert = false;  // flag for propagation to primary vertex
-  bool mIsPrimVertSet = false;        // flag for presence of prim vert z
-  float mPrimVertZ = 0.0;             // primary vertex z
+  bool mPropagateToPrimVert = false; // flag for propagation to primary vertex
+  bool mIsPrimVertSet = false;       // flag for presence of prim vert z
+  float mPrimVertZ = 0.0;            // primary vertex z
 
   Propagator::PropOpt mPropOpt{}; // propagator options
 
@@ -137,6 +141,7 @@ class NA6PFastTrackFitter
   int mMinLayerWithCl = 0x7fffffff;              // lowest layer having clusters
   int mMaxLayerWithCl = -1;                      // highest layer having clusters
   int mNClusters = 0;
+  NA6PMCTruthContainer* mCluMCLabels = nullptr;
 
  protected:
   ClassDefNV(NA6PFastTrackFitter, 1);

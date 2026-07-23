@@ -12,7 +12,8 @@
 #include "NA6PVertex.h"
 #include "NA6PTrackerCA.h"
 #include "MagneticField.h"
-#include "NA6PMuonSpecReconstruction.h"
+#include "NA6PMCTruthContainer.h"
+#include "NA6PReconstruction.h"
 #endif
 
 void runMSTrackMIDTrackletMatching(int firstEv = 0,
@@ -52,7 +53,9 @@ void runMSTrackMIDTrackletMatching(int firstEv = 0,
   printf("Open cluster file: %s\n", fc->GetName());
   TTree* tc = (TTree*)fc->Get("clustersMuonSpec");
   std::vector<NA6PMuonSpecCluster> msClus, *msClusPtr = &msClus;
+  NA6PMCTruthContainer vtCluMCLabels, *vtCluMCLabelsPtr = &vtCluMCLabels;
   tc->SetBranchAddress("MuonSpec", &msClusPtr);
+  tc->SetBranchAddress("MuonSpecMCTruth", &vtCluMCLabelsPtr);
 
   int nEv = tc->GetEntries();
   if (lastEv > nEv || lastEv < 0)
@@ -83,14 +86,20 @@ void runMSTrackMIDTrackletMatching(int firstEv = 0,
   TH1F* hNClusRefitTracks = new TH1F("hNClusRefitTracks", ";n_{clusters};counts", 7, -0.5, 6.5);
 
   std::vector<NA6PTrack> ms42Tracks, *hTrackPtr = &ms42Tracks;
+  std::vector<NA6PMCComposedLabel> ms42TrackLabs, *hTrackLabPtr = &ms42TrackLabs;
   TFile* fouttr = TFile::Open("TracksFourPlusTwo.root", "recreate");
   TTree* trackTree = new TTree("tracksMuonSpec", "MuonSpec Tracks");
   trackTree->Branch("MuonSpec", &hTrackPtr);
+  trackTree->Branch("MuonSpecMCTruth", &hTrackLabPtr);
+
+  NA6PReconstruction rec("dummy");
+  std::vector<NA6PMCComposedLabel> trkMCLabs;
 
   int nFailed = 0;
 
   for (int jEv = firstEv; jEv < lastEv; jEv++) {
     ms42Tracks.clear();
+    ms42TrackLabs.clear();
     mcTree->GetEvent(jEv);
     int nPart = mcArr->size();
     double xvert = 0.;
@@ -112,16 +121,28 @@ void runMSTrackMIDTrackletMatching(int firstEv = 0,
       msClus[i].setClusterIndex(static_cast<int>(i));
     }
     tracker->findTracks(msClus, &primVert);
-
     std::vector<NA6PTrack> trks = tracker->getTracks();
+    rec.assignMCLabels(trks, trkMCLabs, vtCluMCLabels);
     int nTrks = trks.size();
     std::vector<std::pair<NA6PMuonSpecCluster, NA6PMuonSpecCluster>> trkltsMID = tracker->findTracklets(9, 10, msClus, &primVert);
     int nTrklets = trkltsMID.size();
     NA6PFastTrackFitter* fitter = tracker->getTrackFitter();
+    auto clusterMatch = [](const auto& clu, int trackID, const auto& cluMCLabels) {
+      int cluInd = clu.getClusterIndex();
+      std::span labels = cluMCLabels.getLabels(cluInd);
+      int nLabels = labels.size();
+      for (int jLab = 0; jLab < nLabels; jLab++) {
+        NA6PMCComposedLabel lbl = labels[jLab];
+        if (lbl.getTrackID() == trackID)
+          return true;
+      }
+      return false;
+    };
 
     // first loop for counting and histos
     for (int jT = 0; jT < nTrks; jT++) {
       NA6PTrack tr = trks[jT];
+      NA6PMCComposedLabel& lblTr = trkMCLabs[jT];
       int nMatches = 0;
       int nGoodFound = 0;
       int nGoodMatches = 0;
@@ -163,10 +184,10 @@ void runMSTrackMIDTrackletMatching(int firstEv = 0,
           pxyzTr[j] /= norm;
         float distXY = std::sqrt((xyzClu1[0] - xyzTr[0]) * (xyzClu1[0] - xyzTr[0]) + (xyzClu1[1] - xyzTr[1]) * (xyzClu1[1] - xyzTr[1]));
         float costh = dirSegm[0] * pxyzTr[0] + dirSegm[1] * pxyzTr[1] + dirSegm[2] * pxyzTr[2];
-        int idTrack = tr.getParticleID();
-        int idClu1 = clu1.getParticleID();
-        int idClu2 = clu2.getParticleID();
-        if (idTrack == idClu1 && idClu1 == idClu2) {
+        int idTrack = lblTr.getTrackID();
+        bool ok1 = clusterMatch(clu1, idTrack, vtCluMCLabels);
+        bool ok2 = clusterMatch(clu2, idTrack, vtCluMCLabels);
+        if (!lblTr.isFake() && ok1 && ok2) {
           nGoodFound++;
           hDistXYGood->Fill(distXY);
           hCosThGood->Fill(costh);
@@ -177,7 +198,7 @@ void runMSTrackMIDTrackletMatching(int firstEv = 0,
         }
         if (distXY < 7.5 && costh > 0.999) {
           nMatches++;
-          if (idTrack == idClu1 && idClu1 == idClu2) {
+          if (!lblTr.isFake() && ok1 && ok2) {
             nGoodMatches++;
           }
         }
@@ -196,6 +217,7 @@ void runMSTrackMIDTrackletMatching(int firstEv = 0,
     std::vector<MatchCandidate> candidates;
     for (int jT = 0; jT < nTrks; jT++) {
       NA6PTrack tr = trks[jT];
+      NA6PMCComposedLabel& lblTr = trkMCLabs[jT];
       for (int jS = 0; jS < nTrklets; jS++) {
         const auto& tracklet = trkltsMID[jS];
         NA6PMuonSpecCluster clu1 = tracklet.first;
@@ -260,6 +282,7 @@ void runMSTrackMIDTrackletMatching(int firstEv = 0,
 
     for (int jT = 0; jT < nTrks; jT++) {
       NA6PTrack tr = trks[jT];
+      NA6PMCComposedLabel& lblTr = trkMCLabs[jT];
       hNClusOrigTracks->Fill(tr.getNHits());
       auto pxyz = tr.getPXYZ<float>();
       float momtr = tr.getP();
@@ -275,16 +298,16 @@ void runMSTrackMIDTrackletMatching(int firstEv = 0,
       const auto& tracklet = trkltsMID[jS];
       NA6PMuonSpecCluster clu1 = tracklet.first;
       NA6PMuonSpecCluster clu2 = tracklet.second;
-      int idTrack = tr.getParticleID();
-      int idClu1 = clu1.getParticleID();
-      int idClu2 = clu2.getParticleID();
-      if (idTrack >= 0) {
-        if (idTrack == idClu1 && idClu1 == idClu2)
+      int idTrack = lblTr.getTrackID();
+      bool ok1 = clusterMatch(clu1, idTrack, vtCluMCLabels);
+      bool ok2 = clusterMatch(clu2, idTrack, vtCluMCLabels);
+      if (!lblTr.isFake()) {
+        if (ok1 && ok2)
           hMatchType->Fill(0);
         else
           hMatchType->Fill(2);
       } else {
-        if (std::abs(idTrack) == idClu1 && idClu1 == idClu2)
+        if (ok1 && ok2)
           hMatchType->Fill(1);
         else
           hMatchType->Fill(3);
@@ -359,20 +382,9 @@ void runMSTrackMIDTrackletMatching(int firstEv = 0,
       etatr = -std::log(std::tan(thetatr / 2.));
       hEtaRefitTracks->Fill(etatr);
       fitter->constrainTrackToVertex(refitInw, primVert);
-      int id42track = -2;
-      if (idTrack >= 0) {
-        // good track in the MS
-        if (idTrack == idClu1 && idClu1 == idClu2)
-          id42track = idTrack;
-        else
-          id42track = -idTrack;
-      } else {
-        // fake track in the MS, has negative ID. Keep negative also for the 4+2 track
-        id42track = idTrack;
-      }
-      refitInw.setParticleID(id42track);
       ms42Tracks.push_back(refitInw);
     }
+    rec.assignMCLabels(ms42Tracks, ms42TrackLabs, vtCluMCLabels);
     trackTree->Fill();
   }
   fouttr->cd();

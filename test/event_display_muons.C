@@ -13,21 +13,23 @@
 #include <TEveSelection.h>
 #include <iostream>
 #include <TQObject.h>
-#include <NA6PMuonSpecModularHit.h>
-#include <NA6PMuonSpecCluster.h>
-#include <NA6PTrack.h>
-#include <NA6PFastTrackFitter.h>
-#include <Propagator.h>
+#include "NA6PMuonSpecModularHit.h"
+#include "NA6PMuonSpecCluster.h"
+#include "NA6PTrack.h"
+#include "NA6PMCTruthContainer.h"
+#include "NA6PMCComposedLabel.h"
+#include "NA6PFastTrackFitter.h"
+#include "Propagator.h"
+#include "MagneticField.h"
 
-void ResetClusterHighlight(int );
-void HighlightClusterIndex(int , int );
-
+void ResetClusterHighlight(int);
+void HighlightClusterIndex(int, int);
 
 // ---------- GLOBALS ----------
 // cluster index --> EVE object
 std::vector<std::vector<TEvePointSet*>> gClusterEve;
-std::vector<std::vector<Color_t>>       gClusterOrigColor;
-std::vector<std::vector<Float_t>>       gClusterOrigSize;
+std::vector<std::vector<Color_t>> gClusterOrigColor;
+std::vector<std::vector<Float_t>> gClusterOrigSize;
 
 std::vector<std::unique_ptr<NA6PMuonSpecModularHit>> gAllHits;
 std::vector<std::unique_ptr<NA6PTrack>> gAllTracks;
@@ -39,46 +41,52 @@ std::vector<std::vector<std::unique_ptr<TParticle>>> gMCParticles;
 // Define struct for various elements
 // ------------------------------------------------------
 
-enum class EveObjType { Hit, Cluster, Track };
+enum class EveObjType { Hit,
+                        Cluster,
+                        Track };
 
 struct EveUserData : public TObject {
-    EveObjType type;
-    const void* ptr;
-    int event;
+  EveObjType type;
+  const void* ptr;
+  int event;
+  int idPart;
+  std::string mcString;
 
-    EveUserData(EveObjType t, const void* p, int e)
-    : type(t), ptr(p), event(e) {}
+  EveUserData(EveObjType t, const void* p, int e, int jp, std::string lab = "")
+    : type(t), ptr(p), event(e), idPart(jp), mcString(lab) {}
 
-ClassDef(EveUserData, 1);
-
+  ClassDef(EveUserData, 1);
 };
 
-class EvePicker : public TObject {
-public:
-void OnSelectionAdded(TEveElement* el)
+class EvePicker : public TObject
 {
-    if (!el) return;
+ public:
+  void OnSelectionAdded(TEveElement* el)
+  {
+    if (!el)
+      return;
 
     auto* ud = static_cast<EveUserData*>(el->GetUserData());
-    if (!ud) return;
+    if (!ud)
+      return;
 
     switch (ud->type) {
 
-    case EveObjType::Hit: {
+      case EveObjType::Hit: {
         auto* hit =
-            static_cast<const NA6PMuonSpecModularHit*>(ud->ptr);
+          static_cast<const NA6PMuonSpecModularHit*>(ud->ptr);
         std::cout
-            << "[HIT]\n"
-            << "  X = " << hit->getX()
-            << "  Y = " << hit->getY()
-            << "  Z = " << hit->getZ()
-            << std::endl;
+          << "[HIT]\n"
+          << "  X = " << hit->getX()
+          << "  Y = " << hit->getY()
+          << "  Z = " << hit->getZ()
+          << std::endl;
         break;
-    }
+      }
 
-    case EveObjType::Cluster: {
+      case EveObjType::Cluster: {
         auto* clu =
-            static_cast<const NA6PBaseCluster*>(ud->ptr);
+          static_cast<const NA6PBaseCluster*>(ud->ptr);
         std::cout
           << "[CLUSTER]\n"
           << "  layer = " << clu->getLayer()
@@ -87,14 +95,15 @@ void OnSelectionAdded(TEveElement* el)
           << "  X = " << clu->getX()
           << "  Y = " << clu->getY()
           << "  Z = " << clu->getZ()
+          << "  Particle ID = " << (ud->mcString).c_str()
           << std::endl;
         break;
-    }
+      }
 
-    case EveObjType::Track: {
-//        auto* ud = static_cast<EveUserData*>(el->GetUserData());
+      case EveObjType::Track: {
+        //        auto* ud = static_cast<EveUserData*>(el->GetUserData());
         auto* tr =
-            static_cast<const NA6PTrack*>(ud->ptr);
+          static_cast<const NA6PTrack*>(ud->ptr);
         int ev = ud->event;
 
         auto xyz = tr->getXYZ<double>();
@@ -116,7 +125,7 @@ void OnSelectionAdded(TEveElement* el)
                   << "  pt = " << pt
                   << "  eta = " << eta
                   << "\n"
-                  << "  Particle ID = " << tr->getParticleID()
+                  << "  Particle ID = " << (ud->mcString).c_str()
                   << std::endl;
 
         ResetClusterHighlight(ev);
@@ -125,53 +134,53 @@ void OnSelectionAdded(TEveElement* el)
 
         for (int lr = 5; lr < 11; ++lr) {
 
-            int ic = tr->getClusterIndex(lr);
-            if (ic < 0) continue;
+          int ic = tr->getClusterIndex(lr);
+          if (ic < 0)
+            continue;
 
-            HighlightClusterIndex(ev, ic);
+          HighlightClusterIndex(ev, ic);
 
-    // retrieve cluster
-            const auto* clu = gEventClusters[ev][ic];
+          // retrieve cluster
+          const auto* clu = gEventClusters[ev][ic];
 
-            std::cout
-              << "    layer " << clu->getLayer()
-              << "  size " << clu->getClusterSize()
-              << "  X " << clu->getX()
-              << "  Y " << clu->getY()
-              << "  Z " << clu->getZ()
-              << " particle ID " << clu->getParticleID()
-              << "\n";
+          std::cout
+            << "    layer " << clu->getLayer()
+            << "  size " << clu->getClusterSize()
+            << "  X " << clu->getX()
+            << "  Y " << clu->getY()
+            << "  Z " << clu->getZ()
+            << "\n";
         }
 
-        int n  = TMath::Abs(tr->getParticleID());
+        int n = TMath::Abs(ud->idPart);
 
         if (ev >= 0 &&
             ev < (int)gMCParticles.size() &&
-            n  >= 0 &&
-            n  < (int)gMCParticles[ev].size()) {
+            n >= 0 &&
+            n < (int)gMCParticles[ev].size()) {
 
-                const TParticle* p = gMCParticles[ev][n].get();
-                if (tr->getParticleID() < 0)
-                  std::cout << "WARNING: at least one cluster was not generated by the following particle! " << std::endl;
-                std::cout
-                    << "[MC PARTICLE (index = " << n << ")]\n"
-                    << "  PDG = " << p->GetPdgCode()
-                    << "\n"
-                    << "  p = ("
-                    << p->Px() << ", "
-                    << p->Py() << ", "
-                    << p->Pz() << ")\n"
-                    << "  E = " << p->Energy()
-                    << "\n"
-                    << "  vtx = ("
-                    << p->Vx() << ", "
-                    << p->Vy() << ", "
-                    << p->Vz() << ")"
-                    << std::endl;
+          const TParticle* p = gMCParticles[ev][n].get();
+          if (ud->idPart < 0)
+            std::cout << "WARNING: at least one cluster was not generated by the following particle! " << std::endl;
+          std::cout
+            << "[MC PARTICLE (index = " << n << ")]\n"
+            << "  PDG = " << p->GetPdgCode()
+            << "\n"
+            << "  p = ("
+            << p->Px() << ", "
+            << p->Py() << ", "
+            << p->Pz() << ")\n"
+            << "  E = " << p->Energy()
+            << "\n"
+            << "  vtx = ("
+            << p->Vx() << ", "
+            << p->Vy() << ", "
+            << p->Vz() << ")"
+            << std::endl;
         } else {
-                std::cout
-                    << "[MC PARTICLE] invalid ParticleID = "
-                    << n << std::endl;
+          std::cout
+            << "[MC PARTICLE] invalid ParticleID = "
+            << n << std::endl;
         }
 
         std::cout << std::endl;
@@ -179,10 +188,10 @@ void OnSelectionAdded(TEveElement* el)
         gEve->Redraw3D(kFALSE);
 
         break;
+      }
     }
-    }
-}
-ClassDef(EvePicker, 0);
+  }
+  ClassDef(EvePicker, 0);
 };
 
 void event_display_muons(int firstEv = 0, int nEv = 1,
@@ -192,107 +201,110 @@ void event_display_muons(int firstEv = 0, int nEv = 1,
                          const char* fclusters = "ClustersMuonSpec.root",
                          const char* ftracks = "TracksMuonSpec.root")
 {
-// ------------------------------------------------------
-// EVE initialization (only once)
-// ------------------------------------------------------
-if (!gEve) {
+  // ------------------------------------------------------
+  // EVE initialization (only once)
+  // ------------------------------------------------------
+  if (!gEve) {
     TEveManager::Create();
-}
+  }
 
-// ------------------------------------------------------
-// Geometry (only once)
-// ------------------------------------------------------
-static bool geomLoaded = false;
-if (!geomLoaded) {
-    TGeoManager::Import(fgeo);
+  // ------------------------------------------------------
+  // Geometry (only once)
+  // ------------------------------------------------------
+  static bool geomLoaded = false;
+  if (!geomLoaded) {
+    if (!Propagator::loadGeometry(fgeo) || !Propagator::loadField()) {
+      return;
+    }
 
     TEveGeoTopNode* geom =
-        new TEveGeoTopNode(gGeoManager, gGeoManager->GetTopNode());
+      new TEveGeoTopNode(gGeoManager, gGeoManager->GetTopNode());
     geom->SetPickableRecursively(kFALSE);
     gEve->AddGlobalElement(geom);
 
     geomLoaded = true;
-}
+  }
 
-
-// ------------------------------------------------------
-// Clear previous event
-// ------------------------------------------------------
-if (gEve->GetCurrentEvent()) {
+  // ------------------------------------------------------
+  // Clear previous event
+  // ------------------------------------------------------
+  if (gEve->GetCurrentEvent()) {
     gEve->GetCurrentEvent()->DestroyElements();
-}
+  }
 
-// ------------------------------------------------------
-// Create NEW event manager
-// ------------------------------------------------------
-TEveEventManager* ev =
+  // ------------------------------------------------------
+  // Create NEW event manager
+  // ------------------------------------------------------
+  TEveEventManager* ev =
     new TEveEventManager("Event", "NA6 event");
-gEve->AddEvent(ev);
-gEve->SetCurrentEvent(ev);
+  gEve->AddEvent(ev);
+  gEve->SetCurrentEvent(ev);
 
-// ------------------------------------------------------
-// Clear your persistent storage
-// ------------------------------------------------------
-gAllHits.clear();
-gAllTracks.clear();
-gAllClusters.clear();
-gEventClusters.clear();
+  // ------------------------------------------------------
+  // Clear your persistent storage
+  // ------------------------------------------------------
+  gAllHits.clear();
+  gAllTracks.clear();
+  gAllClusters.clear();
+  gEventClusters.clear();
 
-gClusterEve.clear();
-gClusterOrigColor.clear();
-gClusterOrigSize.clear();
+  gClusterEve.clear();
+  gClusterOrigColor.clear();
+  gClusterOrigSize.clear();
 
-gMCParticles.clear();
+  gMCParticles.clear();
 
-static EvePicker* gPicker = new EvePicker;
+  static EvePicker* gPicker = new EvePicker;
 
-gEve->GetSelection()->Disconnect(
+  gEve->GetSelection()->Disconnect(
     "SelectionAdded(TEveElement*)",
     gPicker,
-    "OnSelectionAdded(TEveElement*)"
-);
-gEve->GetSelection()->Connect(
+    "OnSelectionAdded(TEveElement*)");
+  gEve->GetSelection()->Connect(
     "SelectionAdded(TEveElement*)",
     "EvePicker",
     gPicker,
-    "OnSelectionAdded(TEveElement*)"
-);
+    "OnSelectionAdded(TEveElement*)");
 
-// Enable selection
-gEve->GetSelection()->SetPickToSelect(kTRUE);
+  // Enable selection
+  gEve->GetSelection()->SetPickToSelect(kTRUE);
 
-// Load kine
-TFile* fk=new TFile(fkine);
-TTree* tk=(TTree*)fk->Get("mckine");
+  // Load kine
+  TFile* fk = new TFile(fkine);
+  TTree* tk = (TTree*)fk->Get("mckine");
 
-std::vector<TParticle>* mcArr = nullptr;
-tk->SetBranchAddress("tracks", &mcArr);
+  std::vector<TParticle>* mcArr = nullptr;
+  tk->SetBranchAddress("tracks", &mcArr);
 
-// Load hits
-TFile* f = TFile::Open(fhits);
-TTree* t = (TTree*)f->Get("hitsMuonSpecModular");
+  // Load hits
+  TFile* f = TFile::Open(fhits);
+  TTree* t = (TTree*)f->Get("hitsMuonSpecModular");
 
-std::vector<NA6PMuonSpecModularHit> msHits;
-std::vector<NA6PMuonSpecModularHit>* msHitsPtr = &msHits;
-t->SetBranchAddress("MuonSpecModular", &msHitsPtr);
+  std::vector<NA6PMuonSpecModularHit> msHits;
+  std::vector<NA6PMuonSpecModularHit>* msHitsPtr = &msHits;
+  t->SetBranchAddress("MuonSpecModular", &msHitsPtr);
 
-// Load clusters
-TFile* fc = TFile::Open(fclusters);
-TTree* tc = (TTree*)fc->Get("clustersMuonSpec");
+  // Load clusters
+  TFile* fc = TFile::Open(fclusters);
+  TTree* tc = (TTree*)fc->Get("clustersMuonSpec");
 
-std::vector<NA6PMuonSpecCluster> clusters;
-std::vector<NA6PMuonSpecCluster>* clustersPtr = &clusters;
-tc->SetBranchAddress("MuonSpec", &clustersPtr);
+  std::vector<NA6PMuonSpecCluster> clusters;
+  std::vector<NA6PMuonSpecCluster>* clustersPtr = &clusters;
+  NA6PMCTruthContainer cluMCLabels, *cluMCLabelsPtr = &cluMCLabels;
+  tc->SetBranchAddress("MuonSpec", &clustersPtr);
+  tc->SetBranchAddress("MuonSpecMCTruth", &cluMCLabelsPtr);
 
-// Load tracks
+  // Load tracks
 
-TFile* ft=new TFile(ftracks);
-TTree* tt=(TTree*)ft->Get("tracksMuonSpec");
+  TFile* ft = new TFile(ftracks);
+  TTree* tt = (TTree*)ft->Get("tracksMuonSpec");
 
-std::vector<NA6PTrack> msTracks, *msTracksPtr = &msTracks;
-tt->SetBranchAddress("MuonSpec", &msTracksPtr);
+  std::vector<NA6PTrack> msTracks, *msTracksPtr = &msTracks;
+  std::vector<NA6PMCComposedLabel> msTrackLabs, *msTrackLabPtr = &msTrackLabs;
+  tt->SetBranchAddress("MuonSpec", &msTracksPtr);
+  tt->SetBranchAddress("MuonSpecMCTruth", &msTrackLabPtr);
 
-for (int iEv = firstEv; iEv < firstEv + nEv; iEv++) {
+  for (int iEv = firstEv; iEv < firstEv + nEv; iEv++) {
 
     int evIdx = iEv - firstEv;
 
@@ -310,116 +322,124 @@ for (int iEv = firstEv; iEv < firstEv + nEv; iEv++) {
     auto& mcEv = gMCParticles.back();
 
     for (const auto& p : *mcArr) {
-    mcEv.emplace_back(
-        std::make_unique<TParticle>(p)
-    );
+      mcEv.emplace_back(
+        std::make_unique<TParticle>(p));
     }
 
-    int nhit=0;
+    int nhit = 0;
     for (auto& h : msHits) {
 
-        gAllHits.emplace_back(
-            std::make_unique<NA6PMuonSpecModularHit>(h)
-        );
+      gAllHits.emplace_back(
+        std::make_unique<NA6PMuonSpecModularHit>(h));
 
-        auto* hitPtr = gAllHits.back().get();
+      auto* hitPtr = gAllHits.back().get();
 
-        auto* hitEve = new TEvePointSet(1);
-        hitEve->SetNextPoint(h.getX(), h.getY(), h.getZ());
-        hitEve->SetMarkerStyle(4);
-        hitEve->SetMarkerSize(1.5);
-        hitEve->SetMarkerColor(kRed);
-        hitEve->SetPickable(kTRUE);
+      auto* hitEve = new TEvePointSet(1);
+      hitEve->SetNextPoint(h.getX(), h.getY(), h.getZ());
+      hitEve->SetMarkerStyle(4);
+      hitEve->SetMarkerSize(1.5);
+      hitEve->SetMarkerColor(kRed);
+      hitEve->SetPickable(kTRUE);
 
-        // Attach the hit itself
-        hitEve->SetUserData(
-        new EveUserData(EveObjType::Hit, hitPtr, evIdx)
-        );
+      // Attach the hit itself
+      hitEve->SetUserData(
+                          new EveUserData(EveObjType::Hit, hitPtr, evIdx, h.getTrackID(), ""));
 
-        gEve->AddElement(hitEve);
+      gEve->AddElement(hitEve);
 
-        nhit++;
+      nhit++;
+    }
+    int nClusters = clusters.size();
+    for (int j = 0; j < nClusters; ++j) {
+      auto& c = clusters[j];
+      std::span labels = cluMCLabels.getLabels(j);
+      std::string cluLabels = "";
+      int nLabels = labels.size();
+      for (int jLab = 0; jLab < nLabels; jLab++) {
+        if (nLabels > 1)
+          cluLabels.append(Form("(%d)", jLab));
+        NA6PMCComposedLabel lbl = labels[jLab];
+        cluLabels.append(lbl.asString());
+        if (nLabels > 1)
+          cluLabels.append(",");
+      }
+
+      // Persistent copy
+      gAllClusters.emplace_back(
+        std::make_unique<NA6PMuonSpecCluster>(c));
+      auto* cluPtr = gAllClusters.back().get();
+      // EVE object
+      auto* eveClu = new TEvePointSet(1);
+      eveClu->SetNextPoint(
+        cluPtr->getX(),
+        cluPtr->getY(),
+        cluPtr->getZ());
+
+      eveClu->SetName(Form("Cluster L%d", cluPtr->getLayer()));
+      eveClu->SetMarkerStyle(20);
+      eveClu->SetMarkerSize(3.);
+      eveClu->SetMarkerColor(kGreen + 2);
+      eveClu->SetPickable(kTRUE);
+
+      // EVENT-LOCAL INDEXING
+      gEventClusters[evIdx].push_back(cluPtr);
+
+      // Attach cluster
+      eveClu->SetUserData(
+                          new EveUserData(EveObjType::Cluster, cluPtr, evIdx, 9999999, cluLabels));
+
+      gClusterEve[evIdx].push_back(eveClu);
+      gClusterOrigColor[evIdx].push_back(eveClu->GetMarkerColor());
+      gClusterOrigSize[evIdx].push_back(eveClu->GetMarkerSize());
+
+      gEve->AddElement(eveClu);
     }
 
-    for (auto& c : clusters) {
+    int nTracks = msTracks.size();
+    std::cout << " Number of reconstructed tracks " << nTracks << std::endl;
 
-        // Persistent copy
-        gAllClusters.emplace_back(
-            std::make_unique<NA6PMuonSpecCluster>(c)
-        );
-        auto* cluPtr = gAllClusters.back().get();
+    for (int j = 0; j < nTracks; ++j) {
+      auto& track = msTracks[j];
+      NA6PMCComposedLabel lbl = msTrackLabs[j];
 
-        // EVE object
-        auto* eveClu = new TEvePointSet(1);
-        eveClu->SetNextPoint(
-          cluPtr->getX(),
-          cluPtr->getY(),
-          cluPtr->getZ());
+      gAllTracks.emplace_back(std::make_unique<NA6PTrack>(track));
+      auto* trPtr = gAllTracks.back().get();
 
-        eveClu->SetName(Form("Cluster L%d", cluPtr->getLayer()));
-        eveClu->SetMarkerStyle(20);
-        eveClu->SetMarkerSize(3.);
-        eveClu->SetMarkerColor(kGreen+2);
-        eveClu->SetPickable(kTRUE);
+      TEveLine* eveTrack = new TEveLine();
+      eveTrack->SetLineColor(kBlue);
+      eveTrack->SetLineWidth(2);
+      eveTrack->SetPickable(kTRUE);
 
-        // EVENT-LOCAL INDEXING
-        gEventClusters[evIdx].push_back(cluPtr);
+      for (int np = 0; np < 850; np++) {
+        Propagator::Instance()->propagateToZ(track, 0. + np);
+        eveTrack->SetNextPoint(track.getX(), track.getY(), track.getZ());
+      }
 
-        // Attach cluster
-        eveClu->SetUserData(
-        new EveUserData(EveObjType::Cluster, cluPtr, evIdx)
-        );
+      eveTrack->SetUserData(
+                            new EveUserData(EveObjType::Track, trPtr, evIdx, lbl.getTrackIDSigned(), lbl.asString()));
 
-        gClusterEve[evIdx].push_back(eveClu);
-        gClusterOrigColor[evIdx].push_back(eveClu->GetMarkerColor());
-        gClusterOrigSize[evIdx].push_back(eveClu->GetMarkerSize());
-
-        gEve->AddElement(eveClu);
-    }
-
-    std::cout << " Number of reconstructed tracks " << msTracks.size() << std::endl;
-
-    for(auto& track : msTracks) {
-
-        gAllTracks.emplace_back(std::make_unique<NA6PTrack>(track));
-        auto* trPtr = gAllTracks.back().get();
-
-        TEveLine *eveTrack = new TEveLine();
-        eveTrack->SetLineColor(kBlue);
-        eveTrack->SetLineWidth(2);
-        eveTrack->SetPickable(kTRUE);
-
-        for(int np=0;np<850;np++){
-          Propagator::Instance()->propagateToZ(track, 0. + np);
-          eveTrack->SetNextPoint(track.getX(), track.getY(), track.getZ());
-        }
-
-        eveTrack->SetUserData(
-        new EveUserData(EveObjType::Track, trPtr, evIdx)
-        );
-
-        gEve->AddElement(eveTrack);
+      gEve->AddElement(eveTrack);
     }
 
     gEve->Redraw3D(kTRUE);
-
-}
-
+  }
 }
 
 void ResetClusterHighlight(int ev)
 {
-    for (size_t i = 0; i < gClusterEve[ev].size(); ++i) {
-        gClusterEve[ev][i]->SetMarkerColor(gClusterOrigColor[ev][i]);
-        gClusterEve[ev][i]->SetMarkerSize(gClusterOrigSize[ev][i]);
-    }
+  for (size_t i = 0; i < gClusterEve[ev].size(); ++i) {
+    gClusterEve[ev][i]->SetMarkerColor(gClusterOrigColor[ev][i]);
+    gClusterEve[ev][i]->SetMarkerSize(gClusterOrigSize[ev][i]);
+  }
 }
 
 void HighlightClusterIndex(int ev, int idx)
 {
-    if (ev < 0 || ev >= (int)gClusterEve[ev].size()) return;
-    if (idx < 0 || idx >= (int)gClusterEve[ev].size()) return;
+  if (ev < 0 || ev >= (int)gClusterEve[ev].size())
+    return;
+  if (idx < 0 || idx >= (int)gClusterEve[ev].size())
+    return;
 
-    gClusterEve[ev][idx]->SetMarkerColor(kYellow);
-    gClusterEve[ev][idx]->SetMarkerSize(2.5);
+  gClusterEve[ev][idx]->SetMarkerColor(kYellow);
+  gClusterEve[ev][idx]->SetMarkerSize(2.5);
 }
