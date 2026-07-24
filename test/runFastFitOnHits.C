@@ -120,6 +120,7 @@ void runFastFitOnHitsTemplate(int firstEv = 0,
                               const char* hitBranchName = "VerTel",
                               int nLayers = 5,
                               int minHits = 5,
+                              bool verbose = false,
                               bool useVT = true)
 {
 
@@ -140,7 +141,12 @@ void runFastFitOnHitsTemplate(int firstEv = 0,
   int nMomBins = 20;
   float maxP = 10.;
   TH1F* hEtaGen = new TH1F("hEtaGen", ";#eta;counts", 20, 0., 5.);
+  TH1F* hEtaTrackable = new TH1F("hEtaTrackable", ";#eta;counts", 20, 0., 5.);
+  TH1F* hEtaFitted = new TH1F("hEtaFitted", ";#eta;counts", 20, 0., 5.);
   TH1F* hEtaReco = new TH1F("hEtaReco", ";#eta;counts", 20, 0., 5.);
+  TH1F* hMomGen = new TH1F("hMomGen", ";p (GeV/C);counts", nMomBins, 0., maxP);
+  TH1F* hMomTrackable = new TH1F("hMomTrackable", ";p (GeV/C);counts", nMomBins, 0., maxP);
+  TH1F* hMomFitted = new TH1F("hMomFitted", ";p (GeV/C);counts", nMomBins, 0., maxP);
   TH1F* hDeltaPx = new TH1F("hDeltaPx", ";p_{x}^{rec}-p_{x}^{gen} (GeV/c);counts", 100, -0.2, 0.2);
   TH1F* hDeltaPy = new TH1F("hDeltaPy", ";p_{y}^{rec}-p_{y}^{gen} (GeV/c);counts", 100, -0.2, 0.2);
   TH1F* hDeltaPz = new TH1F("hDeltaPz", ";p_{z}^{rec}-p_{z}^{gen} (GeV/c);counts", 100, -0.5, 0.5);
@@ -220,6 +226,7 @@ void runFastFitOnHitsTemplate(int firstEv = 0,
       std::array<std::unique_ptr<NA6PBaseCluster>, 6> clusters{};
       float xclu[6], yclu[6], zclu[6];
       if (curPart.IsPrimary()) {
+        hMomGen->Fill(momPart);
         hEtaGen->Fill(etaPart);
         int maskHits = 0;
         fitter->cleanupAndStartFit();
@@ -244,7 +251,8 @@ void runFastFitOnHitsTemplate(int firstEv = 0,
               if (nLay < 0)
                 continue; // skip hits not in expected z ranges
             }
-            printf("nLay %d nLayers %d\n", nLay, nLayers);
+            if (verbose)
+              printf("nLay %d nLayers %d\n", nLay, nLayers);
             if (nLay < 0 || nLay >= nLayers)
               continue;              // safety check: skip if layer index out of bounds
             maskHits |= (1 << nLay); // use bitmask instead of counter
@@ -273,7 +281,8 @@ void runFastFitOnHitsTemplate(int firstEv = 0,
 
         for (int nLay = 0; nLay < (int)clusters.size(); ++nLay) {
           if (clusters[nLay]) {
-            std::cout << "Adding cluster at layer " << nLay << " for track " << jp << "\n";
+            if (verbose)
+              std::cout << "Adding cluster at layer " << nLay << " for track " << jp << "\n";
             fitter->addCluster(*clusters[nLay]);
           }
         }
@@ -284,13 +293,15 @@ void runFastFitOnHitsTemplate(int firstEv = 0,
         // printf("Initialize seed at %f %f %f p = %f %f %f\n",xyz0[0],xyz0[1],xyz0[2],pxyz0[0],pxyz0[1],pxyz0[2]);
         // int sign = curPart.GetPdgCode() > 0 ? 1 : -1;
         // fitter->setSeed(xyz0,pxyz0,sign);
-
+        hMomTrackable->Fill(momPart);
+        hEtaTrackable->Fill(etaPart);
         TParticle trFit;
         NA6PTrack currTr;
         float chiFit = 0.f;
         if (fitter->computeSeed(-1, &currTr) && (chiFit = fitter->fitSeed(currTr)) >= 0.f) {
           //  if (fitter->fitTrackPoints(currTr)) {
-          std::cout << "Track fit done.\n";
+          if (verbose)
+            std::cout << "Track fit done.\n";
           fitter->addClustersToTrack(currTr);
           currTr.setChi2(chiFit);
           // fitter->propagateToZ(&currTr,zvert);
@@ -298,12 +309,16 @@ void runFastFitOnHitsTemplate(int firstEv = 0,
           int nClusters = currTr.getNHits();
           hNclu->Fill(nClusters);
           if (nClusters != minHits) {
-            std::cout << "Skipping track with only " << nClusters << " hits (minHits=" << minHits << ")\n";
+            if (verbose)
+              std::cout << "Skipping track with only " << nClusters << " hits (minHits=" << minHits << ")\n";
             continue;
-          } else
-            std::cout << "Fitted track with " << nClusters << " hits\n";
+          } else {
+            if (verbose)
+              std::cout << "Fitted track with " << nClusters << " hits\n";
+          }
           chiFit = currTr.getChi2();
-          //   printf("chi2 = %f  chi2/ndf = %f\n",chiFit,currTr.GetNormChi2());
+          if (verbose)
+            printf("chi2 = %f \n", chiFit);
           auto pxyz = currTr.getPXYZ();
           float momtr = currTr.getP();
           float phitr = currTr.getPhi();
@@ -311,6 +326,8 @@ void runFastFitOnHitsTemplate(int firstEv = 0,
           float etatr = currTr.getEta();
           float impparX = currTr.getX() - xvert;
           float impparY = currTr.getY() - yvert;
+          hMomFitted->Fill(momPart);
+          hEtaFitted->Fill(etaPart);
           hEtaReco->Fill(etatr);
           hDeltaPx->Fill(pxyz[0] - pxPart);
           hDeltaPy->Fill(pxyz[1] - pyPart);
@@ -526,20 +543,40 @@ void runFastFitOnHitsTemplate(int firstEv = 0,
   hRelDeltaPzSig->SetMaximum(maxDelP);
   hRelDeltaPzSig->Draw("P");
 
-  TCanvas* ce = new TCanvas("ce", "", 1200, 600);
-  ce->Divide(2, 1);
+  TCanvas* ce = new TCanvas("ce", "", 1400, 800);
+  ce->Divide(2, 2);
   ce->cd(1);
+  hMomGen->SetLineColor(kGray);
+  hMomGen->SetLineWidth(2);
+  hMomGen->Draw();
+  hMomTrackable->SetLineColor(1);
+  hMomTrackable->SetLineWidth(2);
+  hMomTrackable->Draw("sames");
+  hMomFitted->SetLineColor(kGreen + 1);
+  hMomFitted->SetLineWidth(2);
+  hMomFitted->Draw("sames");
+  ce->cd(2);
+  TH1F* hEffMom = (TH1F*)hMomFitted->Clone("hEffMom");
+  hEffMom->Divide(hMomFitted, hMomTrackable, 1., 1., "B");
+  hEffMom->SetMaximum(1.05);
+  hEffMom->SetStats(0);
+  hEffMom->Draw("");
+  ce->cd(3);
   hEtaGen->SetLineColor(kGray);
   hEtaGen->SetLineWidth(2);
   hEtaGen->Draw();
-  hEtaReco->SetLineColor(kGreen + 1);
-  hEtaReco->SetLineWidth(2);
-  hEtaReco->Draw("same");
-  ce->cd(2);
-  TH1F* hEffRec = (TH1F*)hEtaReco->Clone("hEffRec");
-  hEffRec->Divide(hEtaReco, hEtaGen, 1., 1., "B");
-  hEffRec->SetMaximum(1.05);
-  hEffRec->Draw("");
+  hEtaTrackable->SetLineColor(1);
+  hEtaTrackable->SetLineWidth(2);
+  hEtaTrackable->Draw("sames");
+  hEtaFitted->SetLineColor(kGreen + 1);
+  hEtaFitted->SetLineWidth(2);
+  hEtaFitted->Draw("sames");
+  ce->cd(4);
+  TH1F* hEffEta = (TH1F*)hEtaFitted->Clone("hEffEta");
+  hEffEta->Divide(hEtaFitted, hEtaTrackable, 1., 1., "B");
+  hEffEta->SetStats(0);
+  hEffEta->SetMaximum(1.05);
+  hEffEta->Draw("");
 
   TFile* outFFit = new TFile("TrackingFastFit.root", "recreate");
   hImpParXVsP->Write();
@@ -564,11 +601,12 @@ void runFastFitOnVerTelHits(int firstEv = 0,
                             int lastEv = 99999999,
                             float clures = 5.e-4,
                             const char* dirSimu = ".",
-                            int minHits = 5)
+                            int minHits = 5,
+                            bool verbose = false)
 {
   runFastFitOnHitsTemplate<NA6PVerTelHit>(firstEv, lastEv, clures, clures, dirSimu,
                                           "HitsVerTel.root", "hitsVerTel", "VerTel",
-                                          5, minHits, true);
+                                          5, minHits, verbose, true);
 }
 
 // New function for Muon Spectrometer Modular hits
@@ -577,9 +615,10 @@ void runFastFitOnMuonSpecHits(int firstEv = 0,
                               float cluresx = 500.e-4,
                               float cluresy = 1000.e-4,
                               const char* dirSimu = ".",
-                              int minHits = 6)
+                              int minHits = 6,
+                              bool verbose = false)
 {
   runFastFitOnHitsTemplate<NA6PMuonSpecModularHit>(firstEv, lastEv, cluresx, cluresy, dirSimu,
                                                    "HitsMuonSpecModular.root", "hitsMuonSpecModular", "MuonSpecModular",
-                                                   6, minHits, false);
+                                                   6, minHits, verbose, false);
 }

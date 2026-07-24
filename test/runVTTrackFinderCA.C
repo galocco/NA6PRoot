@@ -59,7 +59,11 @@ void runVTTrackFinderCA(int firstEv = 0,
 
   std::unique_ptr<NA6PTrackerCA> tracker = std::make_unique<NA6PTrackerCA>();
   tracker->configureFromRecoParamVT();
+  //  tracker->setNumberOfIterations(1);
+  //  tracker->setIterationParams(0, 0.04, 0.1, 4., 0.4, 0.02, 0.002, 5000, 5000, 5000, 5);
+  //  tracker->setIterationParams(1, 0.10, 0.2, 9., 0.6, 0.05, 0.0075, 1000, 1000, 1000, 3);
   tracker->printConfiguration();
+
   //  tracker->setVerbosity(true);
   TFile* fk = new TFile(Form("%s/MCKine.root", dirSimu));
   TTree* mcTree = (TTree*)fk->Get("mckine");
@@ -105,6 +109,8 @@ void runVTTrackFinderCA(int firstEv = 0,
     }
     primVert.setXYZ(0., 0., zvert);
     uint nHits = vtHits.size();
+    std::vector<bool> isTrackable(nPart, false);
+    std::vector<int> hitMapParticle(nPart, 0);
     for (int jp = 0; jp < nPart; jp++) {
       auto curPart = mcArr->at(jp);
       int maskHits = 0;
@@ -113,10 +119,12 @@ void runVTTrackFinderCA(int firstEv = 0,
         int idPart = hit.getTrackID();
         if (idPart == jp) {
           int nLay = hit.getDetectorID() / 4;
-          maskHits += (1 << nLay);
+          maskHits |= (1 << nLay);
         }
       }
+      hitMapParticle[jp] = maskHits;
       if (maskHits == (1 << nLayers) - 1) {
+        isTrackable[jp] = true;
         double pxPart = curPart.Px();
         double pyPart = curPart.Py();
         double pzPart = curPart.Pz();
@@ -132,6 +140,7 @@ void runVTTrackFinderCA(int firstEv = 0,
     for (size_t i = 0; i < vtClus.size(); ++i) {
       vtClus[i].setClusterIndex(static_cast<int>(i));
     }
+    tracker->setClusterMCTruth(&vtCluMCLabels);
     tracker->findTracks(vtClus, &primVert);
     std::vector<NA6PTrack> trks = tracker->getTracks();
     rec.assignMCLabels(trks, trkMCLabs, vtCluMCLabels);
@@ -142,6 +151,9 @@ void runVTTrackFinderCA(int firstEv = 0,
       int idPartTrack = mcCompLabel.getTrackID();
       int jIteration = tr.getCAIteration();
       if (tr.getNHits() == 5) {
+        if (!isTrackable[idPartTrack] && !mcCompLabel.isFake()) {
+          printf("Mismatch: track %d has 5 hits, label %d, but hit map %d\n", jT, idPartTrack, hitMapParticle[idPartTrack]);
+        }
         auto curPart = mcArr->at(idPartTrack);
         double pxPart = curPart.Px();
         double pyPart = curPart.Py();

@@ -15,12 +15,14 @@
 #include "NA6PMuonSpecReconstruction.h"
 #endif
 
-void convertHitsToRecPoints(){
+void convertHitsToRecPoints(bool simulateDeadVTRegions = true)
+{
   // Process VerTel hits
   TFile* fhVT = TFile::Open("HitsVerTel.root");
   if (!fhVT || fhVT->IsZombie()) {
     LOGP(error, "Cannot open HitsVerTel.root");
-    if (fhVT) delete fhVT;
+    if (fhVT)
+      delete fhVT;
   } else {
     TTree* thVT = (TTree*)fhVT->Get("hitsVerTel");
     if (!thVT) {
@@ -32,12 +34,12 @@ void convertHitsToRecPoints(){
 
       NA6PVerTelReconstruction* recVT = new NA6PVerTelReconstruction();
       recVT->createClustersOutput();
-      for(int jEv=0; jEv<nEvVT; jEv++){
+      for (int jEv = 0; jEv < nEvVT; jEv++) {
         thVT->GetEvent(jEv);
         int nHits = vtHits.size();
         printf("VerTel Event %d nHits=%d\n", jEv, nHits);
         recVT->clearClusters();
-        recVT->hitsToRecPoints(vtHits);
+        recVT->hitsToRecPoints(vtHits, jEv, simulateDeadVTRegions);
         recVT->writeClusters();
       }
       recVT->closeClustersOutput();
@@ -51,7 +53,8 @@ void convertHitsToRecPoints(){
   TFile* fhMS = TFile::Open("HitsMuonSpecModular.root");
   if (!fhMS || fhMS->IsZombie()) {
     LOGP(error, "Cannot open HitsMuonSpecModular.root");
-    if (fhMS) delete fhMS;
+    if (fhMS)
+      delete fhMS;
   } else {
     TTree* thMS = (TTree*)fhMS->Get("hitsMuonSpecModular");
     if (!thMS) {
@@ -63,7 +66,7 @@ void convertHitsToRecPoints(){
 
       NA6PMuonSpecReconstruction* recMS = new NA6PMuonSpecReconstruction();
       recMS->createClustersOutput();
-      for(int jEv=0; jEv<nEvMS; jEv++){
+      for (int jEv = 0; jEv < nEvMS; jEv++) {
         thMS->GetEvent(jEv);
         int nHits = msHits.size();
         printf("MuonSpec Event %d nHits=%d\n", jEv, nHits);

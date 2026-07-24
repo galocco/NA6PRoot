@@ -184,7 +184,7 @@ void plotTracks(const char* dirSimu = ".")
         int idPart = hit.getTrackID();
         if (idPart == jp) {
           int nLay = hit.getDetectorID() / 4;
-          maskHits += (1 << nLay);
+          maskHits |= (1 << nLay);
         }
       }
       if (maskHits == 31) {

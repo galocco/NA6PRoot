@@ -58,7 +58,7 @@ class NA6PVerTelReconstruction : public NA6PReconstruction
   // fast method to smear the hits bypassing digitization and cluster finder
   void setClusterSpaceResolution(double clures) { mCluRes = clures; }
   void setEmulateNoGaps(bool val = true) { mSegmentation.setStaggered(true); }
-  void hitsToRecPoints(const std::vector<NA6PVerTelHit>& hits, int evID = 0);
+  void hitsToRecPoints(const std::vector<NA6PVerTelHit>& hits, int evID = 0, bool simulateDeadRegions = true);
   void digitsToRecPoints(const std::vector<NA6PVerTelDigit>& vtDigits, const NA6PMCTruthContainer& digMCLabels);
 
   NA6PTrackerCA* getTracker() const { return mVTTracker.get(); }

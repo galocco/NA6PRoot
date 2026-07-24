@@ -92,7 +92,7 @@ void NA6PVerTelReconstruction::setClusters(std::vector<NA6PVerTelCluster>& clust
   }
 }
 
-void NA6PVerTelReconstruction::hitsToRecPoints(const std::vector<NA6PVerTelHit>& hits, int evID)
+void NA6PVerTelReconstruction::hitsToRecPoints(const std::vector<NA6PVerTelHit>& hits, int evID, bool simulateDeadRegions)
 {
   int nHits = hits.size();
   for (int jHit = 0; jHit < nHits; ++jHit) {
@@ -100,10 +100,12 @@ void NA6PVerTelReconstruction::hitsToRecPoints(const std::vector<NA6PVerTelHit>&
     double x = hit.getX();
     double y = hit.getY();
     double z = hit.getZ();
-    double xyzLocS[3], xyzLocE[3];
-    mDigitizer.getHitLocalCoord(hit, xyzLocS, xyzLocE);
-    if (mSegmentation.isInAcc(xyzLocS[0], xyzLocS[1]) != 1)
-      continue;
+    if (simulateDeadRegions) {
+      double xyzLocS[3], xyzLocE[3];
+      mDigitizer.getHitLocalCoord(hit, xyzLocS, xyzLocE);
+      if (mSegmentation.isInAcc(xyzLocS[0], xyzLocS[1]) != 1)
+        continue;
+    }
     double ex2clu = 5.e-4;
     double ey2clu = 5.e-4;
     if (mCluRes > 0) {
