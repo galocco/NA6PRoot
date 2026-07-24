@@ -415,6 +415,7 @@ void NA6PTrackerCA::computeLayerTracklets(const std::vector<ClusterType>& cluArr
           float tanL = (z2 - z1) / (r2 - r1);
           float pxpz = (x2 - x1) / (z2 - z1);
           float pypz = (y2 - y1) / (z2 - z1);
+
           tracklets.emplace_back(iLayer, jClu1, jClu2, tanL, phi, pxpz, pypz);
           // do not assign the clusters as used, it will be done when the tracklets are used into tracks
           // mIsClusterUsed[jClu1] = true;
@@ -670,9 +671,8 @@ std::vector<TrackCandidate> NA6PTrackerCA::prolongSeed(const TrackCandidate& see
         }
         // --- Chi2 checks ---
         // Compute chi2 only for the innermost cluster of the cells to be connected
-        const auto& cellTst = (dir == ExtendDirection::kInward) ? refCell : ccNext;
-        const auto& fitCurr = cellTst.trackFitFast;
-        const auto& cluToAdd = cluArr[cellTst.cluIDs[0]];
+        const auto& fitCurr  = (dir == ExtendDirection::kInward) ? refCell.trackFitFast : ccNext.trackFitFast;
+        const auto& cluToAdd = (dir == ExtendDirection::kInward) ? cluArr[ccNext.cluIDs[0]] : cluArr[refCell.cluIDs[0]];
         float chi2 = computeTrackToClusterChi2(fitCurr, cluToAdd);
 #ifdef _CHI2_TUNING_MODE_
         auto mcTruth = getTrackMCTruthStatus(cellTst.cluIDs, cluArr);
@@ -946,9 +946,8 @@ void NA6PTrackerCA::findTracks(std::vector<ClusterType>& cluArr,
   }
 
   LOGP(info, "Process event with nClusters {}, primary vertex in z = {} cm", nClus, mPrimVertPos[2]);
-  mIsClusterUsed.resize(nClus);
-  for (uint jClu = 0; jClu < nClus; jClu++)
-    mIsClusterUsed[jClu] = false;
+  mIsClusterUsed.clear();
+  mIsClusterUsed.resize(nClus, false);
   std::vector<int> firstCluPerLay;
   std::vector<int> lastCluPerLay;
   sortClustersByLayerAndEta(cluArr, firstCluPerLay, lastCluPerLay);
@@ -1024,6 +1023,9 @@ std::vector<std::pair<ClusterType, ClusterType>> NA6PTrackerCA::findTracklets(in
   } else {
     mPrimVertPos[0] = mPrimVertPos[1] = mPrimVertPos[2] = 0.0f;
   }
+  uint nClus = cluArr.size();
+  mIsClusterUsed.clear();
+  mIsClusterUsed.resize(nClus, false);
   int backupStart = mLayerStart;
   int backupLay = mNLayers;
   mLayerStart = jFirstLay;
@@ -1109,7 +1111,6 @@ void NA6PTrackerCA::printStats(const std::vector<T>& candidates,
     for (int jClu = 0; jClu < nClus; jClu++) {
       int cluID = idClus[jClu];
       if (cluID < 0) {
-        isFake = true;
         continue;
       }
       ++nTrueClus;
