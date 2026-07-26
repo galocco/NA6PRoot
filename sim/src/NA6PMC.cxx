@@ -26,7 +26,9 @@
 #include <TMethodCall.h>
 #include <fairlogger/Logger.h>
 #include <filesystem>
+#include <functional>
 #include <regex>
+#include <unistd.h>
 
 using Str = na6p::utils::Str;
 
@@ -354,7 +356,9 @@ void NA6PMC::setRandomSeed(Long64_t r)
 {
   if (r < 0) {
     auto t = std::chrono::system_clock::now().time_since_epoch();
-    mRandomSeed = std::chrono::duration_cast<std::chrono::nanoseconds>(t).count();
+    auto timeSeed = std::chrono::duration_cast<std::chrono::nanoseconds>(t).count();
+    auto pidSeed = static_cast<ULong64_t>(getpid());
+    mRandomSeed = std::hash<std::string>{}(fmt::format("{}:{}", timeSeed, pidSeed));
   } else {
     mRandomSeed = r;
   }
@@ -544,7 +548,7 @@ void NA6PMC::selectTracksToSave()
   mcHeader->setNColl(mStack->getNColl());
   mcHeader->setNPart(mStack->getNPart());
   mcHeader->setImpPar(mStack->getImpPar());
-  mcHeader->setEventID(mEvCount);
+  mcHeader->setEventID(mEventOffset + mEvCount);
   // register secondaries offsets and store primaries
   nkeep = 0;
   for (int i : mSavID) {

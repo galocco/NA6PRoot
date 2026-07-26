@@ -26,6 +26,34 @@ Note that even in this case, one can still modify some parameters via `--configK
 
 Writing of the ini file can be disable by the option `--disable-write-ini`.
 
+## Event-level parallel simulation
+
+For event-level parallelism use the wrapper executable `na6psim_parallel`. It accepts the same command line options as `na6psim`, plus the wrapper option `--workers <N>`
+which defines how many independent `na6psim` processes are run in parallel. The default is `--workers 1`.
+
+Example:
+```
+na6psim_parallel --workers 5 -n 20 -g genDimuonBgEvent.C --configKeyValues "keyval.output_dir=sim_out"
+```
+
+The wrapper splits the requested event count into contiguous chunks (defined by chunk-specific `--event-offset`, `--skip-events`).
+Each worker runs a separate VMC/TGeant4 process with its own temporary `keyval.output_dir`, `--event-offset`, `--skip-events`, and `--doDigitization false`.
+After all workers finish, ROOT output files are merged into the final `keyval.output_dir`; `geometry.root` and `na6pLayout.ini` are copied from the first worker.
+Unless the original command contains `--doDigitization false`, the wrapper then runs a final `na6psim --digitize-only`
+step in the merged output directory, so digit MC labels use the final event numbering.
+If `--digitize-only` is provided explicitly to `na6psim_parallel`, no workers are started and the wrapper runs a single `na6psim --digitize-only` command in the requested output directory.
+
+Parallel mode requires an explicit non-negative `-n` / `--nevents` value, since the wrapper must split the event range before starting workers.
+
+If the original command provides a non-negative random seed with `-r` / `--rnd-seed`, this seed is passed unchanged to the first worker and incremented by one for each following worker.
+For example, `-r 100` with `--workers 3` runs workers with seeds `100`, `101`, and `102`.
+If no or a negative seed is provided, each `na6psim` process generates its own seed from a hash of the current nanosecond time and the process ID.
+File-backed generators such as `NA6PGenHepMC` support `--skip-events`;
+generators which do not override event skipping will run different sequences thanks to modified (or time/process randomized) random seeds.
+
+Before launching workers, `na6psim_parallel` prints the full list of worker commands, their log files, the temporary worker directory,
+and the final merge/digitization directory. Use `--keep-worker-output` to preserve temporary worker directories for inspection after the merge.
+
 ## Available generators
 
 Generators should be configured in root compilable macros with the generator producer function name being the same as the macro name.
@@ -82,16 +110,16 @@ int testHooks(int arg, bool inout)
       int idMoth = part->GetFirstMother();
       int mothPdg = -1;
       while (idMoth >= 0) {
-	auto* currMoth = stack->GetParticle(idMoth);
-	int absPdg = std::abs(currMoth->GetPdgCode());
-	if (absPdg == 11 || absPdg == 22 || absPdg == 211 || absPdg == 130 || absPdg == 321 || absPdg == 2212 || absPdg == 2112) {  // stop if a "stable" particle is found in the ancestors
-	  break;
-	}
-	if ((absPdg > 400 && absPdg < 600) || (absPdg > 4000 && absPdg < 6000) || absPdg == 100443 || absPdg == 20443) {
-	  part->SetBit(UserHook::KeepParticleBit); // force saving particle i (and its ancestors)
-	  break;
-	}
-	idMoth = currMoth->GetFirstMother();
+        auto* currMoth = stack->GetParticle(idMoth);
+        int absPdg = std::abs(currMoth->GetPdgCode());
+        if (absPdg == 11 || absPdg == 22 || absPdg == 211 || absPdg == 130 || absPdg == 321 || absPdg == 2212 || absPdg == 2112) {  // stop if a "stable" particle is found in the ancestors
+          break;
+        }
+        if ((absPdg > 400 && absPdg < 600) || (absPdg > 4000 && absPdg < 6000) || absPdg == 100443 || absPdg == 20443) {
+          part->SetBit(UserHook::KeepParticleBit); // force saving particle i (and its ancestors)
+          break;
+        }
+        idMoth = currMoth->GetFirstMother();
       }
     }
   } else {

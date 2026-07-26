@@ -12,6 +12,7 @@
 #include "MagneticField.h"
 #include "StringUtils.h"
 #include "NA6PMC.h"
+#include "NA6PGenerator.h"
 #include "NA6PVerTelHit.h"
 #include "NA6PVerTelDigitizer.h"
 #include "TG4RunConfiguration.h"
@@ -40,9 +41,12 @@ int main(int argc, char** argv)
     add_option("generator,g", bpo::value<std::string>()->default_value(""), "generator defintion root C macro, must return NA6PGenerator pointer");
     add_option("user-hooks,u", bpo::value<std::string>()->default_value(""), "root macro C macro with user hooks for initialization");
     add_option("user-vertex,V", bpo::value<std::string>()->default_value(""), "root macro C macro with user method for vertex generation");
-    add_option("rnd-seed,r", bpo::value<int64_t>()->default_value(-1), "random number seed, 0 - do not set, <0: generate from time");
+    add_option("rnd-seed,r", bpo::value<int64_t>()->default_value(-1), "random number seed, <0: generate from time + processID");
     add_option("save-bfield,b", bpo::value<bool>()->default_value(false)->implicit_value(true), "Save magnetic field to file");
     add_option("doDigitization,dig", bpo::value<bool>()->default_value(true), "run hits->digits");
+    add_option("digitize-only", bpo::value<bool>()->default_value(false)->implicit_value(true), "only run hits->digits using existing output files");
+    add_option("event-offset", bpo::value<uint32_t>()->default_value(0), "global event ID offset for this job");
+    add_option("skip-events", bpo::value<int64_t>()->default_value(0), "events to skip in the input generator before simulating");
     opt_all.add(opt_general).add(opt_hidden);
     bpo::store(bpo::command_line_parser(argc, argv).options(opt_all).positional(opt_pos).run(), vm);
     if (vm.count("help")) {
@@ -68,8 +72,43 @@ int main(int argc, char** argv)
   LOGP(info, "Printing all configs");
   na6p::conf::ConfigurableParam::printAllKeyValuePairs();
 
+  auto runDigitization = [&]() {
+    LOGP(info, "Run hits -> digits");
+    auto dir = na6p::utils::Str::rectifyDirectory(na6p::conf::ConfigurableParam::getOutputDir());
+    NA6PVerTelDigitizer dig;
+    dig.init((dir + "geometry.root").c_str());
+    TFile* fhVT = TFile::Open((dir + "HitsVerTel.root").c_str());
+    if (!fhVT || fhVT->IsZombie()) {
+      LOGP(fatal, "Failed to open file {}", dir + "HitsVerTel.root");
+    }
+    TTree* thVT = (TTree*)fhVT->Get("hitsVerTel");
+    if (!thVT) {
+      LOGP(fatal, "Failed to get tree hitsVerTel from file {}", dir + "HitsVerTel.root");
+    }
+    std::vector<NA6PVerTelHit> vtHits, *vtHitsPtr = &vtHits;
+    thVT->SetBranchAddress("VerTel", &vtHitsPtr);
+    int nEvVT = thVT->GetEntriesFast();
+    for (int jEv = 0; jEv < nEvVT; jEv++) {
+      thVT->GetEvent(jEv);
+      int nHits = vtHits.size();
+      LOGP(info, "Digitize VerTel Event {} nHits = {}", jEv, nHits);
+      dig.setEventMetaData(vm["event-offset"].as<uint32_t>() + jEv);
+      dig.process(vtHits);
+    }
+    dig.closeDigitsOutput();
+    delete thVT;
+    fhVT->Close();
+    delete fhVT;
+  };
+
+  if (vm["digitize-only"].as<bool>()) {
+    runDigitization();
+    return 0;
+  }
+
   auto mc = new NA6PMC("NA6PMCApp", "NA6P Virtual Monte Carlo Application");
   mc->setVerbosity(vm["verbosity"].as<int>());
+  mc->setEventOffset(vm["event-offset"].as<uint32_t>());
   mc->setRandomSeed(vm["rnd-seed"].as<int64_t>());
   if (!vm["user-hooks"].as<std::string>().empty()) {
     mc->setupUserHooks(vm["user-hooks"].as<std::string>());
@@ -108,6 +147,11 @@ int main(int argc, char** argv)
   }
   if (nEvents && mc->getGenerator()) {
     LOGP(info, "Processing {} events", nEvents);
+    auto skipEvents = vm["skip-events"].as<int64_t>();
+    if (skipEvents > 0) {
+      LOGP(info, "Skipping {} generator events", skipEvents);
+      mc->getGenerator()->skipEvents(skipEvents);
+    }
     // RS: if we want to silence long geant initialization output, we can add here MiscUtils::silenceStdOut("for Geant4 inits");
     // and add in the NA6PMC::BeginEvent() MiscUtils::reviveStdOut();
     TVirtualMC::GetMC()->ProcessRun(nEvents);
@@ -130,31 +174,7 @@ int main(int argc, char** argv)
 
   const bool doHitsToDigits = vm["doDigitization"].as<bool>();
   if (doHitsToDigits) {
-    LOGP(info, "Run hits -> digits");
-    NA6PVerTelDigitizer dig;
-    dig.init("geometry.root");
-    TFile* fhVT = TFile::Open("HitsVerTel.root");
-    if (!fhVT || fhVT->IsZombie()) {
-      LOGP(fatal, "Failed to open file HitsVerTel.root");
-    }
-    TTree* thVT = (TTree*)fhVT->Get("hitsVerTel");
-    if (!thVT) {
-      LOGP(fatal, "Failed to get tree hitsVerTel from file HitsVerTel.root");
-    }
-    std::vector<NA6PVerTelHit> vtHits, *vtHitsPtr = &vtHits;
-    thVT->SetBranchAddress("VerTel", &vtHitsPtr);
-    int nEvVT = thVT->GetEntriesFast();
-    for (int jEv = 0; jEv < nEvVT; jEv++) {
-      thVT->GetEvent(jEv);
-      int nHits = vtHits.size();
-      LOGP(info, "Digitize VerTel Event {} nHits = {}", jEv, nHits);
-      dig.setEventMetaData(jEv);
-      dig.process(vtHits);
-    }
-    dig.closeDigitsOutput();
-    delete thVT;
-    fhVT->Close();
-    delete fhVT;
+    runDigitization();
   }
 
   return 0;

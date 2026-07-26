@@ -10,6 +10,8 @@
 #include <TTree.h>
 
 #include "NA6PLayoutParam.h"
+#include "ConfigurableParam.h"
+#include "StringUtils.h"
 #include "NA6PVerTelDigitizer.h"
 
 void NA6PVerTelDigitizer::init(const char* filename, const char* geoname)
@@ -19,7 +21,8 @@ void NA6PVerTelDigitizer::init(const char* filename, const char* geoname)
   mModules.resize(mNumberOfModules);
   mThresholds.assign(mNumberOfModules * NA6PVerTelSegmentation::NTilesPerModule, kDefaultThresholdEl);
   initGeometry(filename, geoname);
-  createDigitsOutput();
+  const auto outDir = na6p::utils::Str::rectifyDirectory(na6p::conf::ConfigurableParam::getOutputDir());
+  createDigitsOutput(outDir);
 }
 
 void NA6PVerTelDigitizer::initGeometry(const char* filename, const char* geoname)
@@ -29,9 +32,9 @@ void NA6PVerTelDigitizer::initGeometry(const char* filename, const char* geoname
   }
 }
 
-void NA6PVerTelDigitizer::createDigitsOutput()
+void NA6PVerTelDigitizer::createDigitsOutput(const std::string& outDir)
 {
-  auto nm = fmt::format("Digits{}.root", getName());
+  auto nm = fmt::format("{}Digits{}.root", outDir, getName());
   mDigitsFile = TFile::Open(nm.c_str(), "recreate");
   mDigitsTree = new TTree(fmt::format("digits{}", getName()).c_str(), fmt::format("{} Digits", getName()).c_str());
   mDigitsTree->Branch(getName().c_str(), &hDigitsPtr);

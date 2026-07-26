@@ -25,6 +25,7 @@ class NA6PGenerator : public TObject
   auto getStack() const { return mStack; }
 
   virtual long canGenerateMaxEvents() const { return -1; } // if no limit, return negative number
+  virtual void skipEvents(long) {}
   virtual void generate() = 0;
   virtual void init();
   virtual void generatePrimaryVertex(int maxTrials = 1000000);

@@ -45,6 +45,9 @@ class NA6PMC : public TVirtualMCApplication
   void setVerbosity(int v) { mVerbosity = v; }
   auto getVerbosity() const { return mVerbosity; }
 
+  void setEventOffset(size_t offset) { mEventOffset = offset; }
+  auto getEventOffset() const { return mEventOffset; }
+
   void init();
 
   void selectTracksToSave();
@@ -75,6 +78,7 @@ class NA6PMC : public TVirtualMCApplication
   std::vector<std::pair<int, int>> mDtList;
   int mVerbosity = 0;
   ULong64_t mRandomSeed = 0;
+  size_t mEventOffset = 0;
   size_t mEvCount = 0;
   TFile* mKineFile = nullptr;
   TTree* mKineTree = nullptr;

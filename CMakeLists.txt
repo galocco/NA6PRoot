@@ -95,6 +95,7 @@ target_include_directories(na6prec PRIVATE
 
 # Install instructions (optional)
 install(TARGETS na6psim na6prec RUNTIME DESTINATION bin)
+install(PROGRAMS scripts/na6psim_parallel.py DESTINATION bin RENAME na6psim_parallel)
 
 set(DATA_DIR ${CMAKE_SOURCE_DIR}/data)
 # Install all files in the data directory
@@ -109,7 +110,7 @@ install(DIRECTORY ${TESTS_DIR}/
         USE_SOURCE_PERMISSIONS
         FILES_MATCHING PATTERN "*.*")
 
-      
+
 # Define the content of the init.sh script
 configure_file(
     ${CMAKE_CURRENT_SOURCE_DIR}/init.sh.in

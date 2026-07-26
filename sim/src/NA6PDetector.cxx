@@ -11,6 +11,7 @@
 #include "NA6PMuonSpec.h"
 #include "NA6PMuonSpecModular.h"
 #include "NA6PLayoutParam.h"
+#include "ConfigurableParam.h"
 #include "StringUtils.h"
 #include <TGeoManager.h>
 #include <TColor.h>
@@ -20,7 +21,7 @@
 NA6PDetector::NA6PDetector()
 {
   const auto& param = NA6PLayoutParam::Instance();
-  
+
   // Declare modules
   if (!param.use_gdml_magnets) {
     // Analytic magnets from C++ (default behaviour)
@@ -175,12 +176,13 @@ void NA6PDetector::createGeometry(const std::string& name)
     }
   }
   // Finalize
-  geom->GetTopVolume()->Voxelize(""); 
+  geom->GetTopVolume()->Voxelize("");
   geom->CloseGeometry();
   for (auto m : mModulesVec) {
     m->setAlignableEntries();
   }
-  geom->Export("geometry.root");
+  auto outDir = na6p::utils::Str::rectifyDirectory(na6p::conf::ConfigurableParam::getOutputDir());
+  geom->Export((outDir + "geometry.root").c_str());
 }
 
 void NA6PDetector::setVerbosity(int v)

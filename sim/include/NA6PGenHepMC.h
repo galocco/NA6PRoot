@@ -20,6 +20,7 @@ class NA6PGenHepMC : public NA6PGenerator
 
   void SetFileName(const std::string& name) { mFileName = name; }
   long canGenerateMaxEvents() const override;
+  void skipEvents(long nEvents) override;
   void TrackSpectators() { mTrackSpectators = true; }
 
  protected:

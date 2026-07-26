@@ -53,7 +53,7 @@ class NA6PVerTelDigitizer
   void finalizeDigits();
 
   size_t getNDigits() const { return mDigits.size(); }
-  void createDigitsOutput();
+  void createDigitsOutput(const std::string& outDir = "");
   void closeDigitsOutput();
   void writeDigits();
   void clearDigits()

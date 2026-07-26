@@ -81,6 +81,26 @@ void NA6PGenHepMC::init()
   NA6PGenerator::init();
 }
 
+void NA6PGenHepMC::skipEvents(long nEvents)
+{
+  if (nEvents <= 0) {
+    return;
+  }
+  if (!mHEPRootFileReader) {
+    LOGP(fatal, "Cannot skip {} HepMC events before reader initialization", nEvents);
+  }
+  HepMC3::GenEvent evt;
+  for (long i = 0; i < nEvents; ++i) {
+    mHEPRootFileReader->read_event(evt);
+    if (mHEPRootFileReader->failed()) {
+      LOGP(fatal, "Failed to skip HepMC event {} out of {} from {}", i, nEvents, mFileName);
+    }
+    evt.clear();
+  }
+  mReadEvents += nEvents;
+  LOGP(info, "Skipped {} HepMC events", nEvents);
+}
+
 void NA6PGenHepMC::generate()
 {
   if (mReadEvents >= mNEvInTree) {
