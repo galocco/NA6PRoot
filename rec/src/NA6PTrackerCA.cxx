@@ -2,7 +2,7 @@
 
 #include <fmt/format.h>
 #include <iostream>
-#include <fairlogger/Logger.h>
+#include <numeric>
 #include <TGeoManager.h>
 #include <TSystem.h>
 #include "Propagator.h"
@@ -184,6 +184,13 @@ void NA6PTrackerCA::printConfiguration() const
               << std::setw(8) << mMinNClusTracksCA[i]
               << "\n";
   }
+  if (!mLayersToSkip.empty()) {
+    std::cout << "Allow skipping of layers: ";
+    for (size_t i = 0; i < mLayersToSkip.size(); ++i) {
+      std::cout << std::setw(3) << mLayersToSkip[i];
+    }
+    std::cout << "\n";
+  }
   std::cout << "==============================\n";
 }
 
@@ -267,7 +274,7 @@ void NA6PTrackerCA::sortTrackletsByLayerAndIndex(std::vector<TrackletCandidate>&
   // count clusters per layer
   std::vector<int> count(mNLayers - 1, 0);
   for (const auto& trkl : tracklets) {
-    int jLay = trkl.startingLayer;
+    int jLay = trkl.innerLayer;
     if (jLay >= 0 && jLay < mNLayers - 1) {
       count[jLay]++;
     }
@@ -285,7 +292,7 @@ void NA6PTrackerCA::sortTrackletsByLayerAndIndex(std::vector<TrackletCandidate>&
   std::vector<int> countReord = firstIndex;
   std::vector<TrackletCandidate> reordered(tracklets.size());
   for (const auto& trkl : tracklets) {
-    int jLay = trkl.startingLayer;
+    int jLay = trkl.innerLayer;
     if (jLay >= 0 && jLay < mNLayers - 1)
       reordered[countReord[jLay]++] = trkl;
   }
@@ -310,7 +317,7 @@ void NA6PTrackerCA::sortCellsByLayerAndIndex(std::vector<CellCandidate>& cells,
   // count cells per layer
   std::vector<int> count(mNLayers - 2, 0);
   for (const auto& cell : cells) {
-    int jLay = cell.startingLayer;
+    int jLay = cell.innerLayer;
     if (jLay >= 0 && jLay < mNLayers - 2) {
       count[jLay]++;
     }
@@ -328,7 +335,7 @@ void NA6PTrackerCA::sortCellsByLayerAndIndex(std::vector<CellCandidate>& cells,
   std::vector<int> countReord = firstIndex;
   std::vector<CellCandidate> reordered(cells.size());
   for (const auto& cell : cells) {
-    int jLay = cell.startingLayer;
+    int jLay = cell.innerLayer;
     if (jLay >= 0 && jLay < mNLayers - 2)
       reordered[countReord[jLay]++] = cell;
   }
@@ -347,6 +354,7 @@ void NA6PTrackerCA::sortCellsByLayerAndIndex(std::vector<CellCandidate>& cells,
 
 template <typename ClusterType>
 void NA6PTrackerCA::computeLayerTracklets(const std::vector<ClusterType>& cluArr,
+                                          const std::vector<int>& layers,
                                           const std::vector<int>& firstIndex,
                                           const std::vector<int>& lastIndex,
                                           std::vector<TrackletCandidate>& tracklets,
@@ -355,13 +363,19 @@ void NA6PTrackerCA::computeLayerTracklets(const std::vector<ClusterType>& cluArr
 {
 
   tracklets.clear();
+  if (layers.size() < 2) {
+    LOGP(warn, "computeLayerTracklets: layers list has less than 2 entries ({})", layers.size());
+    return;
+  }
   const float pvx = mPrimVertPos[0];
   const float pvy = mPrimVertPos[1];
   const float pvz = mPrimVertPos[2];
 
-  for (int iLayer = 0; iLayer < mNLayers - 1; ++iLayer) {
-    auto layerBegin = cluArr.begin() + firstIndex[iLayer + 1];
-    auto layerEnd = cluArr.begin() + lastIndex[iLayer + 1];
+  for (size_t iStep = 0; iStep < layers.size() - 1; ++iStep) {
+    int iLayer = layers[iStep];
+    int jLayer = layers[iStep + 1];
+    auto layerBegin = cluArr.begin() + firstIndex[jLayer];
+    auto layerEnd = cluArr.begin() + lastIndex[jLayer];
     for (int jClu1 = firstIndex[iLayer]; jClu1 < lastIndex[iLayer]; ++jClu1) {
       if (mIsClusterUsed[jClu1])
         continue;
@@ -416,7 +430,7 @@ void NA6PTrackerCA::computeLayerTracklets(const std::vector<ClusterType>& cluArr
           float pxpz = (x2 - x1) / (z2 - z1);
           float pypz = (y2 - y1) / (z2 - z1);
 
-          tracklets.emplace_back(iLayer, jClu1, jClu2, tanL, phi, pxpz, pypz);
+          tracklets.emplace_back(iLayer, jLayer, jClu1, jClu2, tanL, phi, pxpz, pypz);
           // do not assign the clusters as used, it will be done when the tracklets are used into tracks
           // mIsClusterUsed[jClu1] = true;
           // mIsClusterUsed[jClu2] = true;
@@ -430,6 +444,7 @@ void NA6PTrackerCA::computeLayerTracklets(const std::vector<ClusterType>& cluArr
 
 template <typename ClusterType>
 void NA6PTrackerCA::computeLayerCells(const std::vector<TrackletCandidate>& tracklets,
+                                      const std::vector<int>& layers,
                                       const std::vector<int>& firstIndex,
                                       const std::vector<int>& lastIndex,
                                       const std::vector<ClusterType>& cluArr,
@@ -443,9 +458,17 @@ void NA6PTrackerCA::computeLayerCells(const std::vector<TrackletCandidate>& trac
 {
 
   cells.clear();
-  for (int iLayer = 0; iLayer < mNLayers - 2; ++iLayer) {
-    auto layerBegin = tracklets.begin() + firstIndex[iLayer + 1];
-    auto layerEnd = tracklets.begin() + lastIndex[iLayer + 1];
+  if (layers.size() < 3) {
+    LOGP(warn, "computeLayerCells: layers list has less than 3 entries ({})", layers.size());
+    return;
+  }
+  for (size_t iStep = 0; iStep < layers.size() - 2; ++iStep) {
+    int iLayer = layers[iStep];
+    int jLayer = layers[iStep + 1];
+    int kLayer = layers[iStep + 2];
+
+    auto layerBegin = tracklets.begin() + firstIndex[jLayer];
+    auto layerEnd = tracklets.begin() + lastIndex[jLayer];
     for (int jTrkl1 = firstIndex[iLayer]; jTrkl1 < lastIndex[iLayer]; ++jTrkl1) {
       const TrackletCandidate& trkl1 = tracklets[jTrkl1];
       const int nextLayerClusterIndex = trkl1.secondClusterIndex;
@@ -484,13 +507,13 @@ void NA6PTrackerCA::computeLayerCells(const std::vector<TrackletCandidate>& trac
             }
 #endif
             if (mVerbose) {
-              LOGP(info, "DBG cell accept lay={} trkl=({},{}) clu=({},{},{}) chi={}",
-                   iLayer, jTrkl1, jTrkl2, cluIDs[0], cluIDs[1], cluIDs[2], chi);
+              LOGP(info, "DBG cell accept lay=({},{},{}) trkl=({},{}) clu=({},{},{}) chi={}",
+                   iLayer, jLayer, kLayer, jTrkl1, jTrkl2, cluIDs[0], cluIDs[1], cluIDs[2], chi);
             }
-            cells.emplace_back(iLayer, jTrkl1, jTrkl2, std::move(cluIDs), fitTrackFast);
+            cells.emplace_back(iLayer, jLayer, kLayer, jTrkl1, jTrkl2, std::move(cluIDs), fitTrackFast);
           } else if (mVerbose) {
-            LOGP(info, "DBG cell reject lay={} trkl=({},{}) clu=({},{},{})",
-                 iLayer, jTrkl1, jTrkl2, cluIDs[0], cluIDs[1], cluIDs[2]);
+            LOGP(info, "DBG cell reject lay=({},{},{}) trkl=({},{}) clu=({},{},{})",
+                 iLayer, jLayer, kLayer, jTrkl1, jTrkl2, cluIDs[0], cluIDs[1], cluIDs[2]);
           }
         }
       }
@@ -557,6 +580,7 @@ float NA6PTrackerCA::fitTrackPointsFast(const std::vector<int>& cluIDs,
 
 template <typename ClusterType>
 void NA6PTrackerCA::findCellsNeighbours(const std::vector<CellCandidate>& cells,
+                                        const std::vector<int>& layers,
                                         const std::vector<int>& firstIndex,
                                         const std::vector<int>& lastIndex,
                                         std::vector<std::pair<int, int>>& cneigh,
@@ -565,10 +589,16 @@ void NA6PTrackerCA::findCellsNeighbours(const std::vector<CellCandidate>& cells,
 {
 
   cneigh.clear();
+  if (layers.size() < 4) {
+    LOGP(warn, "findCellsNeighbours: layers list has less than 4 entries ({})", layers.size());
+    return;
+  }
+  for (size_t iStep = 0; iStep < layers.size() - 3; ++iStep) {
+    int iLayer = layers[iStep];     // starting layer of cell1
+    int jLayer = layers[iStep + 1]; // starting layer of cell2
 
-  for (int iLayer = 0; iLayer < mNLayers - 3; ++iLayer) {
-    auto layerBegin = cells.begin() + firstIndex[iLayer + 1];
-    auto layerEnd = cells.begin() + lastIndex[iLayer + 1];
+    auto layerBegin = cells.begin() + firstIndex[jLayer];
+    auto layerEnd = cells.begin() + lastIndex[jLayer];
     for (int jCe1 = firstIndex[iLayer]; jCe1 < lastIndex[iLayer]; ++jCe1) {
       const CellCandidate& cell1 = cells[jCe1];
       const int nextLayerTrackletIndex = cell1.secondTrackletIndex;
@@ -624,6 +654,7 @@ void NA6PTrackerCA::findCellsNeighbours(const std::vector<CellCandidate>& cells,
 template <typename ClusterType>
 std::vector<TrackCandidate> NA6PTrackerCA::prolongSeed(const TrackCandidate& seed,
                                                        const std::vector<CellCandidate>& cells,
+                                                       const std::vector<int>& layers,
                                                        const std::vector<int>& firstIndex,
                                                        const std::vector<int>& lastIndex,
                                                        const std::vector<ClusterType>& cluArr,
@@ -635,24 +666,36 @@ std::vector<TrackCandidate> NA6PTrackerCA::prolongSeed(const TrackCandidate& see
   std::vector<TrackCandidate> next;
   std::vector<TrackCandidate> result;
 
-  int step = (dir == ExtendDirection::kInward) ? -1 : 1;
-  int startLayer = (dir == ExtendDirection::kInward) ? seed.innerLayer - 1 : seed.outerLayer + 1;
-  int endLayer = (dir == ExtendDirection::kInward) ? -1 : mNLayers;
   int maxValidLayerToSearch = firstIndex.size();
 
-  for (int iLayer = startLayer; iLayer != endLayer; iLayer += step) {
+  for (size_t iStep = 0; iStep < layers.size(); ++iStep) {
     next.clear();
     bool foundAnyProlongation = false;
     for (auto& cand : current) {
       const CellCandidate& refCell = (dir == ExtendDirection::kInward) ? cells[cand.innerCellIndex] : cells[cand.outerCellIndex];
       const int nextLayerTrackletIndex = (dir == ExtendDirection::kInward) ? refCell.firstTrackletIndex : refCell.secondTrackletIndex;
-      // in case of outward prolongation, pick up firstIndex and lastIndex at iLayer-2 (the cell contains 3 clus in layers: iLayer-2, iLayer-1 and iLayer)
-      int layToSearch = (dir == ExtendDirection::kInward) ? iLayer : iLayer - 2;
-      if (layToSearch < 0 || layToSearch >= maxValidLayerToSearch) {
-        LOGP(error, "in prolongSeed direction {}: layToSearch out of range {}", step, layToSearch);
+      int innerLayNextCell = -1;
+      if (dir == ExtendDirection::kInward) {
+        // in case of inward prolongation, search for cells starting in an innermost layer as compared to the current seed
+        for (size_t jLay = 0; jLay < layers.size(); jLay++) {
+          if (layers[jLay] == cand.innerLayer) {
+            if (jLay > 0)
+              innerLayNextCell = layers[jLay - 1];
+            break;
+          }
+        }
+      } else {
+        // in case of outward prolongation, seach for cells starting from the middle layer of the outer cell of the current seed
+        innerLayNextCell = refCell.midLayer;
+      }
+
+      if (innerLayNextCell < 0 || innerLayNextCell >= maxValidLayerToSearch) {
+        if (mVerbose) {
+          LOGP(info, "in prolongSeed direction {}: innerLayNextCell {} reached detector edge", dir == ExtendDirection::kInward ? "in" : "out", innerLayNextCell);
+        }
         continue;
       }
-      for (int jCe = firstIndex[layToSearch]; jCe < lastIndex[layToSearch]; ++jCe) {
+      for (int jCe = firstIndex[innerLayNextCell]; jCe < lastIndex[innerLayNextCell]; ++jCe) {
         const CellCandidate& ccNext = cells[jCe];
         if ((dir == ExtendDirection::kInward && ccNext.secondTrackletIndex != nextLayerTrackletIndex) ||
             (dir == ExtendDirection::kOutward && ccNext.firstTrackletIndex != nextLayerTrackletIndex))
@@ -671,7 +714,7 @@ std::vector<TrackCandidate> NA6PTrackerCA::prolongSeed(const TrackCandidate& see
         }
         // --- Chi2 checks ---
         // Compute chi2 only for the innermost cluster of the cells to be connected
-        const auto& fitCurr  = (dir == ExtendDirection::kInward) ? refCell.trackFitFast : ccNext.trackFitFast;
+        const auto& fitCurr = (dir == ExtendDirection::kInward) ? refCell.trackFitFast : ccNext.trackFitFast;
         const auto& cluToAdd = (dir == ExtendDirection::kInward) ? cluArr[ccNext.cluIDs[0]] : cluArr[refCell.cluIDs[0]];
         float chi2 = computeTrackToClusterChi2(fitCurr, cluToAdd);
 #ifdef _CHI2_TUNING_MODE_
@@ -696,12 +739,12 @@ std::vector<TrackCandidate> NA6PTrackerCA::prolongSeed(const TrackCandidate& see
         TrackCandidate extended = cand;
         if (dir == ExtendDirection::kInward) {
           extended.innerCellIndex = jCe;
-          extended.innerLayer = ccNext.startingLayer;
+          extended.innerLayer = ccNext.innerLayer;
           int nLay = cluArr[ccNext.cluIDs[0]].getLayer() - mLayerStart;
           extended.cluIDs[nLay] = ccNext.cluIDs[0];
         } else {
           extended.outerCellIndex = jCe;
-          extended.outerLayer = ccNext.startingLayer;
+          extended.outerLayer = ccNext.outerLayer;
           int nLay = cluArr[ccNext.cluIDs[2]].getLayer() - mLayerStart;
           extended.cluIDs[nLay] = ccNext.cluIDs[2];
         }
@@ -724,6 +767,7 @@ std::vector<TrackCandidate> NA6PTrackerCA::prolongSeed(const TrackCandidate& see
 template <typename ClusterType>
 void NA6PTrackerCA::findRoads(const std::vector<std::pair<int, int>>& cneigh,
                               const std::vector<CellCandidate>& cells,
+                              const std::vector<int>& layers,
                               const std::vector<int>& firstIndex,
                               const std::vector<int>& lastIndex,
                               const std::vector<TrackletCandidate>& tracklets,
@@ -740,7 +784,7 @@ void NA6PTrackerCA::findRoads(const std::vector<std::pair<int, int>>& cneigh,
     int jCe2 = thisPair.second;
     const CellCandidate& cc1 = cells[jCe1];
     const CellCandidate& cc2 = cells[jCe2];
-    bool cc1Inner = (cc1.startingLayer < cc2.startingLayer);
+    bool cc1Inner = (cc1.innerLayer < cc2.innerLayer);
     const int innerIndex = cc1Inner ? jCe1 : jCe2;
     const int outerIndex = cc1Inner ? jCe2 : jCe1;
     const CellCandidate& inner = cells[innerIndex];
@@ -771,18 +815,18 @@ void NA6PTrackerCA::findRoads(const std::vector<std::pair<int, int>>& cneigh,
         outerLay = nLay;
     }
     // consistency checks
-    if (innerLay != inner.startingLayer) {
+    if (innerLay != inner.innerLayer) {
       LOGP(error, "mismatch on inner layer");
       continue;
     }
-    if (outerLay != outer.startingLayer + 2) {
+    if (outerLay != outer.outerLayer) {
       LOGP(error, "mismatch on outer layer");
       continue;
     }
     TrackCandidate seed{innerLay, innerIndex, outerLay, outerIndex, cluIDsFull};
-    auto inwardTracks = prolongSeed(seed, cells, firstIndex, lastIndex, cluArr, maxChi2TrClu, ExtendDirection::kInward);
+    auto inwardTracks = prolongSeed(seed, cells, layers, firstIndex, lastIndex, cluArr, maxChi2TrClu, ExtendDirection::kInward);
     for (const auto& track : inwardTracks) {
-      auto fullTracks = prolongSeed(track, cells, firstIndex, lastIndex, cluArr, maxChi2TrClu, ExtendDirection::kOutward);
+      auto fullTracks = prolongSeed(track, cells, layers, firstIndex, lastIndex, cluArr, maxChi2TrClu, ExtendDirection::kOutward);
       for (auto& finalTrack : fullTracks) {
         trackCands.push_back(std::move(finalTrack));
       }
@@ -910,6 +954,53 @@ void NA6PTrackerCA::fitAndSelectTracks(const std::vector<TrackCandidate>& trackC
   }
 }
 
+template <typename ClusterType>
+void NA6PTrackerCA::doIteration(int jIteration,
+                                const std::vector<ClusterType>& cluArr,
+                                const std::vector<int>& layersToUse,
+                                const std::vector<int>& firstCluPerLay,
+                                const std::vector<int>& lastCluPerLay,
+                                const NA6PVertex* primVert,
+                                int iterationIdToSave)
+{
+  mFoundTracklets.clear();
+  mFoundCells.clear();
+  mCellsNeighbours.clear();
+  mTrackCandidates.clear();
+  mIterationTracks.clear();
+  computeLayerTracklets(cluArr, layersToUse, firstCluPerLay, lastCluPerLay, mFoundTracklets, mMaxDeltaThetaTrackletsCA[jIteration], mMaxDeltaPhiTrackletsCA[jIteration]);
+  std::vector<int> firstTrklPerLay;
+  std::vector<int> lastTrklPerLay;
+  sortTrackletsByLayerAndIndex(mFoundTracklets, firstTrklPerLay, lastTrklPerLay);
+  if (mVerbose)
+    printStats(mFoundTracklets, cluArr, mFoundCells, "tracklets");
+  //
+  computeLayerCells(mFoundTracklets, layersToUse, firstTrklPerLay, lastTrklPerLay, cluArr, mFoundCells, mMaxDeltaTanLCellsCA[jIteration], mMaxDeltaPhiCellsCA[jIteration], mMaxDeltaPxPzCellsCA[jIteration], mMaxDeltaPyPzCellsCA[jIteration], mMaxChi2TrClCellsCA[jIteration], mMaxChi2ndfCellsCA[jIteration]);
+  std::vector<int> firstCellPerLay;
+  std::vector<int> lastCellPerLay;
+  sortCellsByLayerAndIndex(mFoundCells, firstCellPerLay, lastCellPerLay);
+  if (mVerbose)
+    printStats(mFoundCells, cluArr, mFoundCells, "cells");
+  //
+  findCellsNeighbours(mFoundCells, layersToUse, firstCellPerLay, lastCellPerLay, mCellsNeighbours, cluArr, mMaxChi2TrClCellsCA[jIteration]);
+  if (mVerbose)
+    printStats(mCellsNeighbours, cluArr, mFoundCells, "cell pairs");
+  //
+  findRoads(mCellsNeighbours, mFoundCells, layersToUse, firstCellPerLay, lastCellPerLay, mFoundTracklets, cluArr, mTrackCandidates, mMaxChi2TrClCellsCA[jIteration]);
+  if (mVerbose)
+    printStats(mTrackCandidates, cluArr, mFoundCells, "track candidates");
+  //
+  fitAndSelectTracks(mTrackCandidates, cluArr, mIterationTracks, primVert, mMaxChi2TrClCellsCA[jIteration], mMinNClusTracksCA[jIteration], mMaxChi2ndfTracksCA[jIteration]);
+  if (mVerbose) {
+    printStats(mIterationTracks, cluArr, mFoundCells, "selected tracks");
+    printStats(mIterationTracks, cluArr, mFoundCells, "selected tracks", 5);
+    printStats(mIterationTracks, cluArr, mFoundCells, "selected tracks", 4);
+  }
+  for (auto& track : mIterationTracks) {
+    track.trackFitFast.setCAIteration(iterationIdToSave);
+  }
+  mFinalTracks.insert(mFinalTracks.end(), mIterationTracks.begin(), mIterationTracks.end());
+}
 //______________________________________________________________________
 
 template <typename ClusterType>
@@ -951,53 +1042,43 @@ void NA6PTrackerCA::findTracks(std::vector<ClusterType>& cluArr,
   std::vector<int> firstCluPerLay;
   std::vector<int> lastCluPerLay;
   sortClustersByLayerAndEta(cluArr, firstCluPerLay, lastCluPerLay);
-  std::vector<TrackletCandidate> foundTracklets;
-  std::vector<CellCandidate> foundCells;
-  std::vector<std::pair<int, int>> cellsNeighbours;
-  std::vector<TrackCandidate> trackCandidates;
-  std::vector<TrackFitted> iterationTracks;
+  std::vector<int> layersToUse(mNLayers);
+  std::iota(layersToUse.begin(), layersToUse.end(), 0);
+
   for (int jIteration = 0; jIteration < mNIterationsCA; ++jIteration) {
     mCurIteration = jIteration;
     if (mVerbose) {
       LOGP(info, " -> Iteration {} <-", jIteration);
     }
-    foundTracklets.clear();
-    foundCells.clear();
-    cellsNeighbours.clear();
-    trackCandidates.clear();
-    iterationTracks.clear();
-    computeLayerTracklets(cluArr, firstCluPerLay, lastCluPerLay, foundTracklets, mMaxDeltaThetaTrackletsCA[jIteration], mMaxDeltaPhiTrackletsCA[jIteration]);
-    std::vector<int> firstTrklPerLay;
-    std::vector<int> lastTrklPerLay;
-    sortTrackletsByLayerAndIndex(foundTracklets, firstTrklPerLay, lastTrklPerLay);
+    doIteration(jIteration, cluArr, layersToUse, firstCluPerLay, lastCluPerLay, primVert, jIteration);
     if (mVerbose)
-      printStats(foundTracklets, cluArr, foundCells, "tracklets");
-    //
-    computeLayerCells(foundTracklets, firstTrklPerLay, lastTrklPerLay, cluArr, foundCells, mMaxDeltaTanLCellsCA[jIteration], mMaxDeltaPhiCellsCA[jIteration], mMaxDeltaPxPzCellsCA[jIteration], mMaxDeltaPyPzCellsCA[jIteration], mMaxChi2TrClCellsCA[jIteration], mMaxChi2ndfCellsCA[jIteration]);
-    std::vector<int> firstCellPerLay;
-    std::vector<int> lastCellPerLay;
-    sortCellsByLayerAndIndex(foundCells, firstCellPerLay, lastCellPerLay);
-    if (mVerbose)
-      printStats(foundCells, cluArr, foundCells, "cells");
-    //
-    findCellsNeighbours(foundCells, firstCellPerLay, lastCellPerLay, cellsNeighbours, cluArr, mMaxChi2TrClCellsCA[jIteration]);
-    if (mVerbose)
-      printStats(cellsNeighbours, cluArr, foundCells, "cell pairs");
-    //
-    findRoads(cellsNeighbours, foundCells, firstCellPerLay, lastCellPerLay, foundTracklets, cluArr, trackCandidates, mMaxChi2TrClCellsCA[jIteration]);
-    if (mVerbose)
-      printStats(trackCandidates, cluArr, foundCells, "track candidates");
-    //
-    fitAndSelectTracks(trackCandidates, cluArr, iterationTracks, primVert, mMaxChi2TrClCellsCA[jIteration], mMinNClusTracksCA[jIteration], mMaxChi2ndfTracksCA[jIteration]);
-    if (mVerbose) {
-      printStats(iterationTracks, cluArr, foundCells, "selected tracks");
-      printStats(iterationTracks, cluArr, foundCells, "selected tracks", 5);
-      printStats(iterationTracks, cluArr, foundCells, "selected tracks", 4);
+      LOGP(info, "Iteration {}: current number of tracks = {}", jIteration, mFinalTracks.size());
+  }
+  if (!mLayersToSkip.empty()) {
+    // last iteration: after running with all layers, run also with holes in selected layers
+    int jIteration = mNIterationsCA - 1;
+    mCurIteration = jIteration + 1; // debug-stream tag: same cuts as last nominal iteration, but with holes
+    int backupMinNClus = mMinNClusTracksCA[jIteration];
+    for (size_t jStep = 0; jStep < mLayersToSkip.size(); ++jStep) {
+      layersToUse.clear();
+      for (int jLay = 0; jLay < mNLayers; ++jLay) {
+        if (jLay != mLayersToSkip[jStep])
+          layersToUse.push_back(jLay);
+      }
+      if (mMinNClusTracksCA[jIteration] > static_cast<int>(layersToUse.size()))
+        mMinNClusTracksCA[jIteration] = layersToUse.size();
+      if (mVerbose) {
+        std::string laysForPrint = "";
+        for (int j = 0; j < layersToUse.size(); ++j) {
+          laysForPrint.append(fmt::format("{} ", layersToUse[j]));
+        }
+        LOGP(info, "Skipping layer step {}, {} layers used: {}", jStep, layersToUse.size(), laysForPrint.c_str());
+      }
+      doIteration(jIteration, cluArr, layersToUse, firstCluPerLay, lastCluPerLay, primVert, jIteration + 1);
+      if (mVerbose)
+        LOGP(info, "Iteration {}  Step {}: current number of tracks = {}", jIteration, jStep, mFinalTracks.size());
     }
-    for (auto& track : iterationTracks) {
-      track.trackFitFast.setCAIteration(jIteration);
-    }
-    mFinalTracks.insert(mFinalTracks.end(), iterationTracks.begin(), iterationTracks.end());
+    mMinNClusTracksCA[jIteration] = backupMinNClus;
   }
 }
 
@@ -1026,6 +1107,7 @@ std::vector<std::pair<ClusterType, ClusterType>> NA6PTrackerCA::findTracklets(in
   uint nClus = cluArr.size();
   mIsClusterUsed.clear();
   mIsClusterUsed.resize(nClus, false);
+  std::vector<int> layersToUse{0, jLastLay - jFirstLay};
   int backupStart = mLayerStart;
   int backupLay = mNLayers;
   mLayerStart = jFirstLay;
@@ -1042,7 +1124,7 @@ std::vector<std::pair<ClusterType, ClusterType>> NA6PTrackerCA::findTracklets(in
     if (mMaxDeltaPhiTrackletsCA[jIteration] > cutDeltaPhi)
       cutDeltaPhi = mMaxDeltaPhiTrackletsCA[jIteration];
   }
-  computeLayerTracklets(cluArr, firstCluPerLay, lastCluPerLay, foundTracklets, cutDeltaTheta, cutDeltaPhi);
+  computeLayerTracklets(cluArr, layersToUse, firstCluPerLay, lastCluPerLay, foundTracklets, cutDeltaTheta, cutDeltaPhi);
   const int nTracklets = foundTracklets.size();
   std::vector<std::pair<ClusterType, ClusterType>> trackletLines;
   trackletLines.reserve(nTracklets);
@@ -1080,7 +1162,7 @@ void NA6PTrackerCA::printStats(const std::vector<T>& candidates,
       nClus = 2;
       idClus[0] = tr.firstClusterIndex;
       idClus[1] = tr.secondClusterIndex;
-      startLay = tr.startingLayer;
+      startLay = tr.innerLayer;
     } else if constexpr (std::is_same_v<T, std::pair<int, int>>) {
       int jCe1 = tr.first;
       int jCe2 = tr.second;
@@ -1093,7 +1175,7 @@ void NA6PTrackerCA::printStats(const std::vector<T>& candidates,
         else
           idClus[jClu] = cc2.cluIDs[2];
       }
-      startLay = std::min(cc1.startingLayer, cc2.startingLayer);
+      startLay = std::min(cc1.innerLayer, cc2.innerLayer);
     } else if constexpr (std::is_same_v<T, TrackCandidate> || std::is_same_v<T, TrackFitted>) {
       nClus = tr.cluIDs.size();
       for (int jClu = 0; jClu < nClus; jClu++)
@@ -1103,7 +1185,7 @@ void NA6PTrackerCA::printStats(const std::vector<T>& candidates,
       nClus = tr.cluIDs.size();
       for (int jClu = 0; jClu < nClus; jClu++)
         idClus[jClu] = tr.cluIDs[jClu];
-      startLay = tr.startingLayer;
+      startLay = tr.innerLayer;
     }
     int nTrueClus = 0;
     bool isFake = false;
