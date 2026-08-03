@@ -13,7 +13,8 @@
 #include "NA6PMuonSpecCluster.h"
 #include "NA6PVerTelCluster.h"
 
-static constexpr float kThetaMax = M_PI_2 * 0.99f;
+static constexpr float kThetaMax = M_PI_2 * 0.999f;
+static constexpr float kMaxRadius = 700.f; // 7 m to accommodate (with some margin) the biggest MID chamber
 
 namespace
 {
@@ -204,17 +205,19 @@ bool NA6PTrackerCA::loadGeometry(const char* filename, const char* geoname)
 //______________________________________________________________________
 
 template <typename ClusterType>
-void NA6PTrackerCA::sortClustersByLayerAndEta(std::vector<ClusterType>& cluArr,
-                                              std::vector<int>& firstIndex,
-                                              std::vector<int>& lastIndex)
+void NA6PTrackerCA::sortClustersByLayerAndY(std::vector<ClusterType>& cluArr,
+                                            std::vector<int>& firstIndex,
+                                            std::vector<int>& lastIndex)
 {
 
   // Count clusters per layer for all layers
   int maxLayers = 25;
   std::vector<int> count(maxLayers, 0);
+  std::vector<double> zSum(maxLayers, 0.0);
   for (const auto& clu : cluArr) {
     int jLay = clu.getLayer();
     count[jLay]++;
+    zSum[jLay] += clu.getZ();
   }
   // Compute starting offset for each layer
   std::vector<int> firstAll(maxLayers);
@@ -223,13 +226,17 @@ void NA6PTrackerCA::sortClustersByLayerAndEta(std::vector<ClusterType>& cluArr,
     firstAll[i] = firstAll[i - 1] + count[i - 1];
   }
 
-  // Fill firstIndex and lastIndex only for selected layers
+  // Fill firstIndex, lastIndex, and mLayersZ only for selected layers
+  mLayersZ.assign(mNLayers, 0.f);
   firstIndex.resize(mNLayers);
   lastIndex.resize(mNLayers);
   for (int j = 0; j < mNLayers; ++j) {
     int jLay = mLayerStart + j;
     firstIndex[j] = firstAll[jLay];
     lastIndex[j] = firstAll[jLay] + count[jLay];
+    if (count[jLay] > 0) {
+      mLayersZ[j] = static_cast<float>(zSum[jLay] / count[jLay]);
+    }
   }
 
   // Create a reordered vector based on layer grouping
@@ -241,25 +248,14 @@ void NA6PTrackerCA::sortClustersByLayerAndEta(std::vector<ClusterType>& cluArr,
       reordered[countReord[jLay]++] = clu;
   }
   cluArr = std::move(reordered);
-  // sort by theta within each layer (use z^2/r^2 as a proxy of theta to avoid sqrt and atan)
-  const float pvx = mPrimVertPos[0];
-  const float pvy = mPrimVertPos[1];
-  const float pvz = mPrimVertPos[2];
+  // sort by y coordinate (non bending direction) within each layer
   for (int jLay = 0; jLay < maxLayers; jLay++) {
     if (count[jLay] == 0)
       continue;
     auto first = cluArr.begin() + firstAll[jLay];
     auto last = cluArr.begin() + firstAll[jLay] + count[jLay];
-    std::sort(first, last, [pvx, pvy, pvz](const ClusterType& a, const ClusterType& b) {
-      float xa = a.getX() - pvx;
-      float ya = a.getY() - pvy;
-      float za = a.getZ() - pvz;
-      float xb = b.getX() - pvx;
-      float yb = b.getY() - pvy;
-      float zb = b.getZ() - pvz;
-      float r2a = xa * xa + ya * ya;
-      float r2b = xb * xb + yb * yb;
-      return za * za * r2b < zb * zb * r2a;
+    std::sort(first, last, [](const ClusterType& a, const ClusterType& b) {
+      return a.getY() < b.getY();
     });
   }
 }
@@ -388,24 +384,24 @@ void NA6PTrackerCA::computeLayerTracklets(const std::vector<ClusterType>& cluArr
       float phi1 = std::atan2(y1, x1);
       float tanth2Min = std::max(0.f, std::tan(theta1 - 1.2f * deltaThetaMax)); // 1.2 is a safety margin, the tan(theta) range is limited at zero to protect for the case in which theta1 - 1.2 * deltaThetaMax is <0, which would give a negative tangent. The minimum acceptable value for theta is 0
       float tanth2Max = std::tan(std::min(kThetaMax, theta1 + 1.2f * deltaThetaMax));
+      float z2Exp = mLayersZ[jLayer] - pvz;
+      float r2Max = (tanth2Min > 0.f) ? z2Exp / tanth2Min : kMaxRadius;
+      float r2Min = z2Exp / tanth2Max;
+      float phiLo = phi1 - 1.2f * deltaPhiMax;
+      float phiHi = phi1 + 1.2f * deltaPhiMax;
+      float sMin = std::min(std::sin(phiLo), std::sin(phiHi));
+      float sMax = std::max(std::sin(phiLo), std::sin(phiHi));
+      float y2Box[4] = {r2Min * sMin, r2Min * sMax, r2Max * sMin, r2Max * sMax};
+      float y2Min = *std::min_element(y2Box, y2Box + 4);
+      float y2Max = *std::max_element(y2Box, y2Box + 4);
       auto lower = std::partition_point(layerBegin, layerEnd,
-                                        [pvx, pvy, pvz, tanth2Min](const ClusterType& clu) {
-                                          float x = clu.getX() - pvx;
-                                          float y = clu.getY() - pvy;
-                                          float z = clu.getZ() - pvz;
-                                          float r2 = x * x + y * y;
-                                          float tan2 = z * z / r2;
-                                          return tan2 < tanth2Min * tanth2Min;
+                                        [y2Min](const ClusterType& clu) {
+                                          return clu.getY() < y2Min;
                                         });
 
       auto upper = std::partition_point(layerBegin, layerEnd,
-                                        [pvx, pvy, pvz, tanth2Max](const ClusterType& clu) {
-                                          float x = clu.getX() - pvx;
-                                          float y = clu.getY() - pvy;
-                                          float z = clu.getZ() - pvz;
-                                          float r2 = x * x + y * y;
-                                          float tan2 = z * z / r2;
-                                          return tan2 <= tanth2Max * tanth2Max;
+                                        [y2Max](const ClusterType& clu) {
+                                          return clu.getY() <= y2Max;
                                         });
       int lowerIdx = std::distance(cluArr.begin(), lower);
       int upperIdx = std::distance(cluArr.begin(), upper);
@@ -1041,7 +1037,7 @@ void NA6PTrackerCA::findTracks(std::vector<ClusterType>& cluArr,
   mIsClusterUsed.resize(nClus, false);
   std::vector<int> firstCluPerLay;
   std::vector<int> lastCluPerLay;
-  sortClustersByLayerAndEta(cluArr, firstCluPerLay, lastCluPerLay);
+  sortClustersByLayerAndY(cluArr, firstCluPerLay, lastCluPerLay);
   std::vector<int> layersToUse(mNLayers);
   std::iota(layersToUse.begin(), layersToUse.end(), 0);
 
@@ -1114,7 +1110,7 @@ std::vector<std::pair<ClusterType, ClusterType>> NA6PTrackerCA::findTracklets(in
   mNLayers = jLastLay - jFirstLay + 1;
   std::vector<int> firstCluPerLay;
   std::vector<int> lastCluPerLay;
-  sortClustersByLayerAndEta(cluArr, firstCluPerLay, lastCluPerLay);
+  sortClustersByLayerAndY(cluArr, firstCluPerLay, lastCluPerLay);
   std::vector<TrackletCandidate> foundTracklets;
   float cutDeltaTheta = mMaxDeltaThetaTrackletsCA[0];
   float cutDeltaPhi = mMaxDeltaPhiTrackletsCA[0];
