@@ -13,11 +13,15 @@
 #include <TStopwatch.h>
 #include "NA6PVerTelHit.h"
 #include "NA6PMuonSpecModularHit.h"
+#include "NA6PTOFHit.h"
+#include "NA6PLayoutParam.h"
 #include "MagneticField.h"
 #include "StringUtils.h"
 #include "NA6PVerTelReconstruction.h"
 #include "NA6PMuonSpecReconstruction.h"
 #include "NA6PMatching.h"
+#include "NA6PMatch.h"
+#include "NA6PTOFMatching.h"
 #include "NA6PMCTruthContainer.h"
 
 class TreeFromFile
@@ -94,6 +98,7 @@ int main(int argc, char** argv)
     add_option("allowHolesInVTTracks,holesVT", bpo::value<bool>()->default_value(false), "allow holes in VT tracks");
     add_option("doMSTracking,ms", bpo::value<bool>()->default_value(true), "run MS tracker");
     add_option("doMatching,mt", bpo::value<bool>()->default_value(true), "run matching between VT and MS");
+    add_option("doTOFMatching,tof", bpo::value<bool>()->default_value(false), "run TOF hit conversion and matching to VT tracks");
     opt_all.add(opt_general).add(opt_hidden);
     bpo::store(bpo::command_line_parser(argc, argv).options(opt_all).positional(opt_pos).run(), vm);
 
@@ -131,6 +136,9 @@ int main(int argc, char** argv)
   const bool doVTTracking = vm["doVTTracking"].as<bool>();
   const bool doMSTracking = vm["doMSTracking"].as<bool>();
   const bool doMatching = vm["doMatching"].as<bool>();
+  const bool doTOFMatching = vm["doTOFMatching"].defaulted() ?
+                               NA6PLayoutParam::Instance().useTOF :
+                               vm["doTOFMatching"].as<bool>();
   const bool readMC = vm["readMC"].as<bool>();
   const bool skipVTlays = vm["allowHolesInVTTracks"].as<bool>();
 
@@ -151,6 +159,11 @@ int main(int argc, char** argv)
   std::unique_ptr<NA6PMuonSpecReconstruction> msrec = std::make_unique<NA6PMuonSpecReconstruction>();
   msrec->setReadMCTruth(readMC);
   std::unique_ptr<NA6PMatching> matching = std::make_unique<NA6PMatching>();
+  std::unique_ptr<NA6PTOFMatching> tofMatching = std::make_unique<NA6PTOFMatching>(false);
+  if (doTOFMatching) {
+    // Configure the TOF smearing before converting hits to clusters.
+    tofMatching->configureFromRecoParam();
+  }
 
   if (doHitsToRecPoints) {
     { // VTHits
@@ -189,6 +202,22 @@ int main(int argc, char** argv)
       }
       msrec->closeClustersOutput();
     }
+    if (doTOFMatching) { // TOF hits -> clusters
+      TreeFromFile tfTOF("HitsTOF.root", "hitsTOF");
+      std::vector<NA6PTOFHit> tofHits, *tofHitsPtr = &tofHits;
+      tfTOF.getTree()->SetBranchAddress("TOF", &tofHitsPtr);
+      const int nEvTOF = tfTOF.getTree()->GetEntriesFast();
+
+      tofMatching->createClustersOutput();
+      for (int jEv = 0; jEv < nEvTOF; ++jEv) {
+        tfTOF.getTree()->GetEvent(jEv);
+        LOGP(info, "TOF Event {} nHits= {}", jEv, tofHits.size());
+        tofMatching->clearClusters();
+        tofMatching->hitsToRecPoints(tofHits);
+        tofMatching->writeClusters();
+      }
+      tofMatching->closeClustersOutput();
+    }
   } else {
     LOGP(info, "Hits -> Recpoints disabled from input options");
   }
@@ -212,7 +241,7 @@ int main(int argc, char** argv)
     vtrec->closeClustersOutput();
   }
 
-  const bool needsMCKine = doTrackletVertex || doVTTracking || doMSTracking || doMatching;
+  const bool needsMCKine = doTrackletVertex || doVTTracking || doMSTracking || doMatching || doTOFMatching;
   std::unique_ptr<TreeFromFile> tfKine;
   std::vector<TParticle>* mcArr = nullptr;
   if (needsMCKine) {
@@ -369,6 +398,45 @@ int main(int argc, char** argv)
     LOGP(info, "------ Matching time ------");
     timer.Print();
     LOGP(info, "------------------------------");
+  }
+
+  if (doTOFMatching) {
+    tofMatching->initTOFMatching();
+
+    TreeFromFile tfTracks("TracksVerTel.root", "tracksVerTel");
+    std::vector<NA6PTrack> tracks, *tracksPtr = &tracks;
+    tfTracks.getTree()->SetBranchAddress("VerTel", &tracksPtr);
+
+    TreeFromFile tfCTOF("ClustersTOF.root", "clustersTOF");
+    std::vector<NA6PTOFCluster> tofClusters, *tofClustersPtr = &tofClusters;
+    tfCTOF.getTree()->SetBranchAddress("TOF", &tofClustersPtr);
+
+    const int nEv = std::min(tfTracks.getTree()->GetEntries(), tfCTOF.getTree()->GetEntries());
+    const int firstEvTOF = std::max(0, firstEv);
+    const int lastEvTOF = (lastEv < 0 || lastEv > nEv) ? nEv : lastEv;
+
+    TStopwatch timer;
+    timer.Start();
+
+    NA6PVertex pvert;
+    for (int jEv = firstEvTOF; jEv < lastEvTOF; ++jEv) {
+      LOGP(info, "Process TOF matching event {}", jEv);
+      const double zvert = getPrimaryVertexZ(tfKine->getTree(), mcArr, jEv);
+      pvert.setXYZ(0.f, 0.f, zvert);
+      tfTracks.getTree()->GetEvent(jEv);
+      tfCTOF.getTree()->GetEvent(jEv);
+
+      tofMatching->setPrimaryVertex(&pvert);
+      tofMatching->setVerTelTracks(tracks);
+      tofMatching->setClusters(tofClusters);
+      tofMatching->runTOFMatching();
+    }
+    tofMatching->closeTracksOutput();
+
+    timer.Stop();
+    LOGP(info, "------ TOF matching time ------");
+    timer.Print();
+    LOGP(info, "-------------------------------");
   }
 
   if (!vm["disable-write-ini"].as<bool>()) {

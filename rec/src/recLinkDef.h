@@ -19,12 +19,16 @@
 #pragma link C++ class std::vector < NA6PVerTelCluster> + ;
 #pragma link C++ class NA6PMuonSpecCluster + ;
 #pragma link C++ class std::vector < NA6PMuonSpecCluster> + ;
+#pragma link C++ class NA6PTOFCluster + ;
+#pragma link C++ class std::vector < NA6PTOFCluster> + ;
 #pragma link C++ class NA6PTrack + ;
 #pragma link C++ class std::vector < NA6PTrack> + ;
 #pragma link C++ class NA6PVertex + ;
 #pragma link C++ class std::vector < NA6PVertex> + ;
 #pragma link C++ class NA6PMatch + ;
 #pragma link C++ class std::vector < NA6PMatch> + ;
+#pragma link C++ class NA6PTOFMatch + ;
+#pragma link C++ class std::vector < NA6PTOFMatch> + ;
 
 #pragma link C++ class NA6PLine + ;
 #pragma link C++ class NA6PHelixHelper + ;
@@ -35,6 +39,7 @@
 #pragma link C++ class NA6PMuonSpecReconstruction + ;
 #pragma link C++ class NA6PVerTelClusterizer + ;
 #pragma link C++ class NA6PMatching + ;
+#pragma link C++ class NA6PTOFMatching + ;
 #pragma link C++ class NA6PVertexerTracklets + ;
 #pragma link C++ class NA6PVertexerTracks + ;
 #pragma link C++ class NA6PTrackerCA + ;

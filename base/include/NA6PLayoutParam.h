@@ -59,7 +59,7 @@ struct NA6PLayoutParam : public na6p::conf::ConfigurableParamHelper<NA6PLayoutPa
 
   // Time-of-flight layer
   bool useTOF = false;
-  float posTOF[3] = {0.f, 0.f, 900.f}; // centre of the TOF layer
+  float posTOF[3] = {0.f, 0.f, 40.f}; // centre of the TOF layer
   float tofTileSide = 15.f;            // side of each of the four square tiles
   float tofTileThickness = 50.e-4f;    // 50 um
   float tofHoleSize = 0.62f;           // central gap in X and Y

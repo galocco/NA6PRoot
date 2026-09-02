@@ -350,5 +350,9 @@ void NA6PMatching::runMatching()
     runDataMatching();
   }
 
+  LOGP(info, "Matching: {} / {} VT tracks matched to {} MS tracks",
+       mMatchedTracks.size(), hVerTelTrackPtr ? hVerTelTrackPtr->size() : 0,
+       hMuonSpecTrackPtr ? hMuonSpecTrackPtr->size() : 0);
+
   writeTracks();
 }

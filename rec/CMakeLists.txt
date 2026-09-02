@@ -25,6 +25,7 @@ set(DICTIONARY_HEADERS
   NA6PBaseCluster.h
   NA6PMuonSpecCluster.h
   NA6PVerTelCluster.h
+  NA6PTOFCluster.h
   NA6PVerTelClusterizer.h
   NA6PTrackPar.h
   NA6PTrackParCov.h
@@ -43,6 +44,8 @@ set(DICTIONARY_HEADERS
   NA6PFastTrackFitter.h
   NA6PMatching.h
   NA6PMatch.h
+  NA6PTOFMatching.h
+  NA6PTOFMatch.h
   Seeder.h
   ) # Add all class headers requiring dictionary
 

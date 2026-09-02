@@ -100,6 +100,12 @@ struct NA6PRecoParam : public na6p::conf::ConfigurableParamHelper<NA6PRecoParam>
   bool mtUseLinRefOut = true;
   bool mtUseLinRefInw = false;
 
+  // TOF matching parameters
+  float tofClusterResolutionX = 100.e-4f / 3.464101615f; // cm
+  float tofClusterResolutionY = 300.e-4f / 3.464101615f; // cm
+  float tofTimeResolution = 20.e-12f;                    // s (20 ps)
+  float tofMaxMatchChi2 = 25.f;                           // maximum position matching chi2
+
   NA6PParamDef(NA6PRecoParam, "reco");
 };
 
