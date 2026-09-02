@@ -7,6 +7,7 @@
 #include "NA6PMagnetsGDML.h"
 #include "NA6PTarget.h"
 #include "NA6PVerTel.h"
+#include "NA6PTOF.h"
 #include "NA6PAbsorber.h"
 #include "NA6PMuonSpec.h"
 #include "NA6PMuonSpecModular.h"
@@ -34,6 +35,9 @@ NA6PDetector::NA6PDetector()
 
   addModule(new NA6PTarget());
   addModule(new NA6PVerTel());
+  if (param.useTOF) {
+    addModule(new NA6PTOF());
+  }
   addModule(new NA6PAbsorber());
   //addModule(new NA6PMuonSpec());
   addModule(new NA6PMuonSpecModular());

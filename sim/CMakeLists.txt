@@ -35,6 +35,7 @@ set(DICTIONARY_HEADERS
   NA6PGenCocktail.h
   NA6PBaseHit.h
   NA6PVerTelHit.h
+  NA6PTOFHit.h
   NA6PVerTelDigit.h
   NA6PVerTelDigitizer.h
   NA6PVerTelSegmentation.h

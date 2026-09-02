@@ -18,6 +18,9 @@
 #pragma link C++ class NA6PVerTelHit + ;
 #pragma link C++ class std::vector < NA6PVerTelHit> + ;
 
+#pragma link C++ class NA6PTOFHit + ;
+#pragma link C++ class std::vector < NA6PTOFHit> + ;
+
 #pragma link C++ class NA6PMuonSpecHit + ;
 #pragma link C++ class std::vector < NA6PMuonSpecHit> + ;
 
