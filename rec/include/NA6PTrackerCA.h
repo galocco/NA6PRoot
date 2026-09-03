@@ -158,9 +158,9 @@ class NA6PTrackerCA
  protected:
   // methods used in tracking
   template <typename ClusterType>
-  void sortClustersByLayerAndEta(std::vector<ClusterType>& cluArr,
-                                 std::vector<int>& firstIndex,
-                                 std::vector<int>& lastIndex);
+  void sortClustersByLayerAndY(std::vector<ClusterType>& cluArr,
+                               std::vector<int>& firstIndex,
+                               std::vector<int>& lastIndex);
   void sortTrackletsByLayerAndIndex(std::vector<TrackletCandidate>& tracklets,
                                     std::vector<int>& firstIndex,
                                     std::vector<int>& lastIndex);
@@ -263,6 +263,7 @@ class NA6PTrackerCA
   std::unique_ptr<NA6PFastTrackFitter> mTrackFitter;
   std::vector<bool> mIsClusterUsed = {};
   std::vector<int> mLayersToSkip = {};
+  std::vector<float> mLayersZ = {};
   std::vector<TrackletCandidate> mFoundTracklets = {};
   std::vector<CellCandidate> mFoundCells = {};
   std::vector<std::pair<int, int>> mCellsNeighbours = {};

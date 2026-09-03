@@ -12,6 +12,28 @@ if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
   set(CMAKE_INSTALL_PREFIX "${CMAKE_SOURCE_DIR}/install" CACHE PATH "Default installation directory" FORCE)
 endif()
 
+# Runtime library search paths (Linux and macOS)
+#
+# Keep installed NA6PRoot executables/libraries relocatable:
+#   install/bin/na6psim -> install/lib
+#   install/lib/*.so|*.dylib -> install/lib
+#
+# CMAKE_INSTALL_RPATH_USE_LINK_PATH additionally appends non-system
+# directories of linked external dependencies (ROOT, Geant4, HepMC3, ...).
+set(CMAKE_SKIP_BUILD_RPATH FALSE)
+set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+
+if(APPLE)
+  # Modern CMake uses @rpath install names on macOS.
+  set(CMAKE_MACOSX_RPATH TRUE)
+  set(CMAKE_INSTALL_RPATH "@loader_path/../lib")
+elseif(UNIX)
+  # $ORIGIN is resolved to the directory containing the ELF binary/library.
+  set(CMAKE_BUILD_RPATH_USE_ORIGIN TRUE)
+  set(CMAKE_INSTALL_RPATH "$ORIGIN/../lib")
+endif()
+
 include(dependencies/CMakeLists.txt)
 
 # Locate sources and headers for this project
