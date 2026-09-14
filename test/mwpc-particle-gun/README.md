@@ -4,12 +4,39 @@ This is a deliberately small transport test for the detailed `NA6PMWPCChamber`
 geometry. It is the NA6PRoot-native analogue of the earlier isolated-chamber
 muon tests in `na60-dice-mwpc-simulation`.
 
-The test does **not** modify `NA6PMuonSpecModular` and does not define a station
-layout. It creates one complete MWPC chamber at the origin, shoots one controlled
-forward muon per event through the centre, and lets Geant4 transport the particle
-through the ROOT/TGeo geometry via Geant4VMC.
+The test itself creates one complete MWPC chamber at the origin, shoots one
+controlled forward muon per event through the centre, and lets Geant4 transport
+the particle through the ROOT/TGeo geometry via Geant4VMC. It is intentionally
+independent of the full station layout so that the chamber implementation can be
+checked in isolation.
 
-## What it checks
+## Current production integration
+
+The chamber builder is also integrated into `NA6PMuonSpecModular`, which now
+constructs a preliminary six-station staggered MWPC layout. The current working
+point contains 308 chambers:
+
+```text
+MS0  10 x 4   = 40
+MS1   5 x 4   = 20
+MS2   8 x 5   = 40
+MS3   8 x 5   = 40
+MS4  12 x 7   = 84
+MS5  12 x 7   = 84
+                ---
+                308
+```
+
+The active gas areas overlap by 3 cm in both x and y. Chambers are assigned to
+four checkerboard parity classes A/B/C/D and their gas centres are staggered in z
+at -6, -2, +2 and +6 cm relative to the station centre (4 cm step). MS0 uses a
+narrow first-pass chamber with a 25.6 cm active gas width; the standard chambers
+use 51.2 cm active gas width. The current default MS1 station position is 340 cm.
+
+`test/checkMWPCStaggeredLayout.C` checks the station populations, chamber grid,
+gas dimensions and four-level stagger in a generated full geometry.
+
+## What the isolated particle-gun test checks
 
 - the installed branch can link and instantiate `NA6PMWPCChamber`;
 - the complete 22-part chamber is passed to ROOT/TGeo and Geant4VMC;
@@ -107,6 +134,5 @@ Geant4
     -> events.csv / summary.txt
 ```
 
-The local `MWPCTestModule` is test scaffolding only. Production integration should
-still happen through the appropriate muon-spectrometer module (currently
-`NA6PMuonSpecModular`) once the station/chamber layout is ready.
+The local `MWPCTestModule` remains test scaffolding only. The production geometry
+uses the same `NA6PMWPCChamber` builder through `NA6PMuonSpecModular`.
