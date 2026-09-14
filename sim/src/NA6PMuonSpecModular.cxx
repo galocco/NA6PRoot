@@ -12,7 +12,6 @@
 #include <TGeoMatrix.h>
 #include <TGeoNode.h>
 #include <TGeoVolume.h>
-#include <TGeoVolumeAssembly.h>
 #include <fairlogger/Logger.h>
 #include <TFile.h>
 #include <TTree.h>
