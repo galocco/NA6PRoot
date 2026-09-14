@@ -52,6 +52,8 @@ void NA6PMWPCChamber::createMaterials() const
   auto& helper = NA6PTGeoHelper::instance();
   auto& matPool = helper.getMatPool();
 
+  // Materials are kept in a shared pool. If a material is already there we
+  // simply reuse it; otherwise we define it here.
   if (!matPool.count(mMaterials.copper)) {
     matPool[mMaterials.copper] = new TGeoMaterial(mMaterials.copper.c_str(), 63.546, 29., 8.96);
   }
@@ -83,19 +85,41 @@ void NA6PMWPCChamber::createMaterials() const
       throw std::runtime_error("MWPC argonMoleFraction must be between 0 and 1");
     }
 
-    const double argon = p.argonMoleFraction;
-    const double molarMass = argon * 39.948 + (1. - argon) * (12.0107 + 2. * 15.9994);
-    const double density = p.gasPressurePa * molarMass /
+    // The chamber gas is a binary Ar/CO2 mixture. We configure the Ar mole
+    // fraction and obtain the CO2 fraction from the remainder.
+    const double xAr = p.argonMoleFraction;
+    const double xCO2 = 1. - xAr;
+
+    constexpr double mAr = 39.948;
+    constexpr double mC = 12.0107;
+    constexpr double mO = 15.9994;
+    const double mCO2 = mC + 2. * mO;
+    const double meanMolarMass = xAr * mAr + xCO2 * mCO2;
+
+    // Ideal-gas density. meanMolarMass is in g/mol, so the final factor
+    // converts from g/m^3 to g/cm^3, which is what TGeo expects.
+    const double density = p.gasPressurePa * meanMolarMass /
                            (8.31446261815324 * p.gasTemperatureK) * 1.e-6;
+
+    // TGeoMixture is defined through elemental mass fractions rather than
+    // molecular fractions. Convert 70/30 Ar/CO2 (or any configured ratio)
+    // into the corresponding Ar, C and O mass fractions.
+    const double wAr = xAr * mAr / meanMolarMass;
+    const double wC = xCO2 * mC / meanMolarMass;
+    const double wO = xCO2 * 2. * mO / meanMolarMass;
+
     auto* gas = new TGeoMixture(mMaterials.gas.c_str(), 3, density);
-    gas->DefineElement(0, 39.948, 18., argon * 39.948 / molarMass);
-    gas->DefineElement(1, 12.0107, 6., (1. - argon) * 12.0107 / molarMass);
-    gas->DefineElement(2, 15.9994, 8., (1. - argon) * 2. * 15.9994 / molarMass);
+    gas->DefineElement(0, mAr, 18., wAr);
+    gas->DefineElement(1, mC, 6., wC);
+    gas->DefineElement(2, mO, 8., wO);
     gas->SetState(TGeoMaterial::kMatStateGas);
     gas->SetTemperature(p.gasTemperatureK);
     matPool[mMaterials.gas] = gas;
   }
 
+  // Geant/VMC uses TGeoMedium objects for volumes. The material definitions
+  // above live in matPool; addMedium() creates the corresponding media only
+  // when they do not already exist.
   for (const auto& name : {mMaterials.fr4, mMaterials.copper, mMaterials.honeycomb, mMaterials.gas}) {
     if (!helper.getMedPool().count(name)) {
       helper.addMedium(name);
