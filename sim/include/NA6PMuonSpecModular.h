@@ -29,10 +29,9 @@ class NA6PMuonSpecModular : public NA6PModule
   const auto& getHits() const { return mHits; }
 
   NA6PMuonSpecModularHit* addHit(int trackID, int detID, const TVector3& startPos, const TVector3& endPos, const TVector3& startMom, const TVector3& endMom,
-                          float endTime, float eLoss, unsigned char startStatus, unsigned char endStatus);
+                                 float endTime, float eLoss, unsigned char startStatus, unsigned char endStatus);
 
  private:
-  void placeSensors(float sideX, float sideY, float chipDX, float chipDY, float pixChipOffsX, float pixChipOffsY, TGeoVolume* pixelStationVol, TGeoVolume* pixelSensor);
   std::vector<NA6PMuonSpecModularHit> mHits, *hHitsPtr = &mHits;
   TFile* mHitsFile = nullptr;
   TTree* mHitsTree = nullptr;
