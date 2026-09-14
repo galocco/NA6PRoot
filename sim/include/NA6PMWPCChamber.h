@@ -27,7 +27,11 @@ class NA6PMWPCChamber
     double z = 0.;
   };
 
-  NA6PMWPCChamber(const NA6PModule& module, Materials materials);
+  // Negative body overrides mean: use the values from NA6PMWPCParam.
+  // The override is useful for the present narrow-MS0 study while keeping
+  // exactly the same chamber construction code for all six stations.
+  NA6PMWPCChamber(const NA6PModule& module, Materials materials,
+                  double bodyXOverride = -1., double bodyYOverride = -1.);
 
   void createMaterials() const;
   TGeoVolumeAssembly* addTo(TGeoVolume* parent, int chamberID, int localCopyID, const Placement& placement) const;
@@ -54,6 +58,8 @@ class NA6PMWPCChamber
 
   const NA6PModule& mModule;
   Materials mMaterials;
+  double mBodyXOverride = -1.;
+  double mBodyYOverride = -1.;
 };
 
 #endif
