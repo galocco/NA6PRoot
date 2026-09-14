@@ -1,146 +1,236 @@
 // NA6PCCopyright
 
 #include "NA6PMuonSpecModular.h"
+#include "NA6PMWPCChamber.h"
+#include "NA6PMWPCParam.h"
 #include "NA6PDetector.h"
-#include "NA6PTGeoHelper.h"
 #include "NA6PLayoutParam.h"
 #include "NA6PMCStack.h"
 
 #include <TVirtualMC.h>
 #include <TGeoManager.h>
+#include <TGeoMatrix.h>
+#include <TGeoNode.h>
 #include <TGeoVolume.h>
-#include <TGeoVolume.h>
-#include <TGeoBBox.h>
-#include <TGeoTube.h>
-#include <TGeoCompositeShape.h>
-#include <TGeoBoolNode.h>
-#include <TColor.h>
+#include <TGeoVolumeAssembly.h>
 #include <fairlogger/Logger.h>
 #include <TFile.h>
 #include <TTree.h>
 
-// place sensors to station - generalized for n modules per side
-void NA6PMuonSpecModular::placeSensors(float sideX, float sideY, float chipDX, float chipDY, float pixChipOffsX, float pixChipOffsY, TGeoVolume* pixelStationVol, TGeoVolume* pixelSensor)
+#include <cmath>
+#include <stdexcept>
+#include <string>
+
+namespace
 {
-
-  std::vector<float> moduleCenterX, moduleCenterY;
-  int modulesPerSideX = static_cast<int>(sideX / chipDX);
-  int modulesPerSideY = static_cast<int>(sideY / chipDY);
-
-  // Generate positions for n x n grid
-  float baseStartX = -(modulesPerSideX - 1) * chipDX / 2.0f;
-  float baseStartY = -(modulesPerSideY - 1) * chipDY / 2.0f;
-  int midPointX = modulesPerSideX / 2;
-  int midPointY = modulesPerSideY / 2;
-
-  for (int row = 0; row < modulesPerSideY; ++row) {
-    for (int col = 0; col < modulesPerSideX; ++col) {
-      // Determine offset signs based on quadrant
-      float offsetX = (row + 1 > midPointX) ? pixChipOffsX / 2.0f : -pixChipOffsX / 2.0f;
-      float offsetY = (col + 1 > midPointY) ? -pixChipOffsY / 2.0f : pixChipOffsY / 2.0f;
-
-      // Calculate position
-      float x = baseStartX + offsetX + col * chipDX;
-      float y = baseStartY + offsetY + row * chipDY;
-
-      moduleCenterX.push_back(x);
-      moduleCenterY.push_back(y);
-      LOGP(info, "Row {} Col {}: sensor at ({}, {})", row, col, x, y);
-    }
-  }
-
-  // Place the sensors
-  for (size_t ii = 0; ii < moduleCenterX.size(); ++ii) {
-    auto* sensorTransform = new TGeoTranslation(moduleCenterX[ii], moduleCenterY[ii], 0);
-    pixelStationVol->AddNode(pixelSensor, composeSensorVolID(ii), sensorTransform);
-  }
+constexpr const char* LayerName[4] = {"A", "B", "C", "D"};
 }
 
 void NA6PMuonSpecModular::createMaterials()
 {
-  auto& matPool = NA6PTGeoHelper::instance().getMatPool();
-  std::string nameM;
-  nameM = addName("Silicon");
-  if (matPool.find(nameM) == matPool.end()) {
-    matPool[nameM] = new TGeoMaterial(nameM.c_str(), 28.09, 14, 2.33);
-    NA6PTGeoHelper::instance().addMedium(nameM, "", kCyan + 1);
-  }
-  nameM = addName("Air");
-  if (matPool.find(nameM) == matPool.end()) {
-    auto mixt = new TGeoMixture(nameM.c_str(), 2, 0.001);
-    mixt->AddElement(new TGeoElement("N", "Nitrogen", 7, 14.01), 0.78);
-    mixt->AddElement(new TGeoElement("O", "Oxygen", 8, 16.00), 0.22);
-    matPool[nameM] = mixt;
-    NA6PTGeoHelper::instance().addMedium(nameM);
-  }
+  const auto& p = NA6PMWPCParam::Instance();
+  const NA6PMWPCChamber::Materials materials = {
+    addName(p.medFR4),
+    addName(p.medCopper),
+    addName(p.medHoneycomb),
+    addName(p.medGas)};
+  NA6PMWPCChamber chamber(*this, materials);
+  chamber.createMaterials();
 }
 
 void NA6PMuonSpecModular::createGeometry(TGeoVolume* world)
 {
-  const auto& param = NA6PLayoutParam::Instance();
-
-  const float EnvelopDZH = 1;
-  float pixChipDz = param.thicknessMSPlane[0];
-
-  createMaterials();
-
-  for (int ist = 0; ist < param.nMSPlanes; ist++) {
-    const float EnvelopDXH = param.dimXMSPlaneHole[ist] / 2.0f;
-    const float EnvelopDYH = param.dimYMSPlaneHole[ist] / 2.0f;
-    auto* sensorShape = new TGeoBBox("SensorShape", param.msChipDX[ist] / 2.0f, param.msChipDY[ist] / 2.0f, pixChipDz / 2.0f);
-    TGeoVolume* MSSensor = new TGeoVolume("MSSensor", sensorShape, NA6PTGeoHelper::instance().getMedium(addName("Silicon")));
-    MSSensor->SetLineColor(NA6PTGeoHelper::instance().getMediumColor(addName("Silicon")));
-
-    auto stnm = fmt::format("MS{}", ist);
-
-    auto* station = new TGeoBBox((stnm + "SH").c_str(), param.dimXMSPlane[ist] / 2.0f + EnvelopDXH, param.dimYMSPlane[ist] / 2.0f + EnvelopDYH, pixChipDz / 2.0f + EnvelopDZH);
-    auto stationSensVol = new TGeoVolume(stnm.c_str(), station, NA6PTGeoHelper::instance().getMedium(addName(param.medMSPlane[ist])));
-
-    LOGP(info, "Creating MS station {} with dimensions: X={} Y={} Z={}", stnm, param.dimXMSPlane[ist], param.dimYMSPlane[ist], pixChipDz);
-    placeSensors(param.dimXMSPlane[ist], param.dimYMSPlane[ist], param.msChipDX[ist], param.msChipDY[ist], param.dimXMSPlaneHole[ist], param.dimYMSPlaneHole[ist], stationSensVol, MSSensor);
-
-    auto stationSensVolEnv = new TGeoVolume((stnm + "Env").c_str(), station, NA6PTGeoHelper::instance().getMedium(addName("Air")));
-    stationSensVolEnv->AddNode(stationSensVol, composeNonSensorVolID(ist));
-    world->AddNode(stationSensVolEnv, composeNonSensorVolID(ist), new TGeoTranslation(param.shiftMS[0] + param.posMSPlaneX[ist], param.shiftMS[1] + param.posMSPlaneY[ist], param.shiftMS[2] + param.posMSPlaneZ[ist]));
+  if (!world) {
+    throw std::runtime_error("MuonSpecModular requires a world volume");
   }
+
+  const auto& layout = NA6PLayoutParam::Instance();
+  const auto& p = NA6PMWPCParam::Instance();
+  if (layout.nMSPlanes < 0 || layout.nMSPlanes > NA6PMWPCParam::MaxStations) {
+    throw std::runtime_error("nMSPlanes exceeds the MWPC station-layout capacity");
+  }
+
+  const NA6PMWPCChamber::Materials materials = {
+    addName(p.medFR4),
+    addName(p.medCopper),
+    addName(p.medHoneycomb),
+    addName(p.medGas)};
+
+  const NA6PMWPCChamber standardChamber(*this, materials);
+  const double ms0BodyX = static_cast<double>(p.ms0GasX) + 2. * p.innerFrameWidth;
+  const NA6PMWPCChamber narrowMS0Chamber(*this, materials, ms0BodyX, p.bodyY);
+
+  standardChamber.createMaterials();
+
+  int requestedChambers = 0;
+  for (int ist = 0; ist < layout.nMSPlanes; ++ist) {
+    const int nx = p.stationGridNX[ist];
+    const int ny = p.stationGridNY[ist];
+    if (nx <= 0 || ny <= 0) {
+      throw std::runtime_error(fmt::format("MS{} has invalid MWPC grid {}x{}", ist, nx, ny));
+    }
+    if (nx * ny >= MaxNonSensID) {
+      throw std::runtime_error(fmt::format("MS{} has too many chambers for local non-sensitive copy IDs", ist));
+    }
+    requestedChambers += nx * ny;
+  }
+  if (requestedChambers > MaxVolID - MaxNonSensID) {
+    throw std::runtime_error(fmt::format(
+      "MWPC layout requests {} sensitive chambers but the module supports at most {}",
+      requestedChambers, MaxVolID - MaxNonSensID));
+  }
+
+  int chamberID = 0;
+  for (int ist = 0; ist < layout.nMSPlanes; ++ist) {
+    const int nx = p.stationGridNX[ist];
+    const int ny = p.stationGridNY[ist];
+    const bool narrow = ist == 0 && p.useNarrowMS0;
+    const NA6PMWPCChamber& chamber = narrow ? narrowMS0Chamber : standardChamber;
+
+    const auto gasSize = chamber.gasFullSize();
+    const auto gasCentre = chamber.gasCentre();
+    const double overlapX = p.activeOverlapX;
+    const double overlapY = p.activeOverlapY;
+    const double pitchX = gasSize[0] - overlapX;
+    const double pitchY = gasSize[1] - overlapY;
+
+    if (!std::isfinite(overlapX) || !std::isfinite(overlapY) ||
+        overlapX < 0. || overlapY < 0. || pitchX <= 0. || pitchY <= 0.) {
+      throw std::runtime_error(fmt::format(
+        "MS{} has invalid active overlap Ox={} Oy={} for gas {}x{} cm",
+        ist, overlapX, overlapY, gasSize[0], gasSize[1]));
+    }
+    if (!std::isfinite(p.staggerZStep) || p.staggerZStep <= 0.) {
+      throw std::runtime_error("MWPC staggerZStep must be positive");
+    }
+
+    const std::string stationName = fmt::format("MS{}", ist);
+    auto* station = new TGeoVolumeAssembly(stationName.c_str());
+    const int firstChamberID = chamberID;
+    int localCopyID = 0;
+
+    for (int row = 0; row < ny; ++row) {
+      for (int col = 0; col < nx; ++col) {
+        // Checkerboard parity:
+        //   A B A B ...
+        //   C D C D ...
+        //   A B A B ...
+        // and the four parity classes are placed at four successive z levels.
+        const int q = 2 * (row & 1) + (col & 1);
+        const double x = (static_cast<double>(col) - 0.5 * (nx - 1)) * pitchX;
+        const double y = (static_cast<double>(row) - 0.5 * (ny - 1)) * pitchY;
+        const double desiredGasZ = (static_cast<double>(q) - 1.5) * p.staggerZStep;
+
+        // addTo() places the chamber assembly origin.  Subtract the internal
+        // gas-centre offset so that desiredGasZ refers exactly to the sensitive
+        // gas centre, matching the offline stagger scorer.
+        const NA6PMWPCChamber::Placement placement = {
+          x,
+          y,
+          desiredGasZ - gasCentre[2]};
+        chamber.addTo(station, chamberID, localCopyID, placement);
+
+        LOGP(debug,
+             "MS{} row {} col {} layer {} chamberID {} gas centre=({:.3f},{:.3f},{:.3f}) cm",
+             ist, row, col, LayerName[q], chamberID, x, y, desiredGasZ);
+        ++chamberID;
+        ++localCopyID;
+      }
+    }
+
+    const int lastChamberID = chamberID - 1;
+    world->AddNode(
+      station,
+      composeNonSensorVolID(ist),
+      new TGeoTranslation(layout.shiftMS[0] + layout.posMSPlaneX[ist],
+                          layout.shiftMS[1] + layout.posMSPlaneY[ist],
+                          layout.shiftMS[2] + layout.posMSPlaneZ[ist]));
+
+    LOGP(info,
+         "Created MS{} MWPC station: grid={}x{} N={} gas={:.3f}x{:.3f} cm "
+         "pitch={:.3f}x{:.3f} cm overlap={:.3f}x{:.3f} cm "
+         "z(A,B,C,D)=({:.3f},{:.3f},{:.3f},{:.3f}) cm chamberID=[{},{}]{}",
+         ist, nx, ny, nx * ny, gasSize[0], gasSize[1], pitchX, pitchY,
+         overlapX, overlapY,
+         -1.5 * p.staggerZStep, -0.5 * p.staggerZStep,
+         +0.5 * p.staggerZStep, +1.5 * p.staggerZStep,
+         firstChamberID, lastChamberID, narrow ? " [narrow MS0]" : "");
+  }
+
+  LOGP(info, "Created {} MWPC chambers in {} Muon Spectrometer stations",
+       chamberID, layout.nMSPlanes);
 }
+
 void NA6PMuonSpecModular::setAlignableEntries()
 {
-  const auto& param = NA6PLayoutParam::Instance();
-  std::string topNodeName = gGeoManager->GetTopNode()->GetName();
-  int svolCnt = 0;
-  for (int ll = 0; ll < param.nMSPlanes; ++ll) {
-    std::string stationVolName = fmt::format("MS{}", ll);
-    TGeoVolume* stationVol = gGeoManager->GetVolume(stationVolName.c_str());
-    if (!stationVol) {
-      LOGP(error, "Could not find volume {} to extract sensor count!", stationVolName);
+  const auto& layout = NA6PLayoutParam::Instance();
+  if (!gGeoManager || !gGeoManager->GetTopNode() || !gGeoManager->GetTopVolume()) {
+    LOGP(error, "Cannot define MWPC alignable entries without a complete TGeo geometry");
+    return;
+  }
+
+  const std::string topNodeName = gGeoManager->GetTopNode()->GetName();
+  TGeoVolume* topVolume = gGeoManager->GetTopVolume();
+  int nAlignable = 0;
+
+  for (int ist = 0; ist < layout.nMSPlanes; ++ist) {
+    const std::string stationName = fmt::format("MS{}", ist);
+    TGeoNode* stationNode = nullptr;
+    for (int inode = 0; inode < topVolume->GetNdaughters(); ++inode) {
+      TGeoNode* candidate = topVolume->GetNode(inode);
+      if (candidate && candidate->GetVolume() &&
+          stationName == candidate->GetVolume()->GetName()) {
+        stationNode = candidate;
+        break;
+      }
+    }
+    if (!stationNode) {
+      LOGP(error, "Could not find station node {} below the top volume", stationName);
       continue;
     }
-    int nSensorsInThisPlane = stationVol->GetNdaughters();
-    LOGP(info, "Plane {} has {} alignable sensors.", ll, nSensorsInThisPlane);
-    for (int ii = 0; ii < nSensorsInThisPlane; ++ii) {
-      int id = getActiveID() * 100 + svolCnt;
-      std::string nm = fmt::format("MS_Lr{}_Sens{}", ll, ii);
-      TGeoNode* sensorNode = stationVol->GetNode(ii);
-      if (!sensorNode) {
-        LOGP(error, "Could not retrieve daughter node {} from volume {}", ii, stationVolName);
+
+    TGeoVolume* stationVolume = stationNode->GetVolume();
+    for (int ich = 0; ich < stationVolume->GetNdaughters(); ++ich) {
+      TGeoNode* chamberNode = stationVolume->GetNode(ich);
+      if (!chamberNode || !chamberNode->GetVolume()) {
         continue;
       }
-      std::string sensorNodeName = sensorNode->GetName();
-      std::string path = fmt::format("/{}/MS{}Env_{}/MS{}_{}/{}",
-                                     topNodeName,
-                                     ll, composeNonSensorVolID(ll),
-                                     ll, composeNonSensorVolID(ll),
-                                     sensorNodeName);
-      TGeoPNEntry* entry = gGeoManager->SetAlignableEntry(nm.c_str(), path.c_str(), id);
-      if (entry) {
-        LOGP(info, "Successfully added {} {} as alignable sensor {}", nm, path, id);
-      } else {
-        LOGP(error, "FAILED to add alignable entry {} {}", nm, path);
+      TGeoVolume* chamberVolume = chamberNode->GetVolume();
+      TGeoNode* sensorNode = nullptr;
+      for (int ipart = 0; ipart < chamberVolume->GetNdaughters(); ++ipart) {
+        TGeoNode* partNode = chamberVolume->GetNode(ipart);
+        if (partNode && NA6PModule::isSensor(partNode->GetNumber())) {
+          if (sensorNode) {
+            LOGP(error, "Chamber {} contains more than one sensitive node", chamberNode->GetName());
+          }
+          sensorNode = partNode;
+        }
       }
-      svolCnt++;
+      if (!sensorNode) {
+        LOGP(error, "Chamber {} contains no sensitive gas node", chamberNode->GetName());
+        continue;
+      }
+
+      const int sensorID = NA6PModule::volID2SensID(sensorNode->GetNumber());
+      const int alignableID = getActiveID() * 1000 + sensorID;
+      const std::string symbolicName = fmt::format("MS_Lr{}_Ch{}_Gas", ist, sensorID);
+      const std::string path = fmt::format("/{}/{}/{}/{}",
+                                           topNodeName,
+                                           stationNode->GetName(),
+                                           chamberNode->GetName(),
+                                           sensorNode->GetName());
+      TGeoPNEntry* entry = gGeoManager->SetAlignableEntry(
+        symbolicName.c_str(), path.c_str(), alignableID);
+      if (entry) {
+        LOGP(debug, "Added alignable MWPC sensor {} path={} id={}",
+             symbolicName, path, alignableID);
+        ++nAlignable;
+      } else {
+        LOGP(error, "FAILED to add alignable MWPC sensor {} path={}", symbolicName, path);
+      }
     }
   }
+  LOGP(info, "Defined {} alignable MWPC sensitive-gas volumes", nAlignable);
 }
 
 bool NA6PMuonSpecModular::stepManager(int volID)
@@ -196,7 +286,7 @@ bool NA6PMuonSpecModular::stepManager(int volID)
     TLorentzVector positionStop, momentumStop;
     mc->TrackMomentum(momentumStop);
     mc->TrackPosition(positionStop);
-    // Retrieve the indices with the volume path
+    // sensID is the global MWPC chamber ID assigned by createGeometry().
     auto* p = addHit(stack->GetCurrentTrackNumber(), sensID, mTrackData.mPositionStart.Vect(), positionStop.Vect(),
                      mTrackData.mMomentumStart.Vect(), momentumStop.Vect(), positionStop.T(),
                      mTrackData.mEnergyLoss, mTrackData.mTrkStatusStart, status);
@@ -205,6 +295,7 @@ bool NA6PMuonSpecModular::stepManager(int volID)
     }
     // register det points in TParticle
     stack->addHit(getActiveIDBit());
+    mTrackData.mHitStarted = false;
     return true;
   }
   return false;
