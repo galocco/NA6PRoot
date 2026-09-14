@@ -14,6 +14,7 @@
 #include <TGeoVolume.h>
 #include <TVirtualMC.h>
 
+#include <cstdlib>
 #include <filesystem>
 #include <fstream>
 #include <iomanip>
@@ -153,6 +154,7 @@ int main(int argc, char** argv)
     const double momentumGeV = std::stod(argv[3]);
     const int pdg = argc >= 5 ? std::stoi(argv[4]) : 13;
     const int seed = argc >= 6 ? std::stoi(argv[5]) : 20260914;
+    const bool gridMode = std::getenv("MWPC_GUN_GRID_N") != nullptr;
 
     if (events < 1 || events > 100000) {
       throw std::runtime_error("EVENTS must be in the range 1..100000");
@@ -197,12 +199,17 @@ int main(int argc, char** argv)
     geant4->ProcessGeantCommand(("/random/setSeeds " + std::to_string(seed) + " 31").c_str());
     geant4->ProcessRun(events);
 
+    // The central smoke test expects every primary to enter the gas. In grid mode
+    // many tracks are intentionally outside the active rectangle; the dedicated
+    // area-scan analysis checks the expected/observed gas-ID map point by point.
     const bool passed = application->eventCount() == events &&
-                        application->eventsWithPrimaryGasSteps() == events &&
-                        application->eventsWithPrimaryEntry() == events;
+                        (gridMode ||
+                         (application->eventsWithPrimaryGasSteps() == events &&
+                          application->eventsWithPrimaryEntry() == events));
 
     std::ofstream summary("summary.txt");
-    summary << "events=" << application->eventCount() << '\n'
+    summary << "mode=" << (gridMode ? "grid" : "central") << '\n'
+            << "events=" << application->eventCount() << '\n'
             << "events_with_primary_gas_steps=" << application->eventsWithPrimaryGasSteps() << '\n'
             << "events_with_primary_entry=" << application->eventsWithPrimaryEntry() << '\n'
             << "total_gas_steps=" << application->totalGasSteps() << '\n'
@@ -214,7 +221,7 @@ int main(int argc, char** argv)
             << "result=" << (passed ? "PASS" : "FAIL") << '\n';
     summary.close();
 
-    std::cout << "\nMWPC particle-gun result: " << (passed ? "PASS" : "FAIL") << '\n'
+    std::cout << "\nMWPC particle-gun transport result: " << (passed ? "PASS" : "FAIL") << '\n'
               << "  primary entered gas: " << application->eventsWithPrimaryEntry() << '/' << events << " events\n"
               << "  primary had gas steps: " << application->eventsWithPrimaryGasSteps() << '/' << events << " events\n"
               << "  total gas steps: " << application->totalGasSteps() << '\n'
