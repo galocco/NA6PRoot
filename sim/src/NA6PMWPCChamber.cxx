@@ -19,8 +19,10 @@
 #include <stdexcept>
 #include <utility>
 
-NA6PMWPCChamber::NA6PMWPCChamber(const NA6PModule& module, Materials materials)
-  : mModule(module), mMaterials(std::move(materials))
+NA6PMWPCChamber::NA6PMWPCChamber(const NA6PModule& module, Materials materials,
+                                 double bodyXOverride, double bodyYOverride)
+  : mModule(module), mMaterials(std::move(materials)),
+    mBodyXOverride(bodyXOverride), mBodyYOverride(bodyYOverride)
 {
 }
 
@@ -131,8 +133,10 @@ std::vector<NA6PMWPCChamber::Part> NA6PMWPCChamber::buildParts() const
 {
   const auto& p = NA6PMWPCParam::Instance();
 
-  requirePositive(p.bodyX, "bodyX");
-  requirePositive(p.bodyY, "bodyY");
+  const double w = mBodyXOverride > 0. ? mBodyXOverride : p.bodyX;
+  const double h = mBodyYOverride > 0. ? mBodyYOverride : p.bodyY;
+  requirePositive(w, "bodyX");
+  requirePositive(h, "bodyY");
   requirePositive(p.innerFrameWidth, "innerFrameWidth");
   requirePositive(p.honeycombEdgeWall, "honeycombEdgeWall");
   requirePositive(p.readoutEndMargin, "readoutEndMargin", true);
@@ -151,8 +155,6 @@ std::vector<NA6PMWPCChamber::Part> NA6PMWPCChamber::buildParts() const
   requirePositive(p.honeycombBack, "honeycombBack");
   requirePositive(p.outerSkinBack, "outerSkinBack");
 
-  const double w = p.bodyX;
-  const double h = p.bodyY;
   const double frame = p.innerFrameWidth;
   const double wall = p.honeycombEdgeWall;
   const double readoutW = w + p.blueOverhang;
