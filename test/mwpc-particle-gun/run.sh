@@ -8,33 +8,41 @@ SEED="${4:-20260914}"
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO="$(cd "$HERE/../.." && pwd)"
+LOCAL_INSTALL="$REPO/install"
 BUILD="$HERE/build"
 RUNS="$HERE/runs"
 
-if [[ -z "${NA6PROOT_ROOT:-}" ]]; then
-  if [[ -f "$REPO/install/init.sh" ]]; then
-    # Use the local installation when it is available.
-    # shellcheck disable=SC1091
-    source "$REPO/install/init.sh"
-  else
-    echo "NA6PROOT_ROOT is not set and $REPO/install/init.sh was not found." >&2
-    echo "Load the NA6PRoot/O2 environment and build/install this branch first." >&2
-    exit 2
-  fi
+# This test is specifically meant to exercise the MWPC code from the current
+# checkout.  A previously loaded NA6PRoot installation may still be present in
+# LD_LIBRARY_PATH, so source the local install and put its bin/lib directories
+# first.  Otherwise the dynamic loader can silently pick an older libsimLib.so.
+if [[ ! -f "$LOCAL_INSTALL/init.sh" ]]; then
+  cat >&2 <<EOF
+$LOCAL_INSTALL/init.sh was not found.
+
+Build and install the current feature/mwpc-dice checkout first:
+  cd "$REPO"
+  cmake -S . -B build -DCMAKE_INSTALL_PREFIX="$LOCAL_INSTALL"
+  cmake --build build --parallel 5 --target install
+EOF
+  exit 2
 fi
 
-if [[ ! -f "$NA6PROOT_ROOT/include/NA6PMWPCChamber.h" ]]; then
-  cat >&2 <<EOF
-The installed NA6PRoot at
-  $NA6PROOT_ROOT
-does not contain NA6PMWPCChamber.h yet.
+# shellcheck disable=SC1091
+source "$LOCAL_INSTALL/init.sh"
+export NA6PROOT_ROOT="$LOCAL_INSTALL"
+export PATH="$LOCAL_INSTALL/bin:${PATH:-}"
+export LD_LIBRARY_PATH="$LOCAL_INSTALL/lib:${LD_LIBRARY_PATH:-}"
+export ROOT_INCLUDE_PATH="$LOCAL_INSTALL/include:${ROOT_INCLUDE_PATH:-}"
 
-Build and install the current feature/mwpc-dice branch first, for example:
+if [[ ! -f "$LOCAL_INSTALL/include/NA6PMWPCChamber.h" ]]; then
+  cat >&2 <<EOF
+The local NA6PRoot installation does not contain NA6PMWPCChamber.h yet.
+
+Rebuild and install the current branch:
   cd "$REPO"
-  mkdir -p build && cd build
-  cmake -DCMAKE_INSTALL_PREFIX="$REPO/install" ..
-  make -j5 install
-  source "$REPO/install/init.sh"
+  cmake -S . -B build -DCMAKE_INSTALL_PREFIX="$LOCAL_INSTALL"
+  cmake --build build --parallel 5 --target install
 
 Then rerun this script.
 EOF
@@ -42,7 +50,7 @@ EOF
 fi
 
 mkdir -p "$BUILD" "$RUNS"
-cmake -S "$HERE" -B "$BUILD" -DCMAKE_BUILD_TYPE=Release -DNA6P_INSTALL="$NA6PROOT_ROOT"
+cmake -S "$HERE" -B "$BUILD" -DCMAKE_BUILD_TYPE=Release -DNA6P_INSTALL="$LOCAL_INSTALL"
 cmake --build "$BUILD" --parallel 2
 
 STAMP="$(date +%Y%m%d-%H%M%S)"
