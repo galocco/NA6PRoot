@@ -1,0 +1,174 @@
+name: MWPC geometry runtime smoke
+
+on:
+  push:
+    branches:
+      - feature/mwpc-dice
+  workflow_dispatch:
+
+jobs:
+  geometry-runtime:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compile actual MWPC sources and check reference geometry
+        shell: bash
+        run: |
+          set -euo pipefail
+          S=/tmp/mwpc-stubs
+          mkdir -p "$S"
+
+          cat > "$S/ConfigurableParam.h" <<'EOF'
+          #pragma once
+          #include <string>
+          #define NA6PParamDef(classname, key) public: static classname sInstance
+          #define O2ParamImpl(classname) classname classname::sInstance
+          EOF
+
+          cat > "$S/ConfigurableParamHelper.h" <<'EOF'
+          #pragma once
+          namespace na6p { namespace conf {
+          template <class T> class ConfigurableParamHelper {
+           public: static T& Instance() { return T::sInstance; }
+          };
+          }}
+          EOF
+
+          cat > "$S/FakeRoot.h" <<'EOF'
+          #pragma once
+          #include <map>
+          #include <memory>
+          #include <stdexcept>
+          #include <string>
+          #include <utility>
+          #include <vector>
+          constexpr int kGreen=3, kOrange=800, kCyan=432;
+          class TGeoMaterial {
+           public:
+            enum State { kMatStateGas=1 };
+            std::string name; double a=0,z=0,density=0,temperature=0;
+            TGeoMaterial(const char* n,double aa=0,double zz=0,double rho=0):name(n),a(aa),z(zz),density(rho){}
+            virtual ~TGeoMaterial()=default;
+            void SetState(State){}
+            void SetTemperature(double t){temperature=t;}
+          };
+          class TGeoMixture: public TGeoMaterial {
+           public:
+            struct E{double a,z,w;}; std::vector<E> elements;
+            TGeoMixture(const char* n,int m,double rho):TGeoMaterial(n,0,0,rho),elements(static_cast<size_t>(m)){}
+            void DefineElement(int i,double a,double z,double w){elements.at(static_cast<size_t>(i))={a,z,w};}
+          };
+          class TGeoMedium {
+           public: std::string name; TGeoMaterial* material;
+            TGeoMedium(std::string n,TGeoMaterial* m):name(std::move(n)),material(m){}
+          };
+          class TGeoTranslation {
+           public: double x,y,z; TGeoTranslation(double xx=0,double yy=0,double zz=0):x(xx),y(yy),z(zz){}
+          };
+          class TGeoVolume;
+          struct Node{TGeoVolume* volume; int copyID; TGeoTranslation* tr;};
+          class TGeoVolume {
+           public:
+            std::string name; TGeoMedium* medium=nullptr; double hx=0,hy=0,hz=0; std::vector<Node> nodes;
+            TGeoVolume(std::string n={},TGeoMedium* m=nullptr,double x=0,double y=0,double z=0):name(std::move(n)),medium(m),hx(x),hy(y),hz(z){}
+            virtual ~TGeoVolume()=default;
+            void AddNode(TGeoVolume* v,int id,TGeoTranslation* t=nullptr){nodes.push_back({v,id,t});}
+            void SetLineColor(int){} void SetTransparency(int){}
+          };
+          class TGeoVolumeAssembly: public TGeoVolume { public: explicit TGeoVolumeAssembly(const char* n):TGeoVolume(n){} };
+          class TGeoManager {
+           public:
+            std::vector<std::unique_ptr<TGeoVolume>> owned;
+            TGeoVolume* MakeBox(const char* n,TGeoMedium* m,double x,double y,double z){owned.emplace_back(std::make_unique<TGeoVolume>(n,m,x,y,z)); return owned.back().get();}
+          };
+          inline TGeoManager* gGeoManager=nullptr;
+          EOF
+
+          for h in TColor.h TGeoManager.h TGeoMaterial.h TGeoMatrix.h TGeoVolume.h; do
+            printf '#pragma once\n#include "FakeRoot.h"\n' > "$S/$h"
+          done
+
+          cat > "$S/NA6PModule.h" <<'EOF'
+          #pragma once
+          class NA6PModule {
+           public:
+            static constexpr int MaxVolID=1000, MaxNonSensID=300;
+            int composeSensorVolID(int id) const { return MaxNonSensID+id; }
+            int composeNonSensorVolID(int id) const { return id; }
+          };
+          EOF
+
+          cat > "$S/NA6PTGeoHelper.h" <<'EOF'
+          #pragma once
+          #include "FakeRoot.h"
+          #include <map>
+          #include <stdexcept>
+          #include <string>
+          class NA6PTGeoHelper {
+           public:
+            static NA6PTGeoHelper& instance(){static NA6PTGeoHelper h; return h;}
+            auto& getMatPool(){return mats;} auto& getMedPool(){return meds;}
+            void addMedium(const std::string& n){auto i=mats.find(n); if(i==mats.end()) throw std::runtime_error("missing material"); meds[n]=new TGeoMedium(n,i->second);}
+            TGeoMedium* getMedium(const std::string& n){return meds.at(n);}
+           private:
+            std::map<std::string,TGeoMaterial*> mats; std::map<std::string,TGeoMedium*> meds;
+          };
+          EOF
+
+          cat > /tmp/check.cpp <<'EOF'
+          #include "NA6PMWPCChamber.h"
+          #include "NA6PModule.h"
+          #include "NA6PTGeoHelper.h"
+          #include "TGeoManager.h"
+          #include <array>
+          #include <cmath>
+          #include <iomanip>
+          #include <iostream>
+          #include <stdexcept>
+          #include <string>
+
+          static bool near(double a,double b,double e=1e-5){return std::abs(a-b)<=e;}
+          static void check3(const std::array<double,3>& a,const std::array<double,3>& b,const char* what){for(int i=0;i<3;++i) if(!near(a[i],b[i])) throw std::runtime_error(std::string(what)+" mismatch");}
+
+          int main(){
+            TGeoManager mgr; gGeoManager=&mgr; NA6PModule module; TGeoVolume world("World");
+            NA6PMWPCChamber chamber(module,{"FR4","Copper","Honeycomb","ArCO2"});
+            auto* a=chamber.addTo(&world,7,0,{0.,0.,0.});
+            if(!a || a->nodes.size()!=22) throw std::runtime_error("expected 22 chamber parts");
+            check3(chamber.gasFullSize(),{51.2,66.56,0.6},"gas size");
+            check3(chamber.gasCentre(),{0.,0.,0.0325},"gas centre");
+            check3(chamber.envelopeFullSize(),{60.0,72.56,1.9284},"envelope");
+
+            int sensitive=0;
+            bool sawReadout=false, sawGreen=false;
+            for(const auto& n:a->nodes){
+              if(n.copyID==module.composeSensorVolID(7)) ++sensitive;
+              if(n.volume->name=="MWPCChamber_7_ReadoutBoardBlue"){
+                check3({2*n.volume->hx,2*n.volume->hy,2*n.volume->hz},{60.0,67.0,0.08},"readout size");
+                check3({n.tr->x,n.tr->y,n.tr->z},{3.4,0.,-0.3092},"readout centre"); sawReadout=true;
+              }
+              if(n.volume->name=="MWPCChamber_7_GreenExternalStripApproximation"){
+                check3({2*n.volume->hx,2*n.volume->hy,2*n.volume->hz},{53.0,4.0,0.2},"green size");
+                check3({n.tr->x,n.tr->y,n.tr->z},{0.,-36.28,-0.1675},"green centre"); sawGreen=true;
+              }
+            }
+            if(sensitive!=1 || !sawReadout || !sawGreen) throw std::runtime_error("part identity/sensitivity check failed");
+
+            auto* gas=dynamic_cast<TGeoMixture*>(NA6PTGeoHelper::instance().getMatPool().at("ArCO2"));
+            if(!gas || gas->elements.size()!=3) throw std::runtime_error("gas mixture missing");
+            if(!near(gas->density,0.0017113385991111801,1e-7)) throw std::runtime_error("gas density mismatch");
+            if(!near(gas->elements[0].w,0.6792813079583009,1e-6) || !near(gas->elements[1].w,0.08752782909383734,1e-6) || !near(gas->elements[2].w,0.23319086294786168,1e-6)) throw std::runtime_error("gas composition mismatch");
+
+            std::cout<<std::fixed<<std::setprecision(7);
+            std::cout<<"PASS: actual NA6PMWPCChamber.cxx compiled and reproduced the reference chamber\n";
+            auto gs=chamber.gasFullSize(), gc=chamber.gasCentre(), ev=chamber.envelopeFullSize();
+            std::cout<<"parts="<<a->nodes.size()<<"\n";
+            std::cout<<"gas_cm="<<gs[0]<<","<<gs[1]<<","<<gs[2]<<" centre_z_cm="<<gc[2]<<"\n";
+            std::cout<<"envelope_cm="<<ev[0]<<","<<ev[1]<<","<<ev[2]<<"\n";
+            std::cout<<"ArCO2_density_g_cm3="<<gas->density<<"\n";
+          }
+          EOF
+
+          g++ -std=c++17 -O2 -Wall -Wextra -Wpedantic -I"$S" -Isim/include \
+            sim/src/NA6PMWPCParam.cxx sim/src/NA6PMWPCChamber.cxx /tmp/check.cpp -o /tmp/check
+          /tmp/check
