@@ -6,6 +6,8 @@
 #include "NA6PModule.h"
 
 #include <cstddef>
+#include <string>
+#include <vector>
 
 class TGeoVolume;
 
