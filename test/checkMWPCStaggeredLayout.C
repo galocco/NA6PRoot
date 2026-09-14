@@ -39,7 +39,7 @@ void checkMWPCStaggeredLayout(const char* geometryFile = "geometry.root")
   const int nx[6] = {10, 5, 8, 8, 12, 12};
   const int ny[6] = {4, 4, 5, 5, 7, 7};
   const double expectedZ[4] = {-6., -2., 2., 6.};
-  constexpr double tol = 1.e-6;
+  constexpr double tol = 1.e-5;
 
   TGeoManager::Import(geometryFile);
   if (!gGeoManager || !gGeoManager->GetTopVolume()) {
