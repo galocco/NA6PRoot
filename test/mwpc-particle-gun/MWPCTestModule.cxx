@@ -12,18 +12,6 @@
 #include <fstream>
 #include <stdexcept>
 
-namespace
-{
-NA6PMWPCChamber::Materials chamberMaterials(MWPCTestModule& module)
-{
-  const auto& p = NA6PMWPCParam::Instance();
-  // addName() is protected in NA6PModule, so material naming is done from the
-  // module methods below rather than from this free helper.
-  (void)module;
-  return {p.medFR4, p.medCopper, p.medHoneycomb, p.medGas};
-}
-} // namespace
-
 MWPCTestModule::MWPCTestModule(int activeID) : NA6PModule("MWPCTest")
 {
   setActiveID(activeID);
