@@ -64,7 +64,7 @@ struct NA6PLayoutParam : public na6p::conf::ConfigurableParamHelper<NA6PLayoutPa
   float posMSPlaneY[MaxMSPlanes] = {};
   float msChipDX[MaxMSPlanes] = {20.f, 20.f, 120.f, 160.f, 210.f, 230.f};
   float msChipDY[MaxMSPlanes] = {20.f, 20.f, 120.f, 160.f, 210.f, 230.f};
-  float posMSPlaneZ[MaxMSPlanes] = {300.f, 360.f, 530.f, 590.f, 810.f, 850.f};
+  float posMSPlaneZ[MaxMSPlanes] = {300.f, 340.f, 530.f, 590.f, 810.f, 850.f};
   float thicknessMSPlane[MaxMSPlanes] = {0.06f, 0.06f, 0.06f, 0.06f, 0.06f, 0.06f};
   float dimXMSPlane[MaxMSPlanes] = {160.f, 240.f, 240.f, 320.f, 420.f, 460.f}; // size in X of rectangular plane. or diameter if dimYMSPlane is 0
   float dimYMSPlane[MaxMSPlanes] = {160.f, 240.f, 240.f, 320.f, 420.f, 460.f}; // size in Y if >0
