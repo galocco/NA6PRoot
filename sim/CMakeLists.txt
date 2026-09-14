@@ -26,6 +26,7 @@ set(DICTIONARY_HEADERS
   NA6PMCStack.h
   NA6PGenerator.h
   NA6PGenCutParam.h
+  NA6PMWPCParam.h
   NA6PMCEventHeader.h
   NA6PMCGenHeader.h
   NA6PGenBox.h
