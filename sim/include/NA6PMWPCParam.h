@@ -33,7 +33,7 @@ struct NA6PMWPCParam : public na6p::conf::ConfigurableParamHelper<NA6PMWPCParam>
   bool readoutCopperOnBlueExtension = true;
   bool includeGreenExternalStrip = true;
 
-  // Gas conditions
+  // Binary Ar/CO2 gas mixture. The CO2 fraction is 1 - argonMoleFraction.
   float argonMoleFraction = 0.7f;
   float gasTemperatureK = 293.15f;
   float gasPressurePa = 101325.f;
