@@ -18,7 +18,7 @@ if(NOT EXISTS "${NA6P_INSTALL}/include/NA6PMWPCChamber.h")
     "Build and install the current feature/mwpc-dice branch first, then source install/init.sh.")
 endif()
 
-find_package(ROOT REQUIRED COMPONENTS Core RIO Tree Geom Physics EG)
+find_package(ROOT REQUIRED COMPONENTS Core RIO Tree Geom GeomPainter Physics EG)
 find_package(Geant4 REQUIRED)
 find_package(VMC REQUIRED)
 find_package(VGM REQUIRED)
@@ -55,6 +55,7 @@ target_link_libraries(mwpc_particle_gun PRIVATE
   ROOT::RIO
   ROOT::Tree
   ROOT::Geom
+  ROOT::GeomPainter
   ROOT::Physics
   ROOT::EG
   FairLogger::FairLogger
