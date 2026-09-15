@@ -19,6 +19,17 @@
 #include <stdexcept>
 #include <utility>
 
+namespace
+{
+constexpr double kMolarMassH = 1.00794;
+constexpr double kMolarMassC = 12.0107;
+constexpr double kMolarMassN = 14.0067;
+constexpr double kMolarMassO = 15.9994;
+constexpr double kMolarMassSi = 28.0855;
+constexpr double kMolarMassAr = 39.948;
+constexpr double kMolarMassCu = 63.546;
+}
+
 NA6PMWPCChamber::NA6PMWPCChamber(const NA6PModule& module, Materials materials,
                                  double bodyXOverride, double bodyYOverride)
   : mModule(module), mMaterials(std::move(materials)),
@@ -57,25 +68,26 @@ void NA6PMWPCChamber::createMaterials() const
   // Materials are kept in a shared pool. If a material is already there we
   // simply reuse it; otherwise we define it here.
   if (!matPool.count(mMaterials.copper)) {
-    matPool[mMaterials.copper] = new TGeoMaterial(mMaterials.copper.c_str(), 63.546, 29., 8.96);
+    matPool[mMaterials.copper] = new TGeoMaterial(mMaterials.copper.c_str(), kMolarMassCu, 29., 8.96);
   }
 
   if (!matPool.count(mMaterials.fr4)) {
     auto* fr4 = new TGeoMixture(mMaterials.fr4.c_str(), 4, 1.86);
-    fr4->DefineElement(0, 28.0855, 14., 0.2804);
-    fr4->DefineElement(1, 15.9994, 8., 0.3874);
-    fr4->DefineElement(2, 12.0107, 6., 0.3052);
-    fr4->DefineElement(3, 1.00794, 1., 0.0270);
+    fr4->DefineElement(0, kMolarMassSi, 14., 0.2804);
+    fr4->DefineElement(1, kMolarMassO, 8., 0.3874);
+    fr4->DefineElement(2, kMolarMassC, 6., 0.3052);
+    fr4->DefineElement(3, kMolarMassH, 1., 0.0270);
     matPool[mMaterials.fr4] = fr4;
   }
 
   if (!matPool.count(mMaterials.honeycomb)) {
-    const double molarMass = 14. * 12.0107 + 10. * 1.00794 + 2. * 14.0067 + 2. * 15.9994;
+    const double molarMass = 14. * kMolarMassC + 10. * kMolarMassH +
+                             2. * kMolarMassN + 2. * kMolarMassO;
     auto* hc = new TGeoMixture(mMaterials.honeycomb.c_str(), 4, 0.048);
-    hc->DefineElement(0, 12.0107, 6., 14. * 12.0107 / molarMass);
-    hc->DefineElement(1, 1.00794, 1., 10. * 1.00794 / molarMass);
-    hc->DefineElement(2, 14.0067, 7., 2. * 14.0067 / molarMass);
-    hc->DefineElement(3, 15.9994, 8., 2. * 15.9994 / molarMass);
+    hc->DefineElement(0, kMolarMassC, 6., 14. * kMolarMassC / molarMass);
+    hc->DefineElement(1, kMolarMassH, 1., 10. * kMolarMassH / molarMass);
+    hc->DefineElement(2, kMolarMassN, 7., 2. * kMolarMassN / molarMass);
+    hc->DefineElement(3, kMolarMassO, 8., 2. * kMolarMassO / molarMass);
     matPool[mMaterials.honeycomb] = hc;
   }
 
@@ -92,11 +104,8 @@ void NA6PMWPCChamber::createMaterials() const
     const double xAr = p.argonMoleFraction;
     const double xCO2 = 1. - xAr;
 
-    constexpr double mAr = 39.948;
-    constexpr double mC = 12.0107;
-    constexpr double mO = 15.9994;
-    const double mCO2 = mC + 2. * mO;
-    const double meanMolarMass = xAr * mAr + xCO2 * mCO2;
+    const double mCO2 = kMolarMassC + 2. * kMolarMassO;
+    const double meanMolarMass = xAr * kMolarMassAr + xCO2 * mCO2;
 
     // Ideal-gas density. meanMolarMass is in g/mol, so the final factor
     // converts from g/m^3 to g/cm^3, which is what TGeo expects.
@@ -106,14 +115,14 @@ void NA6PMWPCChamber::createMaterials() const
     // TGeoMixture is defined through elemental mass fractions rather than
     // molecular fractions. Convert 70/30 Ar/CO2 (or any configured ratio)
     // into the corresponding Ar, C and O mass fractions.
-    const double wAr = xAr * mAr / meanMolarMass;
-    const double wC = xCO2 * mC / meanMolarMass;
-    const double wO = xCO2 * 2. * mO / meanMolarMass;
+    const double wAr = xAr * kMolarMassAr / meanMolarMass;
+    const double wC = xCO2 * kMolarMassC / meanMolarMass;
+    const double wO = xCO2 * 2. * kMolarMassO / meanMolarMass;
 
     auto* gas = new TGeoMixture(mMaterials.gas.c_str(), 3, density);
-    gas->DefineElement(0, mAr, 18., wAr);
-    gas->DefineElement(1, mC, 6., wC);
-    gas->DefineElement(2, mO, 8., wO);
+    gas->DefineElement(0, kMolarMassAr, 18., wAr);
+    gas->DefineElement(1, kMolarMassC, 6., wC);
+    gas->DefineElement(2, kMolarMassO, 8., wO);
     gas->SetState(TGeoMaterial::kMatStateGas);
     gas->SetTemperature(p.gasTemperatureK);
     matPool[mMaterials.gas] = gas;
@@ -140,10 +149,10 @@ std::vector<NA6PMWPCChamber::Part> NA6PMWPCChamber::buildParts() const
   requirePositive(p.innerFrameWidth, "innerFrameWidth");
   requirePositive(p.honeycombEdgeWall, "honeycombEdgeWall");
   requirePositive(p.readoutEndMargin, "readoutEndMargin", true);
-  requirePositive(p.blueOverhang, "blueOverhang", true);
-  requirePositive(p.greenLengthMargin, "greenLengthMargin", true);
-  requirePositive(p.greenOverhang, "greenOverhang", true);
-  requirePositive(p.greenThickness, "greenThickness");
+  requirePositive(p.electronicsPlaneOverhang, "electronicsPlaneOverhang", true);
+  requirePositive(p.dividerPlaneLengthMargin, "dividerPlaneLengthMargin", true);
+  requirePositive(p.dividerPlaneOverhang, "dividerPlaneOverhang", true);
+  requirePositive(p.dividerPlaneThickness, "dividerPlaneThickness");
 
   requirePositive(p.outerSkinFront, "outerSkinFront");
   requirePositive(p.honeycombFront, "honeycombFront");
@@ -157,13 +166,13 @@ std::vector<NA6PMWPCChamber::Part> NA6PMWPCChamber::buildParts() const
 
   const double frame = p.innerFrameWidth;
   const double wall = p.honeycombEdgeWall;
-  const double readoutW = w + p.blueOverhang;
+  const double readoutW = w + p.electronicsPlaneOverhang;
   const double readoutH = h - 2. * p.readoutEndMargin;
   const double gasW = w - 2. * frame;
   const double gasH = h - 2. * frame;
 
   if (std::min({gasW, gasH, w - 2. * wall, h - 2. * wall, readoutH,
-                w - p.greenLengthMargin}) <= 0.) {
+                w - p.dividerPlaneLengthMargin}) <= 0.) {
     throw std::runtime_error("MWPC dimensions leave a non-positive derived box");
   }
   if (readoutH < gasH) {
@@ -231,12 +240,12 @@ std::vector<NA6PMWPCChamber::Part> NA6PMWPCChamber::buildParts() const
         {w - 2. * wall, wall, t}, {0., +(h - wall) / 2., zz});
   }
 
-  add("ReadoutBoardBlue", MaterialKind::FR4,
+  add("ElectronicsPlane", MaterialKind::FR4,
       {readoutW, readoutH, p.readoutFR4},
-      {p.blueOverhang / 2., 0., z.at("readoutFR4")});
+      {p.electronicsPlaneOverhang / 2., 0., z.at("readoutFR4")});
   if (p.readoutCopper > 0.) {
-    const double copperW = p.readoutCopperOnBlueExtension ? readoutW : w;
-    const double copperX = p.readoutCopperOnBlueExtension ? p.blueOverhang / 2. : 0.;
+    const double copperW = p.readoutCopperOnElectronicsExtension ? readoutW : w;
+    const double copperX = p.readoutCopperOnElectronicsExtension ? p.electronicsPlaneOverhang / 2. : 0.;
     add("ReadoutCopper", MaterialKind::Copper,
         {copperW, readoutH, p.readoutCopper},
         {copperX, 0., z.at("readoutCopper")});
@@ -260,11 +269,11 @@ std::vector<NA6PMWPCChamber::Part> NA6PMWPCChamber::buildParts() const
         {w, h, p.coverCopper}, {0., 0., z.at("coverCopper")});
   }
 
-  if (p.includeGreenExternalStrip && p.greenOverhang > 0.) {
-    add("GreenExternalStripApproximation", MaterialKind::FR4,
-        {w - p.greenLengthMargin, p.greenOverhang, p.greenThickness},
-        {0., -(h + p.greenOverhang) / 2.,
-         z.at("gasGap") - p.gasGap / 2. + p.greenThickness / 2.});
+  if (p.includeDividerPlane && p.dividerPlaneOverhang > 0.) {
+    add("DividerPlaneApproximation", MaterialKind::FR4,
+        {w - p.dividerPlaneLengthMargin, p.dividerPlaneOverhang, p.dividerPlaneThickness},
+        {0., -(h + p.dividerPlaneOverhang) / 2.,
+         z.at("gasGap") - p.gasGap / 2. + p.dividerPlaneThickness / 2.});
   }
 
   validate(parts);
