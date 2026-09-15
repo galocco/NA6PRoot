@@ -64,6 +64,16 @@ double momentumT(const TParticle& p)
   return std::sqrt(p.Px() * p.Px() + p.Py() * p.Py());
 }
 
+double rapidity(const TParticle& p)
+{
+  const double plus = p.Energy() + p.Pz();
+  const double minus = p.Energy() - p.Pz();
+  if (plus <= 0. || minus <= 0.) {
+    return 0.;
+  }
+  return 0.5 * std::log(plus / minus);
+}
+
 int stationFromDetectorID(int detectorID, const NA6PMWPCParam& p, int& localID)
 {
   int first = 0;
@@ -223,7 +233,7 @@ void analyzeMWPCDimuon(const char* runDir = "test_runs/mwpc_dimuon/Jpsi",
     hLayerSum[station]->SetDirectory(nullptr);
   }
 
-  std::vector<double> parentP, parentPt, daughterP, daughterPt;
+  std::vector<double> parentP, parentPt, parentY, daughterP, daughterPt;
   long nGoodPairs = 0;
   long nBadPairs = 0;
   double maxMomentumClosure = 0.;
@@ -252,6 +262,7 @@ void analyzeMWPCDimuon(const char* runDir = "test_runs/mwpc_dimuon/Jpsi",
     const auto& parent = (*tracks)[parentIndex];
     parentP.push_back(momentum(parent));
     parentPt.push_back(momentumT(parent));
+    parentY.push_back(rapidity(parent));
 
     std::vector<int> muonIndices;
     for (std::size_t i = 0; i < tracks->size(); ++i) {
@@ -373,24 +384,36 @@ void analyzeMWPCDimuon(const char* runDir = "test_runs/mwpc_dimuon/Jpsi",
   auto hParentPt = makeMomentumHistogram("hParentPt", Form("%s parent p_{T};p_{T} [GeV/c];parents", displayName(channel).c_str()), parentPt);
   auto hDaughterP = makeMomentumHistogram("hDaughterP", Form("%s daughter muons |p|;|p| [GeV/c];muons", displayName(channel).c_str()), daughterP);
   auto hDaughterPt = makeMomentumHistogram("hDaughterPt", Form("%s daughter muons p_{T};p_{T} [GeV/c];muons", displayName(channel).c_str()), daughterPt);
+  auto hParentY = std::make_unique<TH1D>("hParentY", Form("%s parent rapidity;rapidity y;parents", displayName(channel).c_str()), 120, 0., 6.);
+  hParentY->SetDirectory(nullptr);
+  for (double y : parentY) {
+    hParentY->Fill(y);
+  }
 
-  TCanvas cMom("cMomentum", "", 1200, 900);
-  cMom.Divide(2, 2);
-  cMom.cd(1);
+  TCanvas cKin("cKinematics", "", 1500, 900);
+  cKin.Divide(3, 2);
+  cKin.cd(1);
   gPad->SetLogy();
   hParentP->Draw("HIST");
-  cMom.cd(2);
+  cKin.cd(2);
   hParentPt->Draw("HIST");
-  cMom.cd(3);
+  cKin.cd(3);
+  hParentY->Draw("HIST");
+  cKin.cd(4);
   gPad->SetLogy();
   hDaughterP->Draw("HIST");
-  cMom.cd(4);
+  cKin.cd(5);
   hDaughterPt->Draw("HIST");
-  cMom.SaveAs(Form("%s/momenta_%s.png", plotDir.c_str(), channel.c_str()));
+  cKin.SaveAs(Form("%s/kinematics_%s.png", plotDir.c_str(), channel.c_str()));
+
+  TCanvas cRap("cParentRapidity", "", 900, 700);
+  hParentY->Draw("HIST");
+  cRap.SaveAs(Form("%s/parent_rapidity_%s.png", plotDir.c_str(), channel.c_str()));
 
   TFile out(Form("%s/validation_%s.root", plotDir.c_str(), channel.c_str()), "RECREATE");
   hParentP->Write();
   hParentPt->Write();
+  hParentY->Write();
   hDaughterP->Write();
   hDaughterPt->Write();
   for (int station = 0; station < kNStations; ++station) {
