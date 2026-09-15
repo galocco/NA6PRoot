@@ -36,9 +36,12 @@ TGeoNode* findGasNode(TGeoVolume* chamber)
 
 void checkMWPCStaggeredLayout(const char* geometryFile = "geometry.root")
 {
-  const int nx[6] = {10, 5, 8, 8, 12, 12};
-  const int ny[6] = {4, 4, 5, 5, 7, 7};
+  // Detector-coordinate minimal regular grids for the corrected orientation.
+  const int nx[6] = {4, 4, 5, 5, 7, 8};
+  const int ny[6] = {8, 5, 7, 7, 9, 10};
   const double expectedZ[4] = {-6., -2., 2., 6.};
+  constexpr double overlapX = 3.;
+  constexpr double overlapY = 3.;
   constexpr double tol = 1.e-5;
 
   TGeoManager::Import(geometryFile);
@@ -65,7 +68,12 @@ void checkMWPCStaggeredLayout(const char* geometryFile = "geometry.root")
       ++errors;
     }
 
-    double gasX = -1., gasY = -1.;
+    const double expectedGasX = 66.56;
+    const double expectedGasY = st == 0 ? 30.72 : 51.2;
+    const double pitchX = expectedGasX - overlapX;
+    const double pitchY = expectedGasY - overlapY;
+    double gasGlobalX = -1., gasGlobalY = -1.;
+
     for (int ich = 0; ich < station->GetNdaughters(); ++ich) {
       auto* chamberNode = station->GetNode(ich);
       auto* gasNode = chamberNode ? findGasNode(chamberNode->GetVolume()) : nullptr;
@@ -78,15 +86,23 @@ void checkMWPCStaggeredLayout(const char* geometryFile = "geometry.root")
       const int row = ich / nx[st];
       const int col = ich % nx[st];
       const int q = 2 * (row & 1) + (col & 1);
-      const double* chamberTr = chamberNode->GetMatrix()->GetTranslation();
-      const double* gasTr = gasNode->GetMatrix()->GetTranslation();
-      const double gx = chamberTr[0] + gasTr[0];
-      const double gy = chamberTr[1] + gasTr[1];
-      const double gz = chamberTr[2] + gasTr[2];
 
-      if (std::abs(gz - expectedZ[q]) > tol) {
-        printf("FAIL MS%d row %d col %d: gas z=%g, expected %g\n",
-               st, row, col, gz, expectedZ[q]);
+      // Gas-node translation is expressed in chamber-local coordinates. Apply
+      // the chamber placement matrix (including the 90-degree z rotation) to
+      // obtain detector/station coordinates.
+      const double* gasLocal = gasNode->GetMatrix()->GetTranslation();
+      double gasStation[3] = {0., 0., 0.};
+      chamberNode->GetMatrix()->LocalToMaster(gasLocal, gasStation);
+
+      const double expectedX = (static_cast<double>(col) - 0.5 * (nx[st] - 1)) * pitchX;
+      const double expectedY = (static_cast<double>(row) - 0.5 * (ny[st] - 1)) * pitchY;
+      if (std::abs(gasStation[0] - expectedX) > tol ||
+          std::abs(gasStation[1] - expectedY) > tol ||
+          std::abs(gasStation[2] - expectedZ[q]) > tol) {
+        printf("FAIL MS%d row %d col %d: gas=(%g,%g,%g), expected=(%g,%g,%g)\n",
+               st, row, col,
+               gasStation[0], gasStation[1], gasStation[2],
+               expectedX, expectedY, expectedZ[q]);
         ++errors;
       }
 
@@ -95,26 +111,38 @@ void checkMWPCStaggeredLayout(const char* geometryFile = "geometry.root")
         printf("FAIL MS%d chamber %d: gas is not a box\n", st, ich);
         ++errors;
       } else {
-        gasX = 2. * box->GetDX();
-        gasY = 2. * box->GetDY();
+        // Project the chamber-local half-axis vectors into station coordinates
+        // to measure the installed sensitive footprint after rotation.
+        const double vxLocal[3] = {box->GetDX(), 0., 0.};
+        const double vyLocal[3] = {0., box->GetDY(), 0.};
+        double vxGlobal[3] = {0., 0., 0.};
+        double vyGlobal[3] = {0., 0., 0.};
+        chamberNode->GetMatrix()->LocalToMasterVect(vxLocal, vxGlobal);
+        chamberNode->GetMatrix()->LocalToMasterVect(vyLocal, vyGlobal);
+        gasGlobalX = 2. * (std::abs(vxGlobal[0]) + std::abs(vyGlobal[0]));
+        gasGlobalY = 2. * (std::abs(vxGlobal[1]) + std::abs(vyGlobal[1]));
       }
 
       if (ich < 4) {
         printf("MS%d chamber %3d row=%d col=%d q=%d gas=(%8.3f,%8.3f,%6.3f) cm\n",
-               st, ich, row, col, q, gx, gy, gz);
+               st, ich, row, col, q,
+               gasStation[0], gasStation[1], gasStation[2]);
       }
       ++total;
     }
 
-    const double expectedGasX = st == 0 ? 25.6 : 51.2;
-    if (std::abs(gasX - expectedGasX) > tol || std::abs(gasY - 66.56) > tol) {
-      printf("FAIL MS%d: gas size %.6f x %.6f cm, expected %.6f x 66.56 cm\n",
-             st, gasX, gasY, expectedGasX);
+    if (std::abs(gasGlobalX - expectedGasX) > tol ||
+        std::abs(gasGlobalY - expectedGasY) > tol) {
+      printf("FAIL MS%d: installed gas size %.6f x %.6f cm, expected %.6f x %.6f cm\n",
+             st, gasGlobalX, gasGlobalY, expectedGasX, expectedGasY);
       ++errors;
     }
 
-    printf("MS%d OK summary: grid=%dx%d N=%d gas=%.2fx%.2f cm\n",
-           st, nx[st], ny[st], station->GetNdaughters(), gasX, gasY);
+    const double coverageX = expectedGasX + (nx[st] - 1) * pitchX;
+    const double coverageY = expectedGasY + (ny[st] - 1) * pitchY;
+    printf("MS%d OK summary: grid=%dx%d N=%d detectorGas=%.2fx%.2f cm coverage=%.2fx%.2f cm\n",
+           st, nx[st], ny[st], station->GetNdaughters(),
+           gasGlobalX, gasGlobalY, coverageX, coverageY);
   }
 
   printf("\nChecked %d chambers. %s (%d errors)\n",
