@@ -52,16 +52,26 @@ int stationFromDetectorID(int detectorID, const NA6PMWPCParam& p)
   return -1;
 }
 
+std::array<double, 2> detectorGasSize(int station, const NA6PMWPCParam& p)
+{
+  // The chamber model keeps prototype-local axes (short x, long y), while the
+  // installed chamber is rotated by 90 deg into detector coordinates.
+  const double globalX = p.bodyY - 2. * p.innerFrameWidth;
+  const double globalY = (station == 0 && p.useNarrowMS0)
+                           ? p.ms0GasY
+                           : p.bodyX - 2. * p.innerFrameWidth;
+  return {globalX, globalY};
+}
+
 void drawActiveGrid(int station, double xmin, double xmax, double ymin, double ymax,
                     std::vector<std::unique_ptr<TLine>>& lines)
 {
   const auto& p = NA6PMWPCParam::Instance();
   const int nx = p.stationGridNX[station];
   const int ny = p.stationGridNY[station];
-  const double gasX = (station == 0 && p.useNarrowMS0)
-                        ? p.ms0GasX
-                        : p.bodyX - 2. * p.innerFrameWidth;
-  const double gasY = p.bodyY - 2. * p.innerFrameWidth;
+  const auto gas = detectorGasSize(station, p);
+  const double gasX = gas[0];
+  const double gasY = gas[1];
   const double pitchX = gasX - p.activeOverlapX;
   const double pitchY = gasY - p.activeOverlapY;
 
@@ -95,7 +105,7 @@ void drawActiveGrid(int station, double xmin, double xmax, double ymin, double y
 
 void plotMWPCHitDensity(const char* runDir = "test_runs/mwpc_dimuon/Jpsi",
                         const char* channelName = "Jpsi",
-                        double binSizeCm = 5.)
+                        double binSizeCm = 1.)
 {
   const std::string channel = channelName;
   const int wantedParentPDG = parentPDG(channel);
@@ -136,15 +146,14 @@ void plotMWPCHitDensity(const char* runDir = "test_runs/mwpc_dimuon/Jpsi",
   for (int station = 0; station < kNStations; ++station) {
     const int nx = p.stationGridNX[station];
     const int ny = p.stationGridNY[station];
-    const double gasX = (station == 0 && p.useNarrowMS0)
-                          ? p.ms0GasX
-                          : p.bodyX - 2. * p.innerFrameWidth;
-    const double gasY = p.bodyY - 2. * p.innerFrameWidth;
+    const auto gas = detectorGasSize(station, p);
+    const double gasX = gas[0];
+    const double gasY = gas[1];
     const double pitchX = gasX - p.activeOverlapX;
     const double pitchY = gasY - p.activeOverlapY;
     const double activeX = gasX + (nx - 1) * pitchX;
     const double activeY = gasY + (ny - 1) * pitchY;
-    const double margin = 10.;
+    const double margin = 5.;
 
     xMin[station] = -0.5 * activeX - margin;
     xMax[station] = +0.5 * activeX + margin;
@@ -155,16 +164,16 @@ void plotMWPCHitDensity(const char* runDir = "test_runs/mwpc_dimuon/Jpsi",
     const int nbinY = std::max(10, static_cast<int>(std::ceil((yMax[station] - yMin[station]) / binSizeCm)));
 
     hHits[station] = std::make_unique<TH2D>(
-      Form("hDirectHits_MS%d", station),
-      Form("MS%d - %s - direct Geant4 sensitive-gas crossings;"
-           "x at gas crossing [cm];y at gas crossing [cm];crossings / generated daughter muon",
+      Form("hDirectHitDensity_MS%d", station),
+      Form("MS%d - %s - direct Geant4 sensitive-gas hit density;"
+           "detector X at gas crossing [cm];detector Y at gas crossing [cm];hit density [counts/cm^{2}]",
            station, displayName(channel).c_str()),
       nbinX, xMin[station], xMax[station], nbinY, yMin[station], yMax[station]);
     hHits[station]->SetDirectory(nullptr);
 
     hMultiplicity[station] = std::make_unique<TH1D>(
       Form("hHitMultiplicity_MS%d", station),
-      Form("MS%d - %s - number of MWPC chambers crossed per daughter muon;chamber hits;muons",
+      Form("MS%d - %s - MWPC chambers crossed per daughter muon;chamber hits;muons",
            station, displayName(channel).c_str()),
       9, -0.5, 8.5);
     hMultiplicity[station]->SetDirectory(nullptr);
@@ -213,8 +222,8 @@ void plotMWPCHitDensity(const char* runDir = "test_runs/mwpc_dimuon/Jpsi",
         const double xCentre = layout.shiftMS[0] + layout.posMSPlaneX[station];
         const double yCentre = layout.shiftMS[1] + layout.posMSPlaneY[station];
 
-        // IMPORTANT: no extrapolation.  Fill once for every real Geant4
-        // sensitive-gas crossing, at its actual entrance coordinates.
+        // No extrapolation: every stored Geant4 sensitive-gas crossing is
+        // counted separately at its actual entrance position.
         const double x = hit.getXIn() - xCentre;
         const double y = hit.getYIn() - yCentre;
         hHits[station]->Fill(x, y);
@@ -234,10 +243,17 @@ void plotMWPCHitDensity(const char* runDir = "test_runs/mwpc_dimuon/Jpsi",
   gStyle->SetNumberContours(100);
 
   for (int station = 0; station < kNStations; ++station) {
-    if (nDaughterMuons > 0) hHits[station]->Scale(1. / static_cast<double>(nDaughterMuons));
+    // Convert raw bin counts to counts per unit area.  Each station keeps its
+    // own automatic colour-axis range, as the fluence changes strongly with z.
+    const double binArea = hHits[station]->GetXaxis()->GetBinWidth(1) *
+                           hHits[station]->GetYaxis()->GetBinWidth(1);
+    if (binArea > 0.) {
+      hHits[station]->Scale(1. / binArea);
+    }
 
-    TCanvas c(Form("cDirectHits_MS%d", station), "", 1050, 900);
-    c.SetRightMargin(0.16);
+    TCanvas c(Form("cDirectHits_MS%d", station), "", 1100, 900);
+    c.SetRightMargin(0.19);
+    hHits[station]->GetZaxis()->SetTitleOffset(1.35);
     hHits[station]->Draw("COLZ");
     std::vector<std::unique_ptr<TLine>> gridLines;
     drawActiveGrid(station, xMin[station], xMax[station], yMin[station], yMax[station], gridLines);
@@ -255,16 +271,14 @@ void plotMWPCHitDensity(const char* runDir = "test_runs/mwpc_dimuon/Jpsi",
   }
   out.Close();
 
-  std::cout << "\n========== DIRECT MWPC HIT VALIDATION: " << channel << " ==========\n";
+  std::cout << "\n========== DIRECT MWPC HIT-DENSITY VALIDATION: " << channel << " ==========\n";
   std::cout << "events              = " << nEvents << '\n';
   std::cout << "good dimuon pairs   = " << nGoodPairs << '\n';
   std::cout << "daughter muons      = " << nDaughterMuons << '\n';
+  std::cout << "map bin size        = " << binSizeCm << " cm (requested; actual ROOT widths may differ slightly)\n";
   for (int station = 0; station < kNStations; ++station) {
-    std::cout << "MS" << station << " total chamber hits = " << totalHits[station]
-              << "   mean hits/generated muon = "
-              << (nDaughterMuons ? static_cast<double>(totalHits[station]) / nDaughterMuons : 0.)
-              << '\n';
+    std::cout << "MS" << station << " total chamber hits = " << totalHits[station] << '\n';
   }
   std::cout << "plots: " << plotDir << '\n';
-  std::cout << "========================================================\n";
+  std::cout << "================================================================\n";
 }
