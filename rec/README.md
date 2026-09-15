@@ -52,7 +52,7 @@ In addition to the parameters in `NA6PRecoParam`, the executable provides option
 ```
 
 * `--firstevent` (`-f`): first event to process. Default: `0`.
-* `--lastevent` (`-l`): exclusive upper event limit. Default: `-1` (process until the end of the file).
+* `--lastevent` (`-l`): last event to process (inclusive). Default: `-1` (process until the end of the file).
 
 Example:
 
@@ -60,22 +60,26 @@ Example:
 na6prec <options> -f 100 -l 999
 ```
 
-Processes events from 100 to 998.
+Processes events from 100 to 999.
 
 #### Reconstruction step switches
 
 Each main reconstruction stage can be enabled or disabled from the command line:
 
 ```
---doHitsToRecPoints, -cl <bool>
+--doHitsToRecPoints, -hitcl <bool>
+--doDigitsToRecPoints, -cl <bool>
 --doTrackletVertex,  -vert <bool>
 --doVTTracking,      -vt <bool>
 --doMSTracking,      -ms <bool>
 --doMatching,        -mt <bool>
 ```
 
-* `--doHitsToRecPoints` (`-cl`): run the hits → clusters (rec-points) step.
+* `--doHitsToRecPoints` (`-hitcl`): run the hits → clusters (rec-points) step.
   Default: `true`.
+
+* `--doDigitsToRecPoints` (`-cl`): run the VT digits → clusters step.
+  Default: `false`.
 
 * `--doTrackletVertex` (`-vert`): run the tracklet-based vertex reconstruction.
   Default: `true`.
@@ -100,6 +104,7 @@ This runs the cluster creation, tracklet vertexing and VT reconstruction without
 ## Event-level parallel reconstruction
 
 For event-level parallelism use the wrapper executable `na6prec_parallel`. It accepts the same command-line options as `na6prec`, plus the wrapper option `--workers <N>`, which defines how many independent `na6prec` processes are run in parallel. The default is `--workers 1`.
+Both long and short reconstruction-step switches are recognized by the wrapper when selecting which stages to run.
 
 Example:
 

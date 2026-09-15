@@ -24,12 +24,12 @@ def parse_bool(value):
     return str(value).strip().lower() not in ("0", "false", "no", "off")
 
 
-def chunk_sizes(nevents, n_parallel):
+def chunk_sizes(nevents, n_parallel, first=0):
     n_workers = min(nevents, n_parallel)
     base = nevents // n_workers
     rem = nevents % n_workers
     chunks = []
-    offset = 0
+    offset = first
     for worker in range(n_workers):
         n = base + (1 if worker < rem else 0)
         chunks.append((worker, offset, n))
@@ -154,7 +154,13 @@ def parse_passthrough(args):
     flags = {"--doHitsToRecPoints": True, "--doDigitsToRecPoints": False,
              "--doTrackletVertex": True, "--doVTTracking": True,
              "--doMSTracking": True, "--doMatching": True}
-    stage_options = set(flags) | {"--firstevent", "--lastevent"}
+    stage_aliases = {"-hitcl": "--doHitsToRecPoints",
+                     "-cl": "--doDigitsToRecPoints",
+                     "-vert": "--doTrackletVertex",
+                     "-vt": "--doVTTracking",
+                     "-ms": "--doMSTracking",
+                     "-mt": "--doMatching"}
+    stage_options = set(flags) | set(stage_aliases) | {"--firstevent", "--lastevent", "-f", "-l"}
     i = 0
     while i < len(args):
         arg = args[i]
@@ -167,12 +173,12 @@ def parse_passthrough(args):
             i += 1
         elif key in stage_options:
             value, i = take_option_value(args, i)
-            if key == "--firstevent":
+            if key in ("--firstevent", "-f"):
                 first = int(value)
-            elif key == "--lastevent":
+            elif key in ("--lastevent", "-l"):
                 last = int(value)
             else:
-                flags[key] = parse_bool(value)
+                flags[stage_aliases.get(key, key)] = parse_bool(value)
         elif key == "--configKeyValues":
             value, i = take_option_value(args, i)
             config_values.append(value)
@@ -193,7 +199,7 @@ def parse_passthrough(args):
     if first < 0:
         first = 0
     if nevents is not None and (last is None or last < 0):
-        last = first + nevents
+        last = first + nevents - 1
     if last is not None and last < first:
         raise SystemExit("--lastevent must not precede --firstevent")
     return nevents, first, last, config_values, load_ini, flags, base
@@ -231,11 +237,11 @@ def main():
     nevents, first, last, configs, load_ini, flags, base = parse_passthrough(passthrough)
     if nevents is None:
         total, source, tree = input_event_count(input_dir)
-        last = total if last is None else min(last, total)
-        nevents = last - first
+        last = total - 1 if last is None or last < 0 else min(last, total - 1)
+        nevents = last - first + 1
         print(f"using {nevents} events from {source.name}:{tree}")
     else:
-        nevents = min(nevents, last - first)
+        nevents = min(nevents, last - first + 1)
     if nevents <= 0:
         raise SystemExit("the selected event range is empty")
     output_from_args, kept = split_config(configs)
@@ -245,7 +251,7 @@ def main():
     executable = shutil.which("na6prec")
     if not executable:
         raise SystemExit("na6prec was not found in PATH")
-    event_chunks = chunk_sizes(nevents, workers)
+    event_chunks = chunk_sizes(nevents, workers, first)
     completed = False
     try:
         if flags["--doHitsToRecPoints"] or flags["--doDigitsToRecPoints"]:
@@ -253,7 +259,7 @@ def main():
             for worker, offset, count in event_chunks:
                 directory = temporary / "clusters" / f"worker{worker:03d}"; dirs.append(directory)
                 link_inputs(input_dir, directory, {"ClustersVerTel.root", "ClustersMuonSpec.root", "TracksVerTel.root", "TracksMuonSpec.root", "TracksMatching.root", "VerticesVerTel.root"})
-                command = [executable, *base, "--firstevent", str(offset), "--lastevent", str(offset + count),
+                command = [executable, *base, "--firstevent", str(offset), "--lastevent", str(offset + count - 1),
                            "--doHitsToRecPoints", str(flags["--doHitsToRecPoints"]).lower(), "--doDigitsToRecPoints", str(flags["--doDigitsToRecPoints"]).lower(),
                            "--doTrackletVertex", "false", "--doVTTracking", "false", "--doMSTracking", "false", "--doMatching", "false",
                            "--configKeyValues", build_config(kept, directory)]
@@ -268,7 +274,7 @@ def main():
                 directory = temporary / "tracking" / f"worker{worker:03d}"; dirs.append(directory)
                 link_inputs(final, directory, {"TracksVerTel.root", "TracksMuonSpec.root", "TracksMatching.root", "VerticesVerTel.root"})
                 link_inputs(input_dir, directory, {"TracksVerTel.root", "TracksMuonSpec.root", "TracksMatching.root", "VerticesVerTel.root"})
-                command = [executable, *base, "--firstevent", str(offset), "--lastevent", str(offset + count),
+                command = [executable, *base, "--firstevent", str(offset), "--lastevent", str(offset + count - 1),
                            "--doHitsToRecPoints", "false", "--doDigitsToRecPoints", "false",
                            "--doTrackletVertex", str(flags["--doTrackletVertex"]).lower(), "--doVTTracking", str(flags["--doVTTracking"]).lower(),
                            "--doMSTracking", str(flags["--doMSTracking"]).lower(), "--doMatching", "false",
@@ -278,7 +284,7 @@ def main():
             run_workers(commands); merge_outputs(dirs, final, ("TracksVerTel.root", "TracksMuonSpec.root", "VerticesVerTel.root"))
             
         if flags["--doMatching"]:
-            command = [executable, *base, "--firstevent", str(first), "--lastevent", str(first + nevents),
+            command = [executable, *base, "--firstevent", str(first), "--lastevent", str(first + nevents - 1),
                        "--doHitsToRecPoints", "false", "--doDigitsToRecPoints", "false", "--doTrackletVertex", "false",
                        "--doVTTracking", "false", "--doMSTracking", "false", "--doMatching", "true",
                        "--configKeyValues", build_config(kept, final)]
