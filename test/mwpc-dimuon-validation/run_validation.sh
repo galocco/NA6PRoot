@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-NEVENTS="${1:-20000}"
+NEVENTS="${1:-100000}"
 WORKERS="${2:-4}"
 
 ROOT_DIR="$(git rev-parse --show-toplevel)"
