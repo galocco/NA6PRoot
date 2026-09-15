@@ -21,10 +21,13 @@ if ! command -v na6psim_parallel >/dev/null 2>&1; then
   exit 1
 fi
 
-# Compile the generator and hook once before parallel workers start.  This avoids
+# Compile the generator and hook once before parallel workers start. This avoids
 # several ACLiC processes trying to build the same macro at the same time.
+# NA6PRoot canonicalizes keyval.output_dir during configuration loading, so the
+# directory must already exist for this direct na6psim smoke run.
 SMOKE_DIR="${OUT_BASE}/_compile_smoke"
 rm -rf "${SMOKE_DIR}"
+mkdir -p "${SMOKE_DIR}"
 na6psim \
   -n 1 \
   -r 20260914 \
