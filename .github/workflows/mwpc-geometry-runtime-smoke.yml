@@ -140,19 +140,19 @@ jobs:
             check3(chamber.envelopeFullSize(),{60.0,72.56,1.9284},"envelope");
 
             int sensitive=0;
-            bool sawReadout=false, sawGreen=false;
+            bool sawElectronics=false, sawDivider=false;
             for(const auto& n:a->nodes){
               if(n.copyID==module.composeSensorVolID(7)) ++sensitive;
-              if(n.volume->name=="MWPCChamber_7_ReadoutBoardBlue"){
-                check3({2*n.volume->hx,2*n.volume->hy,2*n.volume->hz},{60.0,67.0,0.08},"readout size");
-                check3({n.tr->x,n.tr->y,n.tr->z},{3.4,0.,-0.3092},"readout centre"); sawReadout=true;
+              if(n.volume->name=="MWPCChamber_7_ElectronicsPlane"){
+                check3({2*n.volume->hx,2*n.volume->hy,2*n.volume->hz},{60.0,67.0,0.08},"electronics plane size");
+                check3({n.tr->x,n.tr->y,n.tr->z},{3.4,0.,-0.3092},"electronics plane centre"); sawElectronics=true;
               }
-              if(n.volume->name=="MWPCChamber_7_GreenExternalStripApproximation"){
-                check3({2*n.volume->hx,2*n.volume->hy,2*n.volume->hz},{53.0,4.0,0.2},"green size");
-                check3({n.tr->x,n.tr->y,n.tr->z},{0.,-36.28,-0.1675},"green centre"); sawGreen=true;
+              if(n.volume->name=="MWPCChamber_7_DividerPlaneApproximation"){
+                check3({2*n.volume->hx,2*n.volume->hy,2*n.volume->hz},{53.0,4.0,0.2},"divider plane size");
+                check3({n.tr->x,n.tr->y,n.tr->z},{0.,-36.28,-0.1675},"divider plane centre"); sawDivider=true;
               }
             }
-            if(sensitive!=1 || !sawReadout || !sawGreen) throw std::runtime_error("part identity/sensitivity check failed");
+            if(sensitive!=1 || !sawElectronics || !sawDivider) throw std::runtime_error("part identity/sensitivity check failed");
 
             auto* gas=dynamic_cast<TGeoMixture*>(NA6PTGeoHelper::instance().getMatPool().at("ArCO2"));
             if(!gas || gas->elements.size()!=3) throw std::runtime_error("gas mixture missing");
