@@ -168,6 +168,7 @@ class NA6PVertexerTracks
   static constexpr float kAlmost0F = 1e-7f; ///< tiny float
   //  static constexpr float kScaleStability = 0.1f;  ///< tolerance for scale change
   static constexpr float kDefTukey = 5.0f;        ///< def.value for Tukey constant
+  static constexpr float kPCATolerance = 1.e-3f;  ///< numerical PCA convergence tolerance (cm)
   float mTukey2I = 1.f / (kDefTukey * kDefTukey); ///< 1./[Tukey parameter]^2
   float mInitScaleSigma2 = 10.f;                  ///< scaling parameter on top of Tukey param
   int mMaxIterations = 20;                        ///< max iterations per vertex fit
