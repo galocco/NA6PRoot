@@ -41,3 +41,14 @@ build
 
 # install dir
 install
+
+# ROOT/NA6PRoot runtime products from local validation runs
+/HitsMuonSpecModular.root
+/HitsVerTel.root
+/MCKine.root
+/geometry.root
+/na6pLayout.ini
+/test_runs/
+
+# ROOT ACLiC generated dictionaries/caches
+*_C_ACLiC_dict_rdict.pcm
