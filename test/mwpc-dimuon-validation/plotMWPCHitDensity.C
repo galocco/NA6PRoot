@@ -153,12 +153,17 @@ void plotMWPCHitDensity(const char* runDir = "test_runs/mwpc_dimuon/Jpsi",
     const double pitchY = gasY - p.activeOverlapY;
     const double activeX = gasX + (nx - 1) * pitchX;
     const double activeY = gasY + (ny - 1) * pitchY;
-    const double margin = 5.;
 
-    xMin[station] = -0.5 * activeX - margin;
-    xMax[station] = +0.5 * activeX + margin;
-    yMin[station] = -0.5 * activeY - margin;
-    yMax[station] = +0.5 * activeY + margin;
+    // Keep the complete outermost chamber row/column comfortably inside the
+    // plotting frame.  The active-gas footprint itself ends at +/-active/2;
+    // 12 cm of visual padding also accommodates the rotated frame/electronics
+    // overhangs so the station is never clipped at the plot boundary.
+    constexpr double plotMargin = 12.;
+
+    xMin[station] = -0.5 * activeX - plotMargin;
+    xMax[station] = +0.5 * activeX + plotMargin;
+    yMin[station] = -0.5 * activeY - plotMargin;
+    yMax[station] = +0.5 * activeY + plotMargin;
 
     const int nbinX = std::max(10, static_cast<int>(std::ceil((xMax[station] - xMin[station]) / binSizeCm)));
     const int nbinY = std::max(10, static_cast<int>(std::ceil((yMax[station] - yMin[station]) / binSizeCm)));
