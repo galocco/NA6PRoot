@@ -49,6 +49,18 @@ void NA6PMuonSpecModular::createGeometry(TGeoVolume* world)
     throw std::runtime_error("nMSPlanes exceeds the MWPC station-layout capacity");
   }
 
+  // The detailed chamber model keeps the prototype-local mechanical axes
+  // (short side = local x, long side = local y).  Installation in the detector
+  // rotates the chamber around z so that detector X is horizontal/along the
+  // long side (wires) and detector Y is vertical/across the wires.
+  const double quarterTurnsReal = static_cast<double>(p.chamberRotationZDeg) / 90.;
+  const long quarterTurns = std::lround(quarterTurnsReal);
+  if (!std::isfinite(p.chamberRotationZDeg) ||
+      std::abs(quarterTurnsReal - static_cast<double>(quarterTurns)) > 1.e-6) {
+    throw std::runtime_error("MWPC chamberRotationZDeg must be a multiple of 90 degrees");
+  }
+  const bool swapXY = (std::abs(quarterTurns) % 2) == 1;
+
   const NA6PMWPCChamber::Materials materials = {
     addName(p.medFR4),
     addName(p.medCopper),
@@ -56,8 +68,10 @@ void NA6PMuonSpecModular::createGeometry(TGeoVolume* world)
     addName(p.medGas)};
 
   const NA6PMWPCChamber standardChamber(*this, materials);
-  const double ms0BodyX = static_cast<double>(p.ms0GasX) + 2. * p.innerFrameWidth;
-  const NA6PMWPCChamber narrowMS0Chamber(*this, materials, ms0BodyX, p.bodyY);
+  // detector Y is chamber-local x after the default +/-90 degree installation
+  // rotation, so the requested MS0 vertical sensitive height overrides local x.
+  const double ms0BodyShort = static_cast<double>(p.ms0GasY) + 2. * p.innerFrameWidth;
+  const NA6PMWPCChamber narrowMS0Chamber(*this, materials, ms0BodyShort, p.bodyY);
 
   standardChamber.createMaterials();
 
@@ -86,21 +100,36 @@ void NA6PMuonSpecModular::createGeometry(TGeoVolume* world)
     const bool narrow = ist == 0 && p.useNarrowMS0;
     const NA6PMWPCChamber& chamber = narrow ? narrowMS0Chamber : standardChamber;
 
-    const auto gasSize = chamber.gasFullSize();
+    const auto localGasSize = chamber.gasFullSize();
     const auto gasCentre = chamber.gasCentre();
+    const double gasX = swapXY ? localGasSize[1] : localGasSize[0];
+    const double gasY = swapXY ? localGasSize[0] : localGasSize[1];
     const double overlapX = p.activeOverlapX;
     const double overlapY = p.activeOverlapY;
-    const double pitchX = gasSize[0] - overlapX;
-    const double pitchY = gasSize[1] - overlapY;
+    const double pitchX = gasX - overlapX;
+    const double pitchY = gasY - overlapY;
 
     if (!std::isfinite(overlapX) || !std::isfinite(overlapY) ||
         overlapX < 0. || overlapY < 0. || pitchX <= 0. || pitchY <= 0.) {
       throw std::runtime_error(fmt::format(
-        "MS{} has invalid active overlap Ox={} Oy={} for gas {}x{} cm",
-        ist, overlapX, overlapY, gasSize[0], gasSize[1]));
+        "MS{} has invalid active overlap Ox={} Oy={} for detector gas {}x{} cm",
+        ist, overlapX, overlapY, gasX, gasY));
     }
     if (!std::isfinite(p.staggerZStep) || p.staggerZStep <= 0.) {
       throw std::runtime_error("MWPC staggerZStep must be positive");
+    }
+
+    const double coverageX = gasX + (nx - 1) * pitchX;
+    const double coverageY = gasY + (ny - 1) * pitchY;
+    if (p.stationWorkingAreaX[ist] > 0.f && coverageX + 1.e-6 < p.stationWorkingAreaX[ist]) {
+      throw std::runtime_error(fmt::format(
+        "MS{} grid covers only {:.3f} cm in X, below requested working area {:.3f} cm",
+        ist, coverageX, p.stationWorkingAreaX[ist]));
+    }
+    if (p.stationWorkingAreaY[ist] > 0.f && coverageY + 1.e-6 < p.stationWorkingAreaY[ist]) {
+      throw std::runtime_error(fmt::format(
+        "MS{} grid covers only {:.3f} cm in Y, below requested working area {:.3f} cm",
+        ist, coverageY, p.stationWorkingAreaY[ist]));
     }
 
     const std::string stationName = fmt::format("MS{}", ist);
@@ -110,7 +139,7 @@ void NA6PMuonSpecModular::createGeometry(TGeoVolume* world)
 
     for (int row = 0; row < ny; ++row) {
       for (int col = 0; col < nx; ++col) {
-        // Checkerboard parity:
+        // Checkerboard parity in detector X/Y:
         //   A B A B ...
         //   C D C D ...
         //   A B A B ...
@@ -120,14 +149,22 @@ void NA6PMuonSpecModular::createGeometry(TGeoVolume* world)
         const double y = (static_cast<double>(row) - 0.5 * (ny - 1)) * pitchY;
         const double desiredGasZ = (static_cast<double>(q) - 1.5) * p.staggerZStep;
 
-        // addTo() places the chamber assembly origin.  Subtract the internal
-        // gas-centre offset so that desiredGasZ refers exactly to the sensitive
-        // gas centre, matching the offline stagger scorer.
-        const NA6PMWPCChamber::Placement placement = {
-          x,
-          y,
-          desiredGasZ - gasCentre[2]};
+        // addTo() first creates the chamber with its prototype-local axes.
+        // Replace the node transform with a rotation+translation so that the
+        // detailed asymmetric mechanical model is rotated as one rigid object;
+        // this preserves the electronics/divider geometry rather than swapping
+        // only the body dimensions.
+        const double chamberZ = desiredGasZ - gasCentre[2];
+        const NA6PMWPCChamber::Placement placement = {x, y, chamberZ};
         chamber.addTo(station, chamberID, localCopyID, placement);
+
+        auto* chamberNode = dynamic_cast<TGeoNodeMatrix*>(station->GetNode(station->GetNdaughters() - 1));
+        if (!chamberNode) {
+          throw std::runtime_error(fmt::format("MS{} chamber {} node does not carry a placement matrix", ist, chamberID));
+        }
+        auto* rotation = new TGeoRotation();
+        rotation->RotateZ(p.chamberRotationZDeg);
+        chamberNode->SetMatrix(new TGeoCombiTrans(x, y, chamberZ, rotation));
 
         LOGP(debug,
              "MS{} row {} col {} layer {} chamberID {} gas centre=({:.3f},{:.3f},{:.3f}) cm",
@@ -146,11 +183,14 @@ void NA6PMuonSpecModular::createGeometry(TGeoVolume* world)
                           layout.shiftMS[2] + layout.posMSPlaneZ[ist]));
 
     LOGP(info,
-         "Created MS{} MWPC station: grid={}x{} N={} gas={:.3f}x{:.3f} cm "
-         "pitch={:.3f}x{:.3f} cm overlap={:.3f}x{:.3f} cm "
+         "Created MS{} MWPC station: grid={}x{} N={} detectorGas={:.3f}x{:.3f} cm "
+         "pitch={:.3f}x{:.3f} cm coverage={:.3f}x{:.3f} cm target={:.3f}x{:.3f} cm "
+         "overlap={:.3f}x{:.3f} cm rotZ={:.1f} deg "
          "z(A,B,C,D)=({:.3f},{:.3f},{:.3f},{:.3f}) cm chamberID=[{},{}]{}",
-         ist, nx, ny, nx * ny, gasSize[0], gasSize[1], pitchX, pitchY,
-         overlapX, overlapY,
+         ist, nx, ny, nx * ny, gasX, gasY, pitchX, pitchY,
+         coverageX, coverageY,
+         p.stationWorkingAreaX[ist], p.stationWorkingAreaY[ist],
+         overlapX, overlapY, p.chamberRotationZDeg,
          -1.5 * p.staggerZStep, -0.5 * p.staggerZStep,
          +0.5 * p.staggerZStep, +1.5 * p.staggerZStep,
          firstChamberID, lastChamberID, narrow ? " [narrow MS0]" : "");
