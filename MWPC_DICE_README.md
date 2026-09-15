@@ -53,8 +53,6 @@ q = 2*(row % 2) + (col % 2)
 q = 0,1,2,3 -> A,B,C,D
 ```
 
-The current `Nx,Ny` values are a provisional working point. They cover the requested finite working rectangles and add one horizontal column at MS2-MS5 relative to the minimum-covering baseline. The downstream raw-acceptance/cost trade-off is still under study, so the grid should not be interpreted as a frozen final design.
-
 ## Main implementation files
 
 `sim/include/NA6PMWPCParam.h`
@@ -121,5 +119,3 @@ The direct-hit plots use the actual sensitive-gas entrance coordinates from `Hit
 ## Present scope
 
 The branch models geometry, materials and Geant4 transport. It does not yet model MWPC signal formation: no electron/ion drift, avalanche gain, induced strip/wire signals, electronics threshold, detector inefficiency or reconstruction response is included.
-
-The main open layout question is the marginal raw-acceptance gain versus chamber cost from adding further horizontal columns, especially for MS3-MS5. That study is deliberately kept separate from the geometry implementation reviewed here.
