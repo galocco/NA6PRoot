@@ -15,7 +15,7 @@ struct NA6PMWPCParam : public na6p::conf::ConfigurableParamHelper<NA6PMWPCParam>
   //   local y = 68.56 cm long body side
   // The complete chamber is rotated around z when installed in an MS station so
   // that detector X is horizontal/along the long side (wires) and detector Y is
-  // vertical/across the wires.  With the default +90 deg rotation the standard
+  // vertical/across the wires. With the default +90 deg rotation the standard
   // sensitive gas footprint in detector coordinates is therefore 66.56 x 51.2 cm.
   float bodyX = 53.2f;
   float bodyY = 68.56f;
@@ -44,18 +44,18 @@ struct NA6PMWPCParam : public na6p::conf::ConfigurableParamHelper<NA6PMWPCParam>
   bool includeDividerPlane = true;
 
   // Approximate required detector working rectangles (global detector X,Y), cm,
-  // from the updated MS layout study.  They are design targets used to choose the
-  // smallest regular 3-cm-overlap grid that still covers each station area.
+  // from the updated MS layout study. They define the present finite station
+  // footprints used when comparing regular staggered grids.
   float stationWorkingAreaX[MaxStations] = {220.f, 230.f, 310.f, 320.f, 440.f, 500.f, 0.f};
   float stationWorkingAreaY[MaxStations] = {220.f, 240.f, 310.f, 320.f, 410.f, 440.f, 0.f};
 
-  // Preliminary minimal-covering regular grids in detector coordinates.
-  // NX counts chambers horizontally (detector X), NY vertically (detector Y).
-  // For Ox=Oy=3 cm, standard active 66.56 x 51.2 cm and MS0 active
-  // 66.56 x 30.72 cm, the minimum regular grids that cover the working areas are:
+  // Current provisional regular grids in detector coordinates. NX counts
+  // chambers horizontally (detector X), NY vertically (detector Y):
   //   MS0 4x8, MS1 4x5, MS2 5x7, MS3 5x7, MS4 7x9, MS5 8x10.
-  // Total: 265 chambers.  These defaults are a geometry working point and remain
-  // configurable for the later acceptance/stagger optimization scans.
+  // With Ox=Oy=3 cm these grids cover the requested working rectangles and have
+  // near-unity working-area-conditioned geometrical efficiency in the current
+  // high-statistics dimuon layout scan. They are a working point, not a frozen
+  // final design; the arrays remain configurable for further acceptance studies.
   int stationGridNX[MaxStations] = {4, 4, 5, 5, 7, 8, 0};
   int stationGridNY[MaxStations] = {8, 5, 7, 7, 9, 10, 0};
 
@@ -70,7 +70,7 @@ struct NA6PMWPCParam : public na6p::conf::ConfigurableParamHelper<NA6PMWPCParam>
   // With the default 4 cm step the gas centres are at -6,-2,+2,+6 cm.
   float staggerZStep = 4.0f;
 
-  // MS0 uses the requested shorter vertical active dimension.  Because the
+  // MS0 uses the requested shorter vertical active dimension. Because the
   // detailed chamber builder keeps the prototype-local axes and the installed
   // chamber is rotated by 90 deg, detector Y corresponds to chamber-local x.
   bool useNarrowMS0 = true;
