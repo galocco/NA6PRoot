@@ -1,13 +1,14 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-NEVENTS="${1:-100000}"
+NEVENTS="${1:-20000}"
 WORKERS="${2:-4}"
 
 ROOT_DIR="$(git rev-parse --show-toplevel)"
 GEN="${ROOT_DIR}/test/genDimuonBgEvent.C"
 HOOK="${ROOT_DIR}/test/mwpc-dimuon-validation/mwpcDimuonHooks.C"
-ANALYSIS="${ROOT_DIR}/test/mwpc-dimuon-validation/analyzeMWPCDimuon.C"
+KIN_ANALYSIS="${ROOT_DIR}/test/mwpc-dimuon-validation/analyzeMWPCDimuon.C"
+HIT_ANALYSIS="${ROOT_DIR}/test/mwpc-dimuon-validation/plotMWPCHitDensity.C"
 OUT_BASE="${ROOT_DIR}/test_runs/mwpc_dimuon"
 
 mkdir -p "${OUT_BASE}"
@@ -58,7 +59,12 @@ run_channel() {
     --doDigitization false \
     --configKeyValues "beam.energyPerNucleon=40;keyval.output_dir=${out}"
 
-  root -l -b -q "${ANALYSIS}+(\"${out}\",\"${channel}\",10,10.)"
+  # Parent/daughter momentum distributions and decay-closure checks.
+  root -l -b -q "${KIN_ANALYSIS}+(\"${out}\",\"${channel}\")"
+
+  # Direct Geant4 MWPC sensitive-gas hit density.  Every chamber crossing is
+  # counted separately at its actual position; 1 cm bins resolve the 3 cm seams.
+  root -l -b -q "${HIT_ANALYSIS}+(\"${out}\",\"${channel}\",1.)"
 }
 
 run_channel Jpsi 20260915
@@ -67,4 +73,5 @@ run_channel Phi 20260917
 
 echo
 echo "All channels finished."
-echo "Plots are under: ${OUT_BASE}/{Jpsi,Omega,Phi}/plots/"
+echo "Kinematics: ${OUT_BASE}/{Jpsi,Omega,Phi}/plots/"
+echo "Hit density: ${OUT_BASE}/{Jpsi,Omega,Phi}/plots_direct_hits/"
