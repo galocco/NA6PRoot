@@ -15,10 +15,10 @@ struct NA6PMWPCParam : public na6p::conf::ConfigurableParamHelper<NA6PMWPCParam>
   float innerFrameWidth = 1.0f;
   float honeycombEdgeWall = 0.1f;
   float readoutEndMargin = 0.78f;
-  float blueOverhang = 6.8f;
-  float greenLengthMargin = 0.2f;
-  float greenOverhang = 4.0f;
-  float greenThickness = 0.2f;
+  float electronicsPlaneOverhang = 6.8f;
+  float dividerPlaneLengthMargin = 0.2f;
+  float dividerPlaneOverhang = 4.0f;
+  float dividerPlaneThickness = 0.2f;
 
   // Layer thicknesses, cm
   float outerSkinFront = 0.015f;
@@ -32,8 +32,8 @@ struct NA6PMWPCParam : public na6p::conf::ConfigurableParamHelper<NA6PMWPCParam>
   float outerSkinBack = 0.015f;
 
   bool coverCopperOnGasFace = false;
-  bool readoutCopperOnBlueExtension = true;
-  bool includeGreenExternalStrip = true;
+  bool readoutCopperOnElectronicsExtension = true;
+  bool includeDividerPlane = true;
 
   // Preliminary full Muon-Spectrometer layout used for the stagger study.
   // Rows/columns are chamber counts in y/x respectively.  The defaults are
