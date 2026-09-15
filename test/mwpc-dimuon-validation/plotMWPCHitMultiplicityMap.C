@@ -52,16 +52,24 @@ int stationFromDetectorID(int detectorID, const NA6PMWPCParam& p)
   return -1;
 }
 
+std::array<double, 2> detectorGasSize(int station, const NA6PMWPCParam& p)
+{
+  const double gasX = p.bodyY - 2. * p.innerFrameWidth;
+  const double gasY = (station == 0 && p.useNarrowMS0)
+                        ? p.ms0GasY
+                        : p.bodyX - 2. * p.innerFrameWidth;
+  return {gasX, gasY};
+}
+
 void drawActiveGrid(int station, double xmin, double xmax, double ymin, double ymax,
                     std::vector<std::unique_ptr<TLine>>& lines)
 {
   const auto& p = NA6PMWPCParam::Instance();
   const int nx = p.stationGridNX[station];
   const int ny = p.stationGridNY[station];
-  const double gasX = (station == 0 && p.useNarrowMS0)
-                        ? p.ms0GasX
-                        : p.bodyX - 2. * p.innerFrameWidth;
-  const double gasY = p.bodyY - 2. * p.innerFrameWidth;
+  const auto gas = detectorGasSize(station, p);
+  const double gasX = gas[0];
+  const double gasY = gas[1];
   const double pitchX = gasX - p.activeOverlapX;
   const double pitchY = gasY - p.activeOverlapY;
 
@@ -135,10 +143,9 @@ void plotMWPCHitMultiplicityMap(const char* runDir = "test_runs/mwpc_dimuon/Phi"
   for (int station = 0; station < kNStations; ++station) {
     const int nx = p.stationGridNX[station];
     const int ny = p.stationGridNY[station];
-    const double gasX = (station == 0 && p.useNarrowMS0)
-                          ? p.ms0GasX
-                          : p.bodyX - 2. * p.innerFrameWidth;
-    const double gasY = p.bodyY - 2. * p.innerFrameWidth;
+    const auto gas = detectorGasSize(station, p);
+    const double gasX = gas[0];
+    const double gasY = gas[1];
     const double pitchX = gasX - p.activeOverlapX;
     const double pitchY = gasY - p.activeOverlapY;
     const double activeX = gasX + (nx - 1) * pitchX;
@@ -204,12 +211,11 @@ void plotMWPCHitMultiplicityMap(const char* runDir = "test_runs/mwpc_dimuon/Phi"
         const double x = hit.getXIn() - xCentre;
         const double y = hit.getYIn() - yCentre;
 
-        hHitSum[station]->Fill(x, y); // every actual chamber hit is counted
+        hHitSum[station]->Fill(x, y);
         const int globalBin = hMuonCount[station]->FindBin(x, y);
         binsTouched[station].insert(globalBin);
       }
 
-      // Denominator: each daughter muon contributes at most once to a given bin.
       for (int station = 0; station < kNStations; ++station) {
         for (int bin : binsTouched[station]) {
           hMuonCount[station]->AddBinContent(bin, 1.0);
@@ -242,7 +248,7 @@ void plotMWPCHitMultiplicityMap(const char* runDir = "test_runs/mwpc_dimuon/Phi"
 
     hMeanHits[station]->SetTitle(Form(
       "MS%d - %s - direct Geant4 chamber-hit multiplicity;"
-      "x at sensitive-gas crossing [cm];y at sensitive-gas crossing [cm];"
+      "detector X at sensitive-gas crossing [cm];detector Y at sensitive-gas crossing [cm];"
       "mean chamber hits per contributing muon",
       station, displayName(channel).c_str()));
     hMeanHits[station]->SetMinimum(0.);
