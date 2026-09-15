@@ -51,12 +51,13 @@ struct NA6PMWPCParam : public na6p::conf::ConfigurableParamHelper<NA6PMWPCParam>
 
   // Current provisional regular grids in detector coordinates. NX counts
   // chambers horizontally (detector X), NY vertically (detector Y):
-  //   MS0 4x8, MS1 4x5, MS2 5x7, MS3 5x7, MS4 7x9, MS5 8x10.
-  // With Ox=Oy=3 cm these grids cover the requested working rectangles and have
-  // near-unity working-area-conditioned geometrical efficiency in the current
-  // high-statistics dimuon layout scan. They are a working point, not a frozen
-  // final design; the arrays remain configurable for further acceptance studies.
-  int stationGridNX[MaxStations] = {4, 4, 5, 5, 7, 8, 0};
+  //   MS0 4x8, MS1 4x5, MS2 6x7, MS3 6x7, MS4 8x9, MS5 9x10.
+  // Ox=Oy=3 cm and adjacent A/B/C/D z spacing is 4 cm. These grids retain the
+  // requested finite working areas while adding one horizontal column at MS2-MS5
+  // relative to the minimum-covering baseline for the current acceptance study.
+  // They are a working point, not a frozen final design; the arrays remain
+  // configurable for further acceptance studies.
+  int stationGridNX[MaxStations] = {4, 4, 6, 6, 8, 9, 0};
   int stationGridNY[MaxStations] = {8, 5, 7, 7, 9, 10, 0};
 
   // Active-gas overlap, not mechanical-envelope overlap. Chamber centre pitches
