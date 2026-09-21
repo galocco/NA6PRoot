@@ -45,9 +45,12 @@ na6psim -n 5 -g $NA6PROOT_ROOT/share/test/genbox.C+
 * \subpage refSIM
 /doxy -->
 
+Detailed detector documentation:
+
+- [Vertex Telescope geometry and data flow](docs/VerTelGeometryAndDataFlow.md)
+- [MWPC module and modular muon spectrometer](docs/MWPCMuonSpectrometerGeometry.md)
+
 ## Reconstruction: [rec module](rec)
 <!-- doxy
 * \subpage refREC
 /doxy -->
-
-

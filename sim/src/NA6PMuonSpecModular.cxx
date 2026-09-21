@@ -75,7 +75,6 @@ void NA6PMuonSpecModular::createGeometry(TGeoVolume* world)
 
   standardChamber.createMaterials();
 
-  int requestedChambers = 0;
   for (int ist = 0; ist < layout.nMSPlanes; ++ist) {
     const int nx = p.stationGridNX[ist];
     const int ny = p.stationGridNY[ist];
@@ -85,8 +84,8 @@ void NA6PMuonSpecModular::createGeometry(TGeoVolume* world)
     if (nx * ny >= MaxNonSensID) {
       throw std::runtime_error(fmt::format("MS{} has too many chambers for local non-sensitive copy IDs", ist));
     }
-    requestedChambers += nx * ny;
   }
+  const int requestedChambers = p.getNModules(layout.nMSPlanes);
   if (requestedChambers > MaxVolID - MaxNonSensID) {
     throw std::runtime_error(fmt::format(
       "MWPC layout requests {} sensitive chambers but the module supports at most {}",
@@ -203,6 +202,7 @@ void NA6PMuonSpecModular::createGeometry(TGeoVolume* world)
 void NA6PMuonSpecModular::setAlignableEntries()
 {
   const auto& layout = NA6PLayoutParam::Instance();
+  const auto& p = NA6PMWPCParam::Instance();
   if (!gGeoManager || !gGeoManager->GetTopNode() || !gGeoManager->GetTopVolume()) {
     LOGP(error, "Cannot define MWPC alignable entries without a complete TGeo geometry");
     return;
@@ -261,13 +261,18 @@ void NA6PMuonSpecModular::setAlignableEntries()
       TGeoPNEntry* entry = gGeoManager->SetAlignableEntry(
         symbolicName.c_str(), path.c_str(), alignableID);
       if (entry) {
-        LOGP(debug, "Added alignable MWPC sensor {} path={} id={}",
+        LOGP(info, "Successfully added {} {} as alignable sensor {}",
              symbolicName, path, alignableID);
         ++nAlignable;
       } else {
         LOGP(error, "FAILED to add alignable MWPC sensor {} path={}", symbolicName, path);
       }
     }
+  }
+  const int expectedAlignable = p.getNModules(layout.nMSPlanes);
+  if (nAlignable != expectedAlignable) {
+    LOGP(error, "Defined {} alignable MWPC sensors, but the configured {} stations contain {} modules",
+         nAlignable, layout.nMSPlanes, expectedAlignable);
   }
   LOGP(info, "Defined {} alignable MWPC sensitive-gas volumes", nAlignable);
 }

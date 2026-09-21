@@ -5,6 +5,7 @@
 #include <TRandom3.h>
 #include <fairlogger/Logger.h>
 #include "NA6PMuonSpecModularHit.h"
+#include "NA6PMuonSpecDigit.h"
 #include "NA6PTrackerCA.h"
 #include "NA6PVertexerTracklets.h"
 #include "NA6PMuonSpecReconstruction.h"
@@ -12,6 +13,7 @@
 
 NA6PMuonSpecReconstruction::NA6PMuonSpecReconstruction() : NA6PReconstruction("MuonSpec")
 {
+  mClusterizer.initGeometry();
   initTracker();
 }
 
@@ -128,6 +130,15 @@ void NA6PMuonSpecReconstruction::hitsToRecPoints(const std::vector<NA6PMuonSpecM
     NA6PMCComposedLabel lbl(hit.getTrackID(), evID, 0);
     mCluMCLabels.addElement(cluID, lbl);
   }
+}
+
+void NA6PMuonSpecReconstruction::digitsToRecPoints(
+  const std::vector<NA6PMuonSpecDigit>& digits,
+  const NA6PMCTruthContainer& digitLabels)
+{
+  mClusterizer.process(digits, digitLabels, mClusters, mCluMCLabels);
+  LOGP(info, " --> nClusters = {} nCluMCLabels = {}",
+       mClusters.size(), mCluMCLabels.getNElements());
 }
 
 //____________________________________________________________________________________

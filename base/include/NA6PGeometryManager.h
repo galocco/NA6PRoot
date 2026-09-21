@@ -17,37 +17,35 @@
 
 #include <Rtypes.h>
 #include <TGeoMatrix.h>
+#include <vector>
 
-class TFile;
 class TGeoVolume;
 
-// helper class to interface to the geometry (martices, sizes) of sensors
+// Helper class to access cached geometry matrices and sizes of alignable sensors.
 
 class NA6PGeometryManager
 {
  public:
   static constexpr int kNVTModulesPerLayer = 4;
 
-  NA6PGeometryManager() = default;
-  ~NA6PGeometryManager() = default;
+  static int getMuonSpecGeometryIndex(int detectorID);
 
   bool loadGeometry(const char* filename = "geometry.root", const char* geoname = "NA6P");
-  bool isGeometryLoaded() const { return mGeoLoaded; }
 
+  // Integer access uses the TGeo alignable-entry index. This is also the
+  // VerTel detector ID as long as the VT entries are registered first and in
+  // detector-ID order.
   const TGeoHMatrix& getMatrix(int jMod) const { return mMatrices[jMod]; }
   float getModuleHalfX(int jMod) const { return mModuleHalfX[jMod]; }
   float getModuleHalfY(int jMod) const { return mModuleHalfY[jMod]; }
-  float getModuleFullX(int jMod) const { return mModuleHalfX[jMod] * 2.0f; }
-  float getModuleFullY(int jMod) const { return mModuleHalfY[jMod] * 2.0f; }
 
  private:
   bool fillModuleSize(int jMod, TGeoVolume* vol);
 
- protected:
-  std::vector<TGeoHMatrix> mMatrices{}; ///< local-to-global transforms
+  std::vector<TGeoHMatrix> mMatrices;   ///< Local-to-global transforms
   std::vector<float> mModuleHalfX;      ///< Module half length along x
   std::vector<float> mModuleHalfY;      ///< Module half length along y
-  bool mGeoLoaded{false};               ///< flag for successful load of geo
+  bool mGeoLoaded{false};               ///< Flag for successful geometry load
   ClassDefNV(NA6PGeometryManager, 1);
 };
 

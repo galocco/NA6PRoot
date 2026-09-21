@@ -13,6 +13,7 @@
 #include <TStopwatch.h>
 #include "NA6PVerTelHit.h"
 #include "NA6PMuonSpecModularHit.h"
+#include "NA6PMuonSpecDigit.h"
 #include "MagneticField.h"
 #include "StringUtils.h"
 #include "NA6PVerTelReconstruction.h"
@@ -133,7 +134,7 @@ int main(int argc, char** argv)
   LOGP(info, "Printing all configs");
   na6p::conf::ConfigurableParam::printAllKeyValuePairs();
 
-  const bool doHitsToRecPoints = vm["doHitsToRecPoints"].as<bool>();
+  bool doHitsToRecPoints = vm["doHitsToRecPoints"].as<bool>();
   const bool doDigitsToRecPoints = vm["doDigitsToRecPoints"].as<bool>();
   const bool doTrackletVertex = vm["doTrackletVertex"].as<bool>();
   const bool doVTTracking = vm["doVTTracking"].as<bool>();
@@ -150,7 +151,8 @@ int main(int argc, char** argv)
   }
 
   if (doHitsToRecPoints && doDigitsToRecPoints) {
-    LOGP(info, "Will do digits to recpoints for VT instead of hits to recpoints");
+    doHitsToRecPoints = false;
+    LOGP(info, "Will do digits to recpoints instead of hits to recpoints");
   }
 
   std::unique_ptr<NA6PVerTelReconstruction> vtrec = std::make_unique<NA6PVerTelReconstruction>();
@@ -161,45 +163,39 @@ int main(int argc, char** argv)
   std::unique_ptr<NA6PMatching> matching = std::make_unique<NA6PMatching>();
 
   if (doHitsToRecPoints) {
-    { // VTHits
-      if (!doDigitsToRecPoints) {
-        TreeFromFile tfVT("HitsVerTel.root", "hitsVerTel");
-        std::vector<NA6PVerTelHit> vtHits, *vtHitsPtr = &vtHits;
-        tfVT.getTree()->SetBranchAddress("VerTel", &vtHitsPtr);
-        int nEvVT = tfVT.getTree()->GetEntriesFast();
+    TreeFromFile tfVT("HitsVerTel.root", "hitsVerTel");
+    std::vector<NA6PVerTelHit> vtHits, *vtHitsPtr = &vtHits;
+    tfVT.getTree()->SetBranchAddress("VerTel", &vtHitsPtr);
+    int nEvVT = tfVT.getTree()->GetEntriesFast();
 
-        vtrec->createClustersOutput();
-        for (int jEv = 0; jEv < nEvVT; jEv++) {
-          tfVT.getTree()->GetEvent(jEv);
-          int nHits = vtHits.size();
-          LOGP(info, "VerTel Event {} nHits= {}", jEv, nHits);
-          vtrec->clearClusters();
-          vtrec->hitsToRecPoints(vtHits, jEv);
-          vtrec->writeClusters();
-        }
-        vtrec->closeClustersOutput();
-      }
+    vtrec->createClustersOutput();
+    for (int jEv = 0; jEv < nEvVT; jEv++) {
+      tfVT.getTree()->GetEvent(jEv);
+      int nHits = vtHits.size();
+      LOGP(info, "VerTel Event {} nHits= {}", jEv, nHits);
+      vtrec->clearClusters();
+      vtrec->hitsToRecPoints(vtHits, jEv);
+      vtrec->writeClusters();
     }
-    { // Muon Spectrometer hits -> clusters
-      TreeFromFile tfMS("HitsMuonSpecModular.root", "hitsMuonSpecModular");
-      std::vector<NA6PMuonSpecModularHit> msHits, *msHitsPtr = &msHits;
-      tfMS.getTree()->SetBranchAddress("MuonSpecModular", &msHitsPtr);
-      int nEvMS = tfMS.getTree()->GetEntriesFast();
+    vtrec->closeClustersOutput();
 
-      msrec->createClustersOutput();
-      for (int jEv = 0; jEv < nEvMS; jEv++) {
-        tfMS.getTree()->GetEvent(jEv);
-        int nHits = msHits.size();
-        LOGP(info, "MuonSpec Event {} nHits= {}", jEv, nHits);
-        msrec->clearClusters();
-        msrec->hitsToRecPoints(msHits, jEv);
-        msrec->writeClusters();
-      }
-      msrec->closeClustersOutput();
+    TreeFromFile tfMS("HitsMuonSpecModular.root", "hitsMuonSpecModular");
+    std::vector<NA6PMuonSpecModularHit> msHits, *msHitsPtr = &msHits;
+    tfMS.getTree()->SetBranchAddress("MuonSpecModular", &msHitsPtr);
+    int nEvMS = tfMS.getTree()->GetEntriesFast();
+
+    msrec->createClustersOutput();
+    for (int jEv = 0; jEv < nEvMS; jEv++) {
+      tfMS.getTree()->GetEvent(jEv);
+      int nHits = msHits.size();
+      LOGP(info, "MuonSpec Event {} nHits= {}", jEv, nHits);
+      msrec->clearClusters();
+      msrec->hitsToRecPoints(msHits, jEv);
+      msrec->writeClusters();
     }
-  } else {
-    LOGP(info, "Hits -> Recpoints disabled from input options");
+    msrec->closeClustersOutput();
   }
+
   if (doDigitsToRecPoints) {
     TreeFromFile tfVT("DigitsVerTel.root", "digitsVerTel");
     std::vector<NA6PVerTelDigit> vtDigits, *vtDigitsPtr = &vtDigits;
@@ -218,6 +214,23 @@ int main(int argc, char** argv)
       vtrec->writeClusters();
     }
     vtrec->closeClustersOutput();
+
+    TreeFromFile tfMS("DigitsMuonSpec.root", "digitsMuonSpec");
+    std::vector<NA6PMuonSpecDigit> msDigits, *msDigitsPtr = &msDigits;
+    NA6PMCTruthContainer msDigMCLabels, *msDigMCLabelsPtr = &msDigMCLabels;
+    tfMS.getTree()->SetBranchAddress("MuonSpec", &msDigitsPtr);
+    tfMS.getTree()->SetBranchAddress("MuonSpecMCTruth", &msDigMCLabelsPtr);
+    int nEvMS = tfMS.getTree()->GetEntriesFast();
+    msrec->createClustersOutput();
+    for (int jEv = 0; jEv < nEvMS; ++jEv) {
+      tfMS.getTree()->GetEvent(jEv);
+      LOGP(info, "MuonSpec Event {} nDigits = {} nDigMClabels = {}",
+            jEv, msDigits.size(), msDigMCLabels.getNElements());
+      msrec->clearClusters();
+      msrec->digitsToRecPoints(msDigits, msDigMCLabels);
+      msrec->writeClusters();
+    }
+    msrec->closeClustersOutput();
   }
 
   const bool needsMCKine = doTrackletVertex || doVTTracking || doMSTracking || doMatching;

@@ -15,6 +15,9 @@
 #include "NA6PGenerator.h"
 #include "NA6PVerTelHit.h"
 #include "NA6PVerTelDigitizer.h"
+#include "NA6PMuonSpecHit.h"
+#include "NA6PMuonSpecModularHit.h"
+#include "NA6PMuonSpecDigitizer.h"
 #include "TG4RunConfiguration.h"
 #include "TGeant4.h"
 
@@ -107,6 +110,43 @@ int main(int argc, char** argv)
     delete thVT;
     fhVT->Close();
     delete fhVT;
+
+    NA6PMuonSpecDigitizer digMS;
+    digMS.init((dir + "geometry.root").c_str());
+    TFile* fhMS = TFile::Open((dir + "HitsMuonSpecModular.root").c_str());
+    if (!fhMS || fhMS->IsZombie()) {
+      LOGP(fatal, "Failed to open file {}", dir + "HitsMuonSpecModular.root");
+    }
+    TTree* thMS = (TTree*)fhMS->Get("hitsMuonSpecModular");
+    if (!thMS) {
+      LOGP(fatal, "Failed to get tree hitsMuonSpec from file {}", dir +"HitsMuonSpecModular.root");
+    }
+    std::vector<NA6PMuonSpecModularHit> msModularHits, *msModularHitsPtr = &msModularHits;
+    thMS->SetBranchAddress("MuonSpecModular", &msModularHitsPtr);
+    std::vector<NA6PMuonSpecHit> msHits;
+    int nEvMS = thMS->GetEntriesFast();
+    for (int jEv = 0; jEv < nEvMS; jEv++) {
+      thMS->GetEvent(jEv);
+      msHits.clear();
+      msHits.reserve(msModularHits.size());
+      for (const auto& modularHit : msModularHits) {
+        msHits.emplace_back(modularHit.getTrackID(), modularHit.getDetectorID(),
+                            TVector3(modularHit.getXIn(), modularHit.getYIn(), modularHit.getZIn()),
+                            TVector3(modularHit.getXOut(), modularHit.getYOut(), modularHit.getZOut()),
+                            TVector3(modularHit.getPXIn(), modularHit.getPYIn(), modularHit.getPZIn()),
+                            TVector3(modularHit.getPXOut(), modularHit.getPYOut(), modularHit.getPZOut()),
+                            modularHit.getTime(), modularHit.getHitValue(),
+                            modularHit.getStatusStart(), modularHit.getStatusEnd());
+      }
+      int nHits = msHits.size();
+      LOGP(info, "Digitize MuonSpec Event {} nHits = {}", jEv, nHits);
+      digMS.setEventMetaData(vm["event-offset"].as<uint32_t>() + jEv);
+      digMS.process(msHits);
+    }
+    digMS.closeDigitsOutput();
+    delete thMS;
+    fhMS->Close();
+    delete fhMS;
   };
 
   if (vm["digitize-only"].as<bool>()) {
@@ -134,7 +174,6 @@ int main(int argc, char** argv)
   }
 
   auto runConfig = new TG4RunConfiguration("geomRoot", "FTFP_BERT");
-  runConfig->SetMTApplication(false);
   auto geant4 = new TGeant4("TGeant4", "Geant4 Monte Carlo Engine", runConfig, argc, argv);
 
   TVirtualMC::GetMC()->SetMagField(TGeoGlobalMagField::Instance()->GetField());

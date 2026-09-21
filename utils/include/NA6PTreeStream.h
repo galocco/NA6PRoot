@@ -101,7 +101,7 @@ static constexpr char getRootTypeCode()
                        std::is_same_v<T, Bool_t>) {
     return 'B';
   } else {
-    static_assert(false, "unsupported type!");
+    static_assert(!std::is_same_v<T, T>, "unsupported type!");
   }
 }
 } // namespace details

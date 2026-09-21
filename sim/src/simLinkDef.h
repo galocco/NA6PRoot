@@ -30,6 +30,10 @@
 #pragma link C++ class NA6PVerTelDigit + ;
 #pragma link C++ class std::vector < NA6PVerTelDigit> + ;
 
+#pragma link C++ struct MSStripID+;
+#pragma link C++ class NA6PMuonSpecDigit + ;
+#pragma link C++ class std::vector < NA6PMuonSpecDigit> + ;
+
 #pragma link C++ class std::unordered_map < std::string, float> + ;
 
 #pragma link C++ class NA6PMCEventHeader + ;
@@ -45,6 +49,7 @@
 #pragma link C++ class NA6PGenCocktail + ;
 
 #pragma link C++ class NA6PVerTelSegmentation + ;
+#pragma link C++ class NA6PMuonSpecSegmentation + ;
 #pragma link C++ class NA6PVerTelDigitizer + ;
 
 #pragma link C++ class std::vector < TParticle> + ;

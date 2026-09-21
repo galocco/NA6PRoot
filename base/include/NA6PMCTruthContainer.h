@@ -16,6 +16,7 @@
 #define NA6P_MCTRUTHCONTAINER_H
 
 #include "NA6PMCComposedLabel.h"
+#include <cassert>
 #include <span>
 #include <stdexcept>
 

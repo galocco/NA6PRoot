@@ -21,6 +21,7 @@
 // Class to steer the VT reconstruction
 
 #include "NA6PMuonSpecCluster.h"
+#include "NA6PMuonSpecClusterizer.h"
 #include "NA6PMCTruthContainer.h"
 #include "NA6PMCComposedLabel.h"
 #include "NA6PTrack.h"
@@ -31,6 +32,7 @@ class TFile;
 class TTree;
 class NA6PMuonSpecHit;
 class NA6PMuonSpecModularHit;
+class NA6PMuonSpecDigit;
 class NA6PMuonSpecVertexerTracklets;
 class NA6PTrackerCA;
 
@@ -64,6 +66,8 @@ class NA6PMuonSpecReconstruction : public NA6PReconstruction
   void setClusterSpaceResolutionX(double clures) { mCluResX = clures; }
   void setClusterSpaceResolutionY(double clures) { mCluResY = clures; }
   void hitsToRecPoints(const std::vector<NA6PMuonSpecModularHit>& hits, int evID = 0);
+  void digitsToRecPoints(const std::vector<NA6PMuonSpecDigit>& digits,
+                         const NA6PMCTruthContainer& digitLabels);
   NA6PTrackerCA* getTracker() const { return mMSTracker.get(); }
 
   // methods to steer tracking
@@ -87,6 +91,7 @@ class NA6PMuonSpecReconstruction : public NA6PReconstruction
  private:
   std::vector<NA6PMuonSpecCluster> mClusters, *hClusPtr = &mClusters;              // vector of clusters
   NA6PMCTruthContainer mCluMCLabels, *hCluMCLabelsPtr = &mCluMCLabels;             // cluster MC labels
+  NA6PMuonSpecClusterizer mClusterizer; //! transient strip cluster finder
   TFile* mClusFile = nullptr;                                                      // file with clusters
   TTree* mClusTree = nullptr;                                                      // tree of clusters
   double mCluResX = 100.e-4;                                                       // cluster resolution, cm (for fast simu)

@@ -60,6 +60,33 @@ struct NA6PMWPCParam : public na6p::conf::ConfigurableParamHelper<NA6PMWPCParam>
   int stationGridNX[MaxStations] = {4, 4, 6, 6, 8, 9, 0};
   int stationGridNY[MaxStations] = {8, 5, 7, 7, 9, 10, 0};
 
+  // Strip readout definition shared by digitization and reconstruction.
+  // A strip count of zero lets the sensitive chamber extent define the range.
+  float stripPitch[2] = {0.1f, 0.1f};
+  // Station-dependent pitches chosen for sigma = pitch/sqrt(12), in cm.
+  // MS0-MS3: 0.1 mm (X), 0.5 mm (Y); MS4-MS5: 5 mm in both coordinates.
+  float stationStripPitch[MaxStations][2] = {
+    {0.034641f, 0.173205f}, {0.034641f, 0.173205f},
+    {0.034641f, 0.173205f}, {0.034641f, 0.173205f},
+    {1.73205f, 1.73205f}, {1.73205f, 1.73205f}, {0.f, 0.f}};
+  float stripAngleDeg[2] = {0.f, 90.f};
+  int stripCount[2] = {0, 0};
+  float maxClusterChargeAsymmetry = 0.5f;
+
+  int getNModules(int nStations = MaxStations) const
+  {
+    if (nStations < 0) {
+      nStations = 0;
+    } else if (nStations > MaxStations) {
+      nStations = MaxStations;
+    }
+    int nModules = 0;
+    for (int i = 0; i < nStations; ++i) {
+      nModules += stationGridNX[i] * stationGridNY[i];
+    }
+    return nModules;
+  }
+
   // Active-gas overlap, not mechanical-envelope overlap. Chamber centre pitches
   // are globalGasX-activeOverlapX and globalGasY-activeOverlapY.
   float activeOverlapX = 3.0f;

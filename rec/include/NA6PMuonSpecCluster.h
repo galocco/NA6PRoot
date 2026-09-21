@@ -16,6 +16,8 @@
 #define NA6P_MUONSPEC_CLUSTER_H
 
 #include "NA6PBaseCluster.h"
+#include <array>
+#include <cstdint>
 
 // Muon Spectrometer cluster class
 
@@ -27,8 +29,17 @@ class NA6PMuonSpecCluster : public NA6PBaseCluster
   NA6PMuonSpecCluster(float x, float y, float z, int clusiz, int layer);
   NA6PMuonSpecCluster(const NA6PMuonSpecCluster&) = default;
   NA6PMuonSpecCluster& operator=(const NA6PMuonSpecCluster&) = default;
+
+  float getReadoutCharge(uint16_t readout) const { return readout < 2 ? mReadoutCharge[readout] : 0.f; }
+  uint16_t getReadoutSize(uint16_t readout) const { return readout < 2 ? mReadoutSize[readout] : 0; }
+  void setReadoutCharge(uint16_t readout, float charge) { if (readout < 2) mReadoutCharge[readout] = charge; }
+  void setReadoutSize(uint16_t readout, uint16_t size) { if (readout < 2) mReadoutSize[readout] = size; }
+
+ private:
+  std::array<float, 2> mReadoutCharge{};
+  std::array<uint16_t, 2> mReadoutSize{};
   
-  ClassDefNV(NA6PMuonSpecCluster, 1);
+  ClassDefNV(NA6PMuonSpecCluster, 2);
 };
 
 #endif

@@ -17,6 +17,7 @@ include_directories(${HEPMC3_INCLUDE_DIR})
 file(GLOB THIS_SOURCES ${THIS_SRC_DIR}/*.cxx)
 file(GLOB THIS_HEADERS ${THIS_INCLUDE_DIR}/*.h)
 list(APPEND THIS_SOURCES ${THIS_SRC_DIR}/NA6PCoolingPlate.cxx)
+list(REMOVE_ITEM THIS_SOURCES ${THIS_SRC_DIR}/NA6PMWPCParam.cxx)
 list(REMOVE_DUPLICATES THIS_SOURCES)
 
 # Add the library
@@ -39,8 +40,11 @@ set(DICTIONARY_HEADERS
   NA6PVerTelDigit.h
   NA6PVerTelDigitizer.h
   NA6PVerTelSegmentation.h
+  NA6PMuonSpecSegmentation.h
   NA6PVerTelPreDigitContainer.h
   NA6PMuonSpecHit.h
+  NA6PMuonSpecDigit.h
+  NA6PMuonSpecDigitizer.h
   NA6PMuonSpecModularHit.h
   GenMUONLMR.h
   NA6PSimMisc.h

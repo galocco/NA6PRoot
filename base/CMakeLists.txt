@@ -7,11 +7,15 @@ set(LIB_NAME "${MOD_NAME}Lib")
 # Include directoroes
 include_directories(${THIS_INCLUDE_DIR})
 include_directories(${UTILS_INCLUDE_DIR})
+include_directories(${CMAKE_SOURCE_DIR}/sim/include)
 include_directories(${ROOT_INCLUDE_DIRS})
 include_directories(${Boost_INCLUDE_DIRS})
 
 file(GLOB THIS_SOURCES ${THIS_SRC_DIR}/*.cxx)
 file(GLOB THIS_HEADERS ${THIS_INCLUDE_DIR}/*.h)
+# NA6PGeometryManager uses the configured MWPC grid in its legacy fallback.
+# Compile the parameter singleton in baseLib to avoid a baseLib -> simLib cycle.
+list(APPEND THIS_SOURCES ${CMAKE_SOURCE_DIR}/sim/src/NA6PMWPCParam.cxx)
 
 # Add the library
 add_library(${LIB_NAME} SHARED ${THIS_SOURCES} ${THIS_HEADERS} )

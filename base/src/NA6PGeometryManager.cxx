@@ -6,8 +6,28 @@
 #include <TGeoBBox.h>
 #include <TGeoManager.h>
 #include <TFile.h>
+#include <cstdio>
 #include "NA6PLayoutParam.h"
+#include "NA6PMWPCParam.h"
 #include "NA6PGeometryManager.h"
+
+namespace
+{
+bool decodeMWPCGasNode(const TGeoNode* node, int& chamberID)
+{
+  if (!node || !node->GetVolume()) {
+    return false;
+  }
+  char trailing = 0;
+  return std::sscanf(node->GetVolume()->GetName(), "MWPCChamber_%d_Gas%c", &chamberID, &trailing) == 1;
+}
+
+} // namespace
+
+int NA6PGeometryManager::getMuonSpecGeometryIndex(int detectorID)
+{
+  return NA6PLayoutParam::Instance().nVerTelPlanes * kNVTModulesPerLayer + detectorID;
+}
 
 bool NA6PGeometryManager::loadGeometry(const char* filename, const char* geoname)
 {
@@ -33,9 +53,14 @@ bool NA6PGeometryManager::loadGeometry(const char* filename, const char* geoname
   std::vector<bool> isMatrixLoaded;
   bool doIter = false;
   if (nAlignMod == 0) {
-    LOGP(info, "No alignable volumes in the geometry, resort to volume names for Vertex Telescope");
-    const auto& param = NA6PLayoutParam::Instance();
-    nAlignMod = param.nVerTelPlanes * kNVTModulesPerLayer;
+    const auto& layout = NA6PLayoutParam::Instance();
+    const auto& mwpc = NA6PMWPCParam::Instance();
+    const int nVTModules = layout.nVerTelPlanes * kNVTModulesPerLayer;
+    const int nMSModules = mwpc.getNModules(layout.nMSPlanes);
+    nAlignMod = nVTModules + nMSModules;
+    LOGP(info,
+         "No alignable entries in the geometry, resort to volume names for {} VerTel and {} MWPC sensors",
+         nVTModules, nMSModules);
     doIter = true;
   } else {
     LOGP(info, "Load geometry info for {} alignable volumes", nAlignMod);
@@ -46,6 +71,7 @@ bool NA6PGeometryManager::loadGeometry(const char* filename, const char* geoname
   mModuleHalfY.assign(nAlignMod, 0.);
 
   if (doIter) {
+    const int nVTModules = NA6PLayoutParam::Instance().nVerTelPlanes * kNVTModulesPerLayer;
     TGeoIterator next(gGeoManager->GetTopVolume());
     TGeoNode* node = nullptr;
     while ((node = next())) {
@@ -58,7 +84,7 @@ bool NA6PGeometryManager::loadGeometry(const char* filename, const char* geoname
         int layer = motherNode->GetNumber() % 10;
         int modNum = node->GetNumber() % 10;
         int modIndex = kNVTModulesPerLayer * layer + modNum;
-        if (modIndex < 0 || modIndex >= nAlignMod) {
+        if (modIndex < 0 || modIndex >= nVTModules) {
           LOGP(error, "Wrong module index {} (layer={}, modNum={})", modIndex, layer, modNum);
           continue;
         }
@@ -66,6 +92,22 @@ bool NA6PGeometryManager::loadGeometry(const char* filename, const char* geoname
         bool sizeOk = fillModuleSize(modIndex, node->GetVolume());
         if (!sizeOk)
           continue;
+        isMatrixLoaded[modIndex] = true;
+        continue;
+      }
+
+      int chamberID = -1;
+      if (name.BeginsWith("MWPCChamber_") && name.Contains("_Gas_") &&
+          decodeMWPCGasNode(node, chamberID)) {
+        const int modIndex = nVTModules + chamberID;
+        if (chamberID < 0 || modIndex >= nAlignMod) {
+          LOGP(error, "Wrong MWPC module index {} (chamberID={})", modIndex, chamberID);
+          continue;
+        }
+        mMatrices[modIndex] = *(next.GetCurrentMatrix());
+        if (!fillModuleSize(modIndex, node->GetVolume())) {
+          continue;
+        }
         isMatrixLoaded[modIndex] = true;
       }
     }
