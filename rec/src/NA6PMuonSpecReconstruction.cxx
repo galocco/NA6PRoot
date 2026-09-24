@@ -191,9 +191,10 @@ void NA6PMuonSpecReconstruction::runMSTrackMIDTrackletMatching()
   auto& clusters = getClusters();
   const auto& trks = mMSTracker->getFinalTracks();
 
-  auto saveTrack = [&trks, this](int j, int flag) {
+  auto saveTrack = [&trks, this](int j, int flag) -> NA6PTrack& {
     this->mTracks.push_back(trks[j].trackFitFast);
     this->mTracks.back().setStatusMS(flag);
+    return this->mTracks.back();
   };
 
   int nTrks = trks.size();
@@ -245,6 +246,13 @@ void NA6PMuonSpecReconstruction::runMSTrackMIDTrackletMatching()
   std::vector<bool> segmentUsed(nTrklets, false);
   std::vector<int> trackMatch(nTrks, -1);
 
+  auto saveUnrefittedMatch = [&saveTrack](int trackIndex,
+                                          const std::pair<NA6PMuonSpecCluster, NA6PMuonSpecCluster>& tracklet) {
+    auto& savedTrack = saveTrack(trackIndex, NA6PTrack::kMSMatchedToMIDnotRefitted);
+    savedTrack.addCluster(&tracklet.first);
+    savedTrack.addCluster(&tracklet.second);
+  };
+
   for (auto& c : candidates) {
     if (trackUsed[c.track])
       continue;
@@ -262,14 +270,21 @@ void NA6PMuonSpecReconstruction::runMSTrackMIDTrackletMatching()
       saveTrack(jT, NA6PTrack::kMSNotMatchedToMID);
       continue;
     }
-    auto& trOut = outTrProp[jT]; // propagated tracks are guaranteed to exist if there was at least 1 match (or even tracklet)
+
     const auto& tracklet = trkltsMID[jS];
+    if (!param.msDoRefitMSTrackletMID) {
+      // Store the MID cluster IDs without including them in the fit.
+      saveUnrefittedMatch(jT, tracklet);
+      continue;
+    }
+
+    auto& trOut = outTrProp[jT]; // propagated tracks are guaranteed to exist if there was at least 1 match (or even tracklet)
     fitter->cleanupAndStartFit();
     fitter->addCluster(tracklet.first);
     fitter->addCluster(tracklet.second);
     if (fitter->fitSeedOutward(trOut, false) < 0.) {
       // track not refitted: save with specific status flag
-      saveTrack(jT, NA6PTrack::kMSMatchedToMIDnotRefitted);
+      saveUnrefittedMatch(jT, tracklet);
       continue;
     }
 
@@ -291,7 +306,7 @@ void NA6PMuonSpecReconstruction::runMSTrackMIDTrackletMatching()
     float chi2Refit = fitter->fitSeedInward(refitInw, true);
     if (chi2Refit < 0.f) {
       // track not refitted: save with specific status flag
-      saveTrack(jT, NA6PTrack::kMSMatchedToMIDnotRefitted);
+      saveUnrefittedMatch(jT, tracklet);
       continue;
     }
     saveTrack(jT, NA6PTrack::kMSMatchedToMIDRefitted);

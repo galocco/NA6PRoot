@@ -61,6 +61,7 @@ struct NA6PRecoParam : public na6p::conf::ConfigurableParamHelper<NA6PRecoParam>
   // MuonSpec CA tracker
   int msNLayers = 6;
   bool msDoTrackMSTrackletMID = false;
+  bool msDoRefitMSTrackletMID = false;
   float msZForMSMIDmatch = 810.f;
   float msMaxDistTrackMSTrackletMID = 7.5f;
   float msMinCosThetaTrackMSTrackletMID = 0.999f;
