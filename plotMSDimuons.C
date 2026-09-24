@@ -13,11 +13,13 @@
 #include <TGeoManager.h>
 #include <TStyle.h>
 #include <TString.h>
+#include <TLatex.h>
 #include <TLorentzVector.h>
 #include <cstdio>
 #include <exception>
 #include <vector>
 #include "NA6PMCComposedLabel.h"
+#include "NA6PMCTruthContainer.h"
 #include "NA6PEventReader.h"
 #include "NA6PTrack.h"
 #include "MagneticField.h"
@@ -132,6 +134,18 @@ void plotMSDimuons(int pdg = 443, int NRecoClusters = 6, const char* dirSimu = "
   }
   th->SetBranchAddress("MuonSpecModular", &hitArr);
 
+  // The track-level MC label only says that at least one associated cluster
+  // has a different truth label.  Read the cluster truth container to locate
+  // the offending MS plane(s).
+  TFile* fClusters = TFile::Open(Form("%s/ClustersMuonSpec.root", dirSimu));
+  TTree* tClusters = (fClusters) ? (TTree*)fClusters->Get("clustersMuonSpec") : nullptr;
+  NA6PMCTruthContainer* msClusterMCTruth = nullptr;
+  if (!tClusters || !tClusters->GetBranch("MuonSpecMCTruth")) {
+    printf("[plotMSDimuons] ERROR: required cluster-truth tree/branch not found in %s/ClustersMuonSpec.root\n", dirSimu);
+    return;
+  }
+  tClusters->SetBranchAddress("MuonSpecMCTruth", &msClusterMCTruth);
+
   constexpr double muonMass = 0.1056583755; // GeV/c^2
   constexpr double maxMuonP = 30.; // GeV/c
   const double yCMShift = NA6PBeamParam::Instance().getYCM();
@@ -152,6 +166,14 @@ void plotMSDimuons(int pdg = 443, int NRecoClusters = 6, const char* dirSimu = "
   TH1D* hdimumassConstrainedGood = new TH1D("hdimumassConstrainedGood", "Good-label pairs; m_{#mu#mu} (GeV/c^{2});Counts", 200, rangeMMin, rangeMMax);
   TH1D* hdimumassUnconstrainedFake = new TH1D("hdimumassUnconstrainedFake", "Pairs containing fake labels; m_{#mu#mu} (GeV/c^{2});Counts", 200, rangeMMin, rangeMMax);
   TH1D* hdimumassConstrainedFake = new TH1D("hdimumassConstrainedFake", "Pairs containing fake labels; m_{#mu#mu} (GeV/c^{2});Counts", 200, rangeMMin, rangeMMax);
+  TH1D* hMSTrackFakeHitCategory = new TH1D("hMSTrackFakeHitCategory",
+                                            "MS-track MC-truth category;Category;Tracks", 9, 0.5, 9.5);
+  hMSTrackFakeHitCategory->GetXaxis()->SetBinLabel(1, "true");
+  for (int iMS = 0; iMS < 6; ++iMS) {
+    hMSTrackFakeHitCategory->GetXaxis()->SetBinLabel(iMS + 2, Form("fake: MS%d", iMS));
+  }
+  hMSTrackFakeHitCategory->GetXaxis()->SetBinLabel(8, "fake: multiple");
+  hMSTrackFakeHitCategory->GetXaxis()->SetBinLabel(9, "fake: unavailable");
   TH1D* hdimuygen = new TH1D("hdimuygen", "dimuon y gen", 100, 0., 5.);
   TH1D* hdimuptgen = new TH1D("hdimuptgen", "dimuon pT gen", 100, 0., 5.);
   TH1D* hdimumassgen = new TH1D("hdimumassgen", "dimuon m gen", 100, 0., 5.);
@@ -238,13 +260,27 @@ void plotMSDimuons(int pdg = 443, int NRecoClusters = 6, const char* dirSimu = "
 
   long long nPairCandidates = 0;
   long long nPairFilled = 0;
+  long long nMSTracks = 0;
+  long long nPassNHits = 0;
+  long long nPassValidMCLabel = 0;
+  long long nPassMuonPDG = 0;
+  long long nPassClusterMap = 0;
+  long long nPassMotherPDG = 0;
+  long long nEventsWithTwoFilteredTracks = 0;
 
-  const std::int64_t nEv = reader.entries();
-  printf("Number of events = %d\n", nEv);
+  const std::int64_t readerEntries = reader.entries();
+  const std::int64_t clusterEntries = tClusters->GetEntries();
+  const std::int64_t nEv = readerEntries < clusterEntries ? readerEntries : clusterEntries;
+  if (clusterEntries != readerEntries) {
+    printf("[plotMSDimuons] WARNING: cluster-truth tree has %lld entries, reader has %lld; using %lld events\n",
+           static_cast<long long>(clusterEntries), static_cast<long long>(readerEntries), static_cast<long long>(nEv));
+  }
+  printf("Number of events = %lld\n", static_cast<long long>(nEv));
 
   for (int jEv = 0; jEv < nEv; jEv++) {
-    printf("Processing event %d/%d\r", jEv + 1, nEv);
+    printf("Processing event %d/%lld\r", jEv + 1, static_cast<long long>(nEv));
     if (!reader.loadEvent(jEv)) continue;
+    tClusters->GetEntry(jEv);
     const auto& trArr = reader.tracksMuonSpec();
     const auto& trMCLabels = reader.trackLabelsMuonSpec();
     const auto& mcArr = reader.mcParticles();
@@ -259,9 +295,60 @@ void plotMSDimuons(int pdg = 443, int NRecoClusters = 6, const char* dirSimu = "
 
     int nPart = mcArr.size();
     int nTracks = trArr.size();
+    nMSTracks += nTracks;
     if (trMCLabels.size() != static_cast<size_t>(nTracks)) {
       printf("[plotMSDimuons] ERROR: track/MC-label size mismatch in event %d\n", jEv);
       return;
+    }
+
+    // Categorize every reconstructed MS track with a valid MC label.  The
+    // reconstruction marks a track fake when its dominant MC label is absent
+    // from one or more associated clusters.  Reproduce that criterion plane
+    // by plane to identify the single wrong hit, or the multiple-hit case.
+    for (int jTr = 0; jTr < nTracks; ++jTr) {
+      const NA6PTrack& tr = trArr.at(jTr);
+      const auto& trackLabel = trMCLabels.at(jTr);
+      if (!trackLabel.isValid()) continue;
+      if (!trackLabel.isFake()) {
+        hMSTrackFakeHitCategory->Fill(1.);
+        continue;
+      }
+
+      int nWrongMSHits = 0;
+      int wrongMSLayer = -1;
+      bool unavailable = msClusterMCTruth == nullptr;
+      for (int iMS = 0; iMS < 6; ++iMS) {
+        const int trackLayer = param.nVerTelPlanes + iMS;
+        if ((tr.getClusterMap() & (1u << trackLayer)) == 0u) {
+          unavailable = true;
+          continue;
+        }
+        const int clusterIndex = tr.getClusterIndex(trackLayer);
+        if (clusterIndex < 0) {
+          unavailable = true;
+          continue;
+        }
+        const auto labels = msClusterMCTruth->getLabels(clusterIndex);
+        bool matchesTrackLabel = false;
+        for (const auto& clusterLabel : labels) {
+          if (clusterLabel == trackLabel) {
+            matchesTrackLabel = true;
+            break;
+          }
+        }
+        if (!matchesTrackLabel) {
+          ++nWrongMSHits;
+          wrongMSLayer = iMS;
+        }
+      }
+
+      if (unavailable || nWrongMSHits == 0) {
+        hMSTrackFakeHitCategory->Fill(9.);
+      } else if (nWrongMSHits == 1) {
+        hMSTrackFakeHitCategory->Fill(wrongMSLayer + 2.);
+      } else {
+        hMSTrackFakeHitCategory->Fill(8.);
+      }
     }
 
     // Build the MC-track hit mask in physical MS-plane numbering (0 ... nMSPlanes-1).
@@ -322,18 +409,23 @@ void plotMSDimuons(int pdg = 443, int NRecoClusters = 6, const char* dirSimu = "
     for (int jTr = 0; jTr < nTracks; ++jTr) {
       const NA6PTrack& tr = trArr.at(jTr);
       if (tr.getNHits() < NRecoClusters) continue;
+      ++nPassNHits;
       const auto& mcLabel = trMCLabels.at(jTr);
       const int mcTrackID = mcLabel.getTrackID();
       if (!mcLabel.isValid() || mcTrackID < 0 || mcTrackID >= nPart) continue;
+      ++nPassValidMCLabel;
       if (TMath::Abs(mcArr.at(mcTrackID).GetPdgCode()) != 13) continue;
+      ++nPassMuonPDG;
 
       uint32_t clustermap = tr.getClusterMap();
       uint32_t maskClusters = (NRecoClusters == 4) ? (((1u << 4) - 1) << 5) : (((1u << 6) - 1) << 5);
       if ((clustermap & maskClusters) != maskClusters) continue;
+      ++nPassClusterMap;
 
       // Same mother selection as the denominator
       const int iMother = mcArr.at(mcTrackID).GetFirstMother();
       if (iMother < 0 || iMother >= nPart || mcArr.at(iMother).GetPdgCode() != pdg) continue;
+      ++nPassMotherPDG;
 
       // Momentum resolutions at the production vertex for both track states.
       NA6PTrackParCov inward = tr.getInwardParam();
@@ -419,6 +511,7 @@ void plotMSDimuons(int pdg = 443, int NRecoClusters = 6, const char* dirSimu = "
 
     // --- Dimuon Pairing ---
     if (filteredIndices.size() < 2) continue;
+    ++nEventsWithTwoFilteredTracks;
     nPairCandidates += static_cast<long long>(filteredIndices.size()) * static_cast<long long>(filteredIndices.size() - 1) / 2;
 
     for (size_t i = 0; i < filteredIndices.size(); ++i) {
@@ -529,6 +622,11 @@ void plotMSDimuons(int pdg = 443, int NRecoClusters = 6, const char* dirSimu = "
     }
   }
   printf("[plotMSDimuons] Pair summary: candidates=%lld comparison sample=%lld\n", nPairCandidates, nPairFilled);
+  printf("[plotMSDimuons] MS-track prefilter (NRecoClusters=%d): total=%lld, "
+         "nHits=%lld, valid MC label=%lld, muons=%lld, full cluster map=%lld, "
+         "J/#psi daughters=%lld, events with >=2 selected tracks=%lld\n",
+         NRecoClusters, nMSTracks, nPassNHits, nPassValidMCLabel, nPassMuonPDG,
+         nPassClusterMap, nPassMotherPDG, nEventsWithTwoFilteredTracks);
   auto* hMassUnconstrainedDraw = static_cast<TH1D*>(hdimumassUnconstrained->Clone("hdimumassUnconstrained_draw"));
   auto* hMassConstrainedDraw = static_cast<TH1D*>(hdimumassConstrained->Clone("hdimumassConstrained_draw"));
   hMassUnconstrainedDraw->SetDirectory(nullptr);
@@ -716,6 +814,31 @@ void plotMSDimuons(int pdg = 443, int NRecoClusters = 6, const char* dirSimu = "
   }
   cTrackPulls->SaveAs(Form("%s/muon_track_parameter_pullsMS.png", dirSimu));
 
+  TCanvas* cMSTrackFakeHitCategory = new TCanvas("cMSTrackFakeHitCategory", "MS-track fake-hit category", 1400, 700);
+  cMSTrackFakeHitCategory->SetBottomMargin(0.20);
+  hMSTrackFakeHitCategory->SetLineColor(kBlue + 1);
+  hMSTrackFakeHitCategory->SetLineWidth(2);
+  hMSTrackFakeHitCategory->SetFillColor(kAzure - 9);
+  hMSTrackFakeHitCategory->GetXaxis()->LabelsOption("v");
+  const double nCategorizedTracks = hMSTrackFakeHitCategory->Integral(1, hMSTrackFakeHitCategory->GetNbinsX());
+  const double maxCategoryCount = hMSTrackFakeHitCategory->GetMaximum();
+  if (maxCategoryCount > 0.) {
+    hMSTrackFakeHitCategory->SetMaximum(1.15 * maxCategoryCount);
+  }
+  hMSTrackFakeHitCategory->Draw("HIST");
+  if (nCategorizedTracks > 0.) {
+    TLatex categoryPercentage;
+    categoryPercentage.SetTextAlign(22);
+    categoryPercentage.SetTextSize(0.030);
+    for (int bin = 1; bin <= hMSTrackFakeHitCategory->GetNbinsX(); ++bin) {
+      const double count = hMSTrackFakeHitCategory->GetBinContent(bin);
+      categoryPercentage.DrawLatex(hMSTrackFakeHitCategory->GetXaxis()->GetBinCenter(bin),
+                                   count + 0.035 * maxCategoryCount,
+                                   Form("%.1f%%", 100. * count / nCategorizedTracks));
+    }
+  }
+  cMSTrackFakeHitCategory->SaveAs(Form("%s/ms_track_fake_hit_category.png", dirSimu));
+
   const TString outputPath = Form("%s/%s", dirSimu, outputFileName);
   TFile fOut(outputPath, "RECREATE");
   if (fOut.IsZombie()) {
@@ -733,6 +856,7 @@ void plotMSDimuons(int pdg = 443, int NRecoClusters = 6, const char* dirSimu = "
   hdimumassConstrainedGood->Write();
   hdimumassUnconstrainedFake->Write();
   hdimumassConstrainedFake->Write();
+  hMSTrackFakeHitCategory->Write();
   hdimuygen->Write();
   hdimuptgen->Write();
   hdimumassgen->Write();
