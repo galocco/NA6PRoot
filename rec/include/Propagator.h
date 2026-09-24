@@ -45,7 +45,9 @@ class Propagator
     float maxStep{2.0f};
     MatCorrType matCorr{MatCorrType::USEMatCorrTGeo};
     bool byOnly{false};
-    ClassDefNV(PropOpt, 1);
+    bool fullFieldJacobian{true};
+    bool fieldGradientJacobian{false};
+    ClassDefNV(PropOpt, 3);
   };
 
   bool propagateToZ(NA6PTrackParCov& track, float z) const;

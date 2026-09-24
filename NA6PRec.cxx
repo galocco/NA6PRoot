@@ -8,6 +8,7 @@
 #include <boost/program_options.hpp>
 #include <filesystem>
 #include <algorithm>
+#include <array>
 #include <TTree.h>
 #include <TFile.h>
 #include <TParticle.h>
@@ -51,18 +52,28 @@ class TreeFromFile
   TTree* tree = nullptr;
 };
 
-double getPrimaryVertexZ(TTree* mcTree, std::vector<TParticle>* mcArr, int eventID)
+bool getPrimaryVertex(TTree* mcTree, std::vector<TParticle>*& mcArr, int eventID,
+                      std::array<float, 3>& vertex)
 {
-  if (!mcTree || !mcArr) {
-    return 0.0;
+  vertex = {0.f, 0.f, 0.f};
+  if (!mcTree) {
+    return false;
   }
-  mcTree->GetEvent(eventID);
+
+  mcTree->GetEntry(eventID);
+  if (!mcArr) {
+    return false;
+  }
+
   for (const auto& part : *mcArr) {
     if (part.IsPrimary()) {
-      return part.Vz();
+      vertex = {static_cast<float>(part.Vx()),
+                static_cast<float>(part.Vy()),
+                static_cast<float>(part.Vz())};
+      return true;
     }
   }
-  return 0.0;
+  return false;
 }
 
 int main(int argc, char** argv)
@@ -289,8 +300,11 @@ int main(int argc, char** argv)
     NA6PVertex pvert;
     for (int jEv = first; jEv <= last; jEv++) {
       LOGP(info, "Process event {}", jEv);
-      const double zvert = getPrimaryVertexZ(tfKine->getTree(), mcArr, jEv);
-      pvert.setXYZ(0.f, 0.f, zvert);
+      std::array<float, 3> primaryVertex{};
+      if (!getPrimaryVertex(tfKine->getTree(), mcArr, jEv, primaryVertex)) {
+        LOGP(warn, "Primary vertex not found for event {}", jEv);
+      }
+      pvert.setXYZ(primaryVertex[0], primaryVertex[1], primaryVertex[2]);
 
       if (doTrackletVertex || doVTTracking) {
         LOGP(info, "VT reconstruction");
@@ -364,8 +378,11 @@ int main(int argc, char** argv)
     NA6PVertex pvert;
     for (int jEv = first; jEv <= last; jEv++) {
       LOGP(info, "Process event {}", jEv);
-      const double zvert = getPrimaryVertexZ(tfKine->getTree(), mcArr, jEv);
-      pvert.setXYZ(0.f, 0.f, zvert);
+      std::array<float, 3> primaryVertex{};
+      if (!getPrimaryVertex(tfKine->getTree(), mcArr, jEv, primaryVertex)) {
+        LOGP(warn, "Primary vertex not found for event {}", jEv);
+      }
+      pvert.setXYZ(primaryVertex[0], primaryVertex[1], primaryVertex[2]);
 
       tfCVT.getTree()->GetEvent(jEv);
       tfCMS.getTree()->GetEvent(jEv);

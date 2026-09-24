@@ -96,7 +96,8 @@ bool NA6PTrackPar::propagateParamToZ(float z, const float* bxyz)
     return true;
   }
   const float kappa = getCurvature(bxyz[1]); // kB2C*By*(q/pxz)
-  if (std::abs(kappa) < kSmallKappa) {
+  const float field2 = bxyz[0] * bxyz[0] + bxyz[1] * bxyz[1] + bxyz[2] * bxyz[2];
+  if (getCharge() == 0 || field2 < kTinyF * kTinyF) {
     return propagateParamToZ(z, 0.f); // for the straight-line propagation use 1D field method
   }
   const float bend = kappa * dz, abend = std::abs(bend);
@@ -281,7 +282,7 @@ bool NA6PTrackPar::correctForELoss(float xrho, float density, float atomicZ, flo
 
 std::string NA6PTrackPar::asString() const
 {
-  return std::format("Z:{:+.4e} Par: {:+.4e} {:+.4e} {:+.4e} {:+.4e} {:+.4e} {:s}", getZ(), getX(), getY(), getTx(), getTy(), getQ2Pxz(), getPID().getName());
+  return fmt::format("Z:{:+.4e} Par: {:+.4e} {:+.4e} {:+.4e} {:+.4e} {:+.4e} {:s}", getZ(), getX(), getY(), getTx(), getTy(), getQ2Pxz(), getPID().getName());
 }
 
 float NA6PTrackPar::BetheBlochSolid(float bg, float rho, float kp1, float kp2, float meanI, float meanZA)

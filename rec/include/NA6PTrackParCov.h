@@ -116,6 +116,24 @@ class NA6PTrackParCov : public NA6PTrackPar
   bool propagateToZ(float z, const float* b);
   bool propagateToZ(float z, const float* b, NA6PTrackPar& linRef);
   bool propagateToZ(float z, const float* b, NA6PTrackPar* linRef) { return linRef ? propagateToZ(z, b, *linRef) : propagateToZ(z, b); }
+  bool propagateToZ(float z, const float* b, const float* dbdxy, NA6PTrackPar& linRef);
+  bool propagateToZ(float z, const float* b, const float* dbdxy, NA6PTrackPar* linRef)
+  {
+    if (linRef) {
+      return propagateToZ(z, b, dbdxy, *linRef);
+    }
+    NA6PTrackPar localRef{*this};
+    return propagateToZ(z, b, dbdxy, localRef);
+  }
+  bool propagateToZLegacy(float z, const float* b, NA6PTrackPar& linRef);
+  bool propagateToZLegacy(float z, const float* b, NA6PTrackPar* linRef)
+  {
+    if (linRef) {
+      return propagateToZLegacy(z, b, *linRef);
+    }
+    NA6PTrackPar localRef{*this};
+    return propagateToZLegacy(z, b, localRef);
+  }
   bool propagateToZ(float z, const std::array<float, 3> b) { return propagateToZ(z, b.data()); }
   bool propagateToZ(float z, const std::array<float, 3> b, NA6PTrackPar& linRef) { return propagateToZ(z, b.data(), linRef); }
   bool propagateToZ(float z, const std::array<float, 3> b, NA6PTrackPar* linRef) { return linRef ? propagateToZ(z, b, *linRef) : propagateToZ(z, b); }
@@ -159,6 +177,7 @@ class NA6PTrackParCov : public NA6PTrackPar
   CovArray mC{}; // lower triangle representation
 
   void transportCovariance(prec_t f02, prec_t f04, prec_t f12, prec_t f13, prec_t f14, prec_t f24);
+  void transportCovariance(const std::array<std::array<prec_t, 5>, 5>& jacobian);
   bool isCovariancePositiveDefinite(const NA6PTrackParCov::CovArray& c);
   void checkCovariancePosDef();
 

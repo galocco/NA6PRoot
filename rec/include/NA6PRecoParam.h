@@ -10,6 +10,8 @@ struct NA6PRecoParam : public na6p::conf::ConfigurableParamHelper<NA6PRecoParam>
 
   static constexpr int MaxIterationsTrackerCA = 10;
   float maxPropagationStep = 2.0; // in cm
+  bool useFullFieldJacobian = true; // false: legacy full-field state with By-only covariance Jacobian
+  bool useFieldGradientJacobian = false; // add d(state)/dB * dB/d(x,y) to the full-field Jacobian
   // VerTel reconstruction parameters
   int vtNLayers = 5;
   // tracklet vertexer

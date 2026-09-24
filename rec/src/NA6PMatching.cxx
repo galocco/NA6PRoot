@@ -37,6 +37,8 @@ bool NA6PMatching::initMatching()
   mTrackFitter->enableMaterialCorrections();
   mTrackFitter->setPropagateToPrimaryVertex(false);
   mTrackFitter->setMaxPropagationStep(mRecoParam->maxPropagationStep);
+  mTrackFitter->setUseFullFieldJacobian(mRecoParam->useFullFieldJacobian);
+  mTrackFitter->setUseFieldGradientJacobian(mRecoParam->useFieldGradientJacobian);
 
   createTracksOutput();
   mNDOF = Propagator::Instance()->getNDOFTrack();

@@ -51,6 +51,8 @@ class NA6PFastTrackFitter
   void disableMaterialCorrections() { mPropOpt.matCorr = Propagator::MatCorrType::USEMatCorrNONE; }
   void setMaxPropagationStep(float v) { mPropOpt.maxStep = std::max(0.1f, std::abs(v)); }
   void setUseByPropagation(bool v = true) { mPropOpt.byOnly = v; }
+  void setUseFullFieldJacobian(bool v = true) { mPropOpt.fullFieldJacobian = v; }
+  void setUseFieldGradientJacobian(bool v = true) { mPropOpt.fieldGradientJacobian = v; }
 
   void setPropagateToPrimaryVertex(bool opt = true) { mPropagateToPrimVert = opt; }
   void setPrimaryVertexZ(float zvert)

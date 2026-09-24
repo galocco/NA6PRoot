@@ -99,6 +99,8 @@ void NA6PTrackerCA::configureFromRecoParamVT()
   setNumberOfIterations(param.vtNIterationsTrackerCA);
   setNLayers(param.vtNLayers);
   setMaxPropagationStep(param.maxPropagationStep);
+  mTrackFitter->setUseFullFieldJacobian(param.useFullFieldJacobian);
+  mTrackFitter->setUseFieldGradientJacobian(param.useFieldGradientJacobian);
   setUseLinRef(param.useLinRefVT);
   mTrackFitter->setSeedImprovePrec(param.seedImprovePrecVT);
   mTrackFitter->setPID(mPID);
@@ -131,6 +133,8 @@ void NA6PTrackerCA::configureFromRecoParamMS()
   setStartLayer(param.vtNLayers);
   setDoTrackConstrainedToPrimVert(param.msDoConstrainedTrack);
   setMaxPropagationStep(param.maxPropagationStep);
+  mTrackFitter->setUseFullFieldJacobian(param.useFullFieldJacobian);
+  mTrackFitter->setUseFieldGradientJacobian(param.useFieldGradientJacobian);
   setUseLinRef(param.useLinRefMS);
   mTrackFitter->setSeedImprovePrec(param.seedImprovePrecMS);
   mTrackFitter->setPID(mPID);

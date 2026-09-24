@@ -3,6 +3,200 @@
 #include <TMath.h>
 #include <fmt/format.h>
 #include <fairlogger/Logger.h>
+#include <limits>
+
+namespace
+{
+using StateD = std::array<double, 5>;
+using JacobianD = std::array<std::array<double, 5>, 5>;
+
+constexpr double kB2CD = -0.299792458e-3; // GeV/(kG*cm)
+
+bool propagateFullFieldD(StateD& p, double z0, double z1, const double* bxyz, int charge)
+{
+  const double dz = z1 - z0;
+  if (std::abs(dz) < 1.e-12) {
+    return true;
+  }
+
+  const double tx0 = p[2];
+  const double ty0 = p[3];
+  const double q2pxz = p[4];
+  if (std::abs(tx0) >= 1. || std::abs(q2pxz) < 1.e-15) {
+    return false;
+  }
+  const double cosPsi0 = std::sqrt((1. - tx0) * (1. + tx0));
+  const double p2pxz = std::sqrt(1. + ty0 * ty0);
+  const double pxz = charge != 0 ? charge / q2pxz : 1. / q2pxz;
+  const double momentum = pxz * p2pxz;
+  if (!(momentum > 0.)) {
+    return false;
+  }
+
+  // Estimate the signed path length to the target Z plane. By controls the
+  // bending in XZ; when it vanishes use the straight-line path estimate, but
+  // still apply Bx and Bz in the full helix step below.
+  const double kappa = charge != 0 ? kB2CD * static_cast<double>(bxyz[1]) * q2pxz : 0.;
+  double step = dz * p2pxz / cosPsi0;
+  if (std::abs(kappa) >= 1.e-14) {
+    const double tx1By = tx0 + kappa * dz;
+    if (std::abs(tx1By) >= 1.) {
+      return false;
+    }
+    const double cosPsi1By = std::sqrt((1. - tx1By) * (1. + tx1By));
+    const double denom = cosPsi0 + cosPsi1By;
+    if (denom < 1.e-15) {
+      return false;
+    }
+    const double dx2dz = (tx0 + tx1By) / denom;
+    const double bend = kappa * dz;
+    if (std::abs(bend) < 0.05) {
+      step = p2pxz * dz * std::abs(cosPsi1By + tx1By * dx2dz);
+    } else {
+      const double arg = 0.5 * dz * std::sqrt(1. + dx2dz * dx2dz) * kappa;
+      if (std::abs(arg) > 1.) {
+        return false;
+      }
+      step = p2pxz * 2. * std::asin(arg) / kappa;
+    }
+  }
+
+  const double pInv = 1. / p2pxz;
+  std::array<double, 7> lab = {p[0], p[1], z0,
+                               tx0 * pInv, ty0 * pInv, cosPsi0 * pInv,
+                               momentum};
+
+  const double bx = bxyz[0], by = bxyz[1], bz = bxyz[2];
+  const double bt = std::hypot(bx, by);
+  const double bb = std::hypot(bt, bz);
+  const double cosPhi = bt > 1.e-15 ? bx / bt : 1.;
+  const double sinPhi = bt > 1.e-15 ? by / bt : 0.;
+  const double cosTheta = bb > 1.e-15 ? bz / bb : 1.;
+  const double sinTheta = bb > 1.e-15 ? bt / bb : 0.;
+
+  std::array<double, 7> fieldFrame = {
+    cosTheta * cosPhi * lab[0] + cosTheta * sinPhi * lab[1] - sinTheta * lab[2],
+    -sinPhi * lab[0] + cosPhi * lab[1],
+    sinTheta * cosPhi * lab[0] + sinTheta * sinPhi * lab[1] + cosTheta * lab[2],
+    cosTheta * cosPhi * lab[3] + cosTheta * sinPhi * lab[4] - sinTheta * lab[5],
+    -sinPhi * lab[3] + cosPhi * lab[4],
+    sinTheta * cosPhi * lab[3] + sinTheta * sinPhi * lab[4] + cosTheta * lab[5],
+    lab[6]};
+
+  if (charge != 0 && bb > 1.e-15) {
+    const double rho = charge * bb * kB2CD / fieldFrame[6];
+    const double angle = rho * step;
+    double sinAngleOverAngle, angleMinusSinOverAngle, oneMinusCosOverAngle, sinAngle;
+    if (std::abs(angle) > 0.03) {
+      sinAngle = std::sin(angle);
+      sinAngleOverAngle = sinAngle / angle;
+      angleMinusSinOverAngle = (angle - sinAngle) / angle;
+      oneMinusCosOverAngle = (1. - std::cos(angle)) / angle;
+    } else {
+      const double angle2 = angle * angle;
+      sinAngleOverAngle = 1. - angle2 / 6. + angle2 * angle2 / 120.;
+      angleMinusSinOverAngle = angle2 / 6. - angle2 * angle2 / 120.;
+      oneMinusCosOverAngle = 0.5 * angle - angle * angle2 / 24.;
+      sinAngle = angle * sinAngleOverAngle;
+    }
+    const double dirX = fieldFrame[3];
+    const double dirY = fieldFrame[4];
+    const double dirZ = fieldFrame[5];
+    const double f1 = step * sinAngleOverAngle;
+    const double f2 = step * oneMinusCosOverAngle;
+    const double f3 = step * angleMinusSinOverAngle * dirZ;
+    const double f4 = -angle * oneMinusCosOverAngle;
+    fieldFrame[0] += f1 * dirX - f2 * dirY;
+    fieldFrame[1] += f1 * dirY + f2 * dirX;
+    fieldFrame[2] += f1 * dirZ + f3;
+    fieldFrame[3] += f4 * dirX - sinAngle * dirY;
+    fieldFrame[4] += f4 * dirY + sinAngle * dirX;
+  } else {
+    fieldFrame[0] += step * fieldFrame[3];
+    fieldFrame[1] += step * fieldFrame[4];
+    fieldFrame[2] += step * fieldFrame[5];
+  }
+
+  lab[0] = cosPhi * cosTheta * fieldFrame[0] - sinPhi * fieldFrame[1] + cosPhi * sinTheta * fieldFrame[2];
+  lab[1] = sinPhi * cosTheta * fieldFrame[0] + cosPhi * fieldFrame[1] + sinPhi * sinTheta * fieldFrame[2];
+  lab[2] = -sinTheta * fieldFrame[0] + cosTheta * fieldFrame[2];
+  lab[3] = cosPhi * cosTheta * fieldFrame[3] - sinPhi * fieldFrame[4] + cosPhi * sinTheta * fieldFrame[5];
+  lab[4] = sinPhi * cosTheta * fieldFrame[3] + cosPhi * fieldFrame[4] + sinPhi * sinTheta * fieldFrame[5];
+  lab[5] = -sinTheta * fieldFrame[3] + cosTheta * fieldFrame[5];
+
+  const double dzFinal = z1 - lab[2];
+  if (std::abs(lab[5]) < 1.e-15) {
+    return false;
+  }
+  lab[0] += dzFinal * lab[3] / lab[5];
+  lab[1] += dzFinal * lab[4] / lab[5];
+
+  const double pxzDirInv = 1. / std::hypot(lab[3], lab[5]);
+  p[0] = lab[0];
+  p[1] = lab[1];
+  p[2] = lab[3] * pxzDirInv;
+  p[3] = lab[4] * pxzDirInv;
+  p[4] = charge != 0 ? charge * pxzDirInv / lab[6] : pxzDirInv / lab[6];
+  return std::abs(p[2]) < 1.;
+}
+
+bool buildFullFieldJacobian(const NA6PTrackPar& reference, float z,
+                            const float* bxyz, const float* dbdxy,
+                            JacobianD& jacobian)
+{
+  StateD nominal{};
+  std::array<double, 3> nominalField{};
+  for (int i = 0; i < 5; ++i) {
+    nominal[i] = reference.getParam(i);
+    jacobian[i].fill(0.);
+  }
+  for (int i = 0; i < 3; ++i) {
+    nominalField[i] = bxyz[i];
+  }
+  if (!dbdxy) {
+    jacobian[0][0] = 1.;
+    jacobian[1][1] = 1.;
+  }
+
+  const double stepScale = std::cbrt(std::numeric_limits<double>::epsilon());
+  const int firstColumn = dbdxy ? 0 : 2;
+  for (int column = firstColumn; column < 5; ++column) {
+    double delta = stepScale * std::max(1., std::abs(nominal[column]));
+    if (column == NA6PTrackPar::kTx) {
+      delta = std::min(delta, 0.25 * (1. - std::abs(nominal[column])));
+    } else if (column == NA6PTrackPar::kQ2Pxz) {
+      delta = std::min(delta, 0.25 * std::abs(nominal[column]));
+    }
+    if (!(delta > 0.)) {
+      return false;
+    }
+
+    StateD plus = nominal;
+    StateD minus = nominal;
+    plus[column] += delta;
+    minus[column] -= delta;
+    auto plusField = nominalField;
+    auto minusField = nominalField;
+    if (dbdxy) {
+      for (int component = 0; component < 3; ++component) {
+        const double dBdx = dbdxy[2 * component];
+        const double dBdy = dbdxy[2 * component + 1];
+        plusField[component] += dBdx * (plus[0] - nominal[0]) + dBdy * (plus[1] - nominal[1]);
+        minusField[component] += dBdx * (minus[0] - nominal[0]) + dBdy * (minus[1] - nominal[1]);
+      }
+    }
+    if (!propagateFullFieldD(plus, reference.getZ(), z, plusField.data(), reference.getCharge()) ||
+        !propagateFullFieldD(minus, reference.getZ(), z, minusField.data(), reference.getCharge())) {
+      return false;
+    }
+    const double inverseSpan = 0.5 / delta;
+    for (int row = 0; row < 5; ++row) {
+      jacobian[row][column] = (plus[row] - minus[row]) * inverseSpan;
+    }
+  }
+  return true;
+}
+} // namespace
 
 // ----------------------- ctor / init -----------------------
 NA6PTrackParCov::NA6PTrackParCov(const float* xyz, const float* pxyz, int sign, float errLoose)
@@ -124,136 +318,118 @@ bool NA6PTrackParCov::propagateToZ(float z, const float* bxyz)
 
 bool NA6PTrackParCov::propagateToZ(float z, const float* bxyz, NA6PTrackPar& linRef0)
 {
-  //----------------------------------------------------------------
-  // Extrapolate this track to the plane z in the field bxyz. Cov matrix is trasported with by only. Linearization wrt externally provided linRef
-  //----------------------------------------------------------------
+  return propagateToZ(z, bxyz, nullptr, linRef0);
+}
+
+bool NA6PTrackParCov::propagateToZ(float z, const float* bxyz, const float* dbdxy, NA6PTrackPar& linRef0)
+{
+  // Extrapolate the state and covariance to Z in a locally constant 3D field.
+  // The reference state uses the nominal full-field transport, while its
+  // Jacobian is evaluated in double precision and includes Bx, By and Bz.
 #ifdef _SAVE_TRACK_FOR_DEBUG_
   auto sav = *this;
 #endif
-  const float dz = z - mZ;
-  if (std::abs(dz) < 1e-6f) {
+  if (std::abs(z - mZ) < 1.e-6f) {
     setZ(z);
     linRef0.setZ(z);
     return true;
   }
-  const float kappa = (std::abs(bxyz[1]) < kTinyF) ? 0.f : linRef0.getCurvature(bxyz[1]); // kB2C*By*(q/pxz)
-  if (std::abs(kappa) < kSmallKappa) {
-    return propagateToZ(z, 0.f, linRef0); // for the straight-line propagation use 1D field method
-  }
-  const float K = kB2C * bxyz[1], bend = kappa * dz, abend = std::abs(bend);
-  const float s0 = linRef0.getTx(), s1 = s0 + bend;
-  if (std::abs(s0) > kAlmost1F || std::abs(s1) > kAlmost1F) {
+
+  JacobianD jacobian{};
+  if (!buildFullFieldJacobian(linRef0, z, bxyz, dbdxy, jacobian)) {
     return false;
   }
-  const float c0 = linRef0.getCosPsi(), c1 = getCosFromSin(s1), denom = c0 + c1;
-  if (denom < kTinyF) {
+
+  NA6PTrackPar linRef1 = linRef0;
+  if (!linRef1.propagateParamToZ(z, bxyz)) {
     return false;
   }
-  const float dx2dz = (s0 + s1) / denom, cps_dx2dz = (c1 + s1 * dx2dz);
-  const float step = linRef0.getP2Pxz() * (abend < 0.05f ? dz * std::abs(cps_dx2dz) :                                      // chord
-                                             2.f * std::asin(0.5f * dz * std::sqrt(1.f + dx2dz * dx2dz) * kappa) / kappa); // arc
-  //
-  //
-  // get the track x,y,z,px/p,py/p,pz/p,p
-  std::array<float, 7> vecLab{0.f};
-  if (!linRef0.getPosDirGlo(vecLab)) {
-    return false;
-  }
-  // rotate to the system where Bx=By=0.
-  float bxy2 = bxyz[0] * bxyz[0] + bxyz[1] * bxyz[1];
-  float bt = std::sqrt(bxy2);
-  float cosphi = 1.f, sinphi = 0.f;
-  if (bt > kTinyF) {
-    cosphi = bxyz[0] / bt;
-    sinphi = bxyz[1] / bt;
-  }
-  float bb = std::sqrt(bxy2 + bxyz[2] * bxyz[2]);
-  float costet = 1.f, sintet = 0.f;
-  if (bb > kTinyF) {
-    costet = bxyz[2] / bb;
-    sintet = bt / bb;
-  }
-  std::array<float, 7> vect{costet * cosphi * vecLab[0] + costet * sinphi * vecLab[1] - sintet * vecLab[2],
-                            -sinphi * vecLab[0] + cosphi * vecLab[1],
-                            sintet * cosphi * vecLab[0] + sintet * sinphi * vecLab[1] + costet * vecLab[2],
-                            costet * cosphi * vecLab[3] + costet * sinphi * vecLab[4] - sintet * vecLab[5],
-                            -sinphi * vecLab[3] + cosphi * vecLab[4],
-                            sintet * cosphi * vecLab[3] + sintet * sinphi * vecLab[4] + costet * vecLab[5],
-                            vecLab[6]};
 
-  // Do the helix step
-  float q = getCharge();
-  g3helx3(q * bb, step, vect);
-
-  // rotate back to the Global System
-  vecLab[0] = cosphi * costet * vect[0] - sinphi * vect[1] + cosphi * sintet * vect[2];
-  vecLab[1] = sinphi * costet * vect[0] + cosphi * vect[1] + sinphi * sintet * vect[2];
-  vecLab[2] = -sintet * vect[0] + costet * vect[2];
-
-  vecLab[3] = cosphi * costet * vect[3] - sinphi * vect[4] + cosphi * sintet * vect[5];
-  vecLab[4] = sinphi * costet * vect[3] + cosphi * vect[4] + sinphi * sintet * vect[5];
-  vecLab[5] = -sintet * vect[3] + costet * vect[5];
-
-  // Do the final correcting step to the target plane (linear approximation)
-  float x = vecLab[0], y = vecLab[1];
-  auto dzFin = z - vecLab[2];
-  if (std::abs(dzFin) > kTinyF) {
-    if (std::abs(vecLab[5]) < kTinyF) {
-      return false;
+  std::array<double, 5> difference{};
+  std::array<double, 5> transported{};
+  for (int i = 0; i < 5; ++i) {
+    difference[i] = static_cast<double>(getParam(i)) - linRef0.getParam(i);
+    transported[i] = linRef1.getParam(i);
+    for (int j = 0; j < 5; ++j) {
+      transported[i] += jacobian[i][j] * difference[j];
     }
-    x += dzFin * vecLab[3] / vecLab[5]; // dz * px/pz
-    y += dzFin * vecLab[4] / vecLab[5]; // dz * py/pz
   }
-  // Calculate the linRef updated track parameters
-  auto linRef1 = linRef0;
-  auto t = 1.f / std::sqrt(vecLab[3] * vecLab[3] + vecLab[5] * vecLab[5]); // p / pxz
-  linRef1.setZ(z);
-  linRef1.setX(x);
-  linRef1.setY(y);
-  linRef1.setTx(vecLab[3] * t);
-  linRef1.setTy(vecLab[4] * t);
-  linRef1.setQ2Pxz(q * t / vecLab[6]);
-  //
-  // transport cov matrix
-  // Recompute the Jacobian from the transported linearization reference, matching O2.
-  prec_t snpRef0 = linRef0.getTx();
-  prec_t snpRef1 = linRef1.getTx();
-  prec_t cspRef0 = linRef0.getCosPsi();
-  prec_t cspRef1 = linRef1.getCosPsi();
-  prec_t cc = cspRef0 + cspRef1;
+  if (std::abs(transported[kTx]) > kAlmost1F) {
+    return false;
+  }
+
+  setZ(z);
+  for (int i = 0; i < 5; ++i) {
+    setParam(i, static_cast<float>(transported[i]));
+  }
+  linRef0 = linRef1;
+  transportCovariance(jacobian);
+  return true;
+}
+
+bool NA6PTrackParCov::propagateToZLegacy(float z, const float* bxyz, NA6PTrackPar& linRef0)
+{
+  // Legacy mixed transport: propagate the reference state in the full field,
+  // but transport deviations and covariance with the sparse By-only Jacobian.
+  const float dz = z - mZ;
+  if (std::abs(dz) < 1.e-6f) {
+    setZ(z);
+    linRef0.setZ(z);
+    return true;
+  }
+
+  const float kappa = std::abs(bxyz[1]) < kTinyF ? 0.f : linRef0.getCurvature(bxyz[1]);
+  if (std::abs(kappa) < kSmallKappa) {
+    return propagateToZ(z, 0.f, linRef0);
+  }
+
+  NA6PTrackPar linRef1 = linRef0;
+  if (!linRef1.propagateParamToZ(z, bxyz)) {
+    return false;
+  }
+
+  const prec_t K = kB2C * bxyz[1];
+  const prec_t snpRef0 = linRef0.getTx();
+  const prec_t snpRef1 = linRef1.getTx();
+  const prec_t cspRef0 = linRef0.getCosPsi();
+  const prec_t cspRef1 = linRef1.getCosPsi();
+  const prec_t cc = cspRef0 + cspRef1;
   if (cspRef0 < kTinyF || cspRef1 < kTinyF || cc < kTinyF) {
     return false;
   }
-  prec_t cspRef0Inv = 1. / cspRef0;
-  prec_t cspRef1Inv = 1. / cspRef1;
-  prec_t ccInv = 1. / cc;
-  prec_t dx2dzRef = (snpRef0 + snpRef1) * ccInv;
-  prec_t dzccInv = dz * ccInv;
-  prec_t hh = dzccInv * cspRef1Inv * (1. + cspRef0 * cspRef1 + snpRef0 * snpRef1);
-  prec_t jj = dz * (dx2dzRef - snpRef1 * cspRef1Inv);
-  prec_t f02 = hh * cspRef0Inv;
-  prec_t f04 = hh * dzccInv * K;
-  prec_t f24 = dz * K;
-  prec_t f12 = linRef0.getTy() * (f02 * snpRef1 + jj);
-  prec_t f13 = dz * (cspRef1 + snpRef1 * dx2dzRef);
-  prec_t f14 = linRef0.getTy() * (f04 * snpRef1 + jj * f24);
 
-  float diff[5];
-  for (int i = 0; i < 5; i++) {
-    diff[i] = getParam(i) - linRef0.getParam(i);
+  const prec_t cspRef0Inv = 1. / cspRef0;
+  const prec_t cspRef1Inv = 1. / cspRef1;
+  const prec_t ccInv = 1. / cc;
+  const prec_t dx2dzRef = (snpRef0 + snpRef1) * ccInv;
+  const prec_t dzccInv = dz * ccInv;
+  const prec_t hh = dzccInv * cspRef1Inv *
+                    (1. + cspRef0 * cspRef1 + snpRef0 * snpRef1);
+  const prec_t jj = dz * (dx2dzRef - snpRef1 * cspRef1Inv);
+  const prec_t f02 = hh * cspRef0Inv;
+  const prec_t f04 = hh * dzccInv * K;
+  const prec_t f24 = dz * K;
+  const prec_t f12 = linRef0.getTy() * (f02 * snpRef1 + jj);
+  const prec_t f13 = dz * (cspRef1 + snpRef1 * dx2dzRef);
+  const prec_t f14 = linRef0.getTy() * (f04 * snpRef1 + jj * f24);
+
+  std::array<float, 5> difference{};
+  for (int i = 0; i < 5; ++i) {
+    difference[i] = getParam(i) - linRef0.getParam(i);
   }
-  float snpUpd = linRef1.getTx() + diff[kTx] + f24 * diff[kQ2Pxz];
-  if (std::abs(snpUpd) > kAlmost1F) {
+  const float tx = linRef1.getTx() + difference[kTx] + f24 * difference[kQ2Pxz];
+  if (std::abs(tx) > kAlmost1F) {
     return false;
   }
-  setZ(z);
-  setX(linRef1.getX() + diff[kX] + f02 * diff[kTx] + f04 * diff[kQ2Pxz]);
-  setY(linRef1.getY() + diff[kY] + f12 * diff[kTx] + f13 * diff[kTy] + f14 * diff[kQ2Pxz]);
-  setTx(snpUpd);
-  setTy(linRef1.getTy() + diff[kTy]);
-  setQ2Pxz(linRef1.getQ2Pxz() + diff[kQ2Pxz]);
-  linRef0 = linRef1; // update reference track after transporting this track, as in O2
 
+  setZ(z);
+  setX(linRef1.getX() + difference[kX] + f02 * difference[kTx] + f04 * difference[kQ2Pxz]);
+  setY(linRef1.getY() + difference[kY] + f12 * difference[kTx] +
+       f13 * difference[kTy] + f14 * difference[kQ2Pxz]);
+  setTx(tx);
+  setTy(linRef1.getTy() + difference[kTy]);
+  setQ2Pxz(linRef1.getQ2Pxz() + difference[kQ2Pxz]);
+  linRef0 = linRef1;
   transportCovariance(f02, f04, f12, f13, f14, f24);
   return true;
 }
@@ -294,6 +470,41 @@ void NA6PTrackParCov::transportCovariance(prec_t f02, prec_t f04, prec_t f12, pr
   C32 += b32;
   C42 += b42;
 
+  checkCovariance();
+}
+
+void NA6PTrackParCov::transportCovariance(const JacobianD& jacobian)
+{
+  // Dense 5x5 transport for the general 3D-field Jacobian. All storage is on
+  // the stack; mC remains in the packed lower-triangle representation.
+  std::array<std::array<prec_t, 5>, 5> covariance{};
+  std::array<std::array<prec_t, 5>, 5> leftProduct{};
+  std::array<std::array<prec_t, 5>, 5> transported{};
+
+  for (int i = 0; i < 5; ++i) {
+    for (int j = 0; j < 5; ++j) {
+      covariance[i][j] = getCovMatElem(i, j);
+    }
+  }
+  for (int i = 0; i < 5; ++i) {
+    for (int j = 0; j < 5; ++j) {
+      prec_t value = 0.;
+      for (int k = 0; k < 5; ++k) {
+        value += jacobian[i][k] * covariance[k][j];
+      }
+      leftProduct[i][j] = value;
+    }
+  }
+  for (int i = 0; i < 5; ++i) {
+    for (int j = 0; j <= i; ++j) {
+      prec_t value = 0.;
+      for (int k = 0; k < 5; ++k) {
+        value += leftProduct[i][k] * jacobian[j][k];
+      }
+      transported[i][j] = value;
+      setCovMatElem(i, j, value);
+    }
+  }
   checkCovariance();
 }
 

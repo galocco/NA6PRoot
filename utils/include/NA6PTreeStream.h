@@ -71,6 +71,9 @@ concept TrivialRootType = IsTrivialRootType<T>::value;
 template <typename T>
 concept ComplexRootType = !IsTrivialRootType<T>::value;
 
+template <typename>
+inline constexpr bool UnsupportedRootType = false;
+
 template <TrivialRootType T>
 static constexpr char getRootTypeCode()
 {
@@ -101,7 +104,7 @@ static constexpr char getRootTypeCode()
                        std::is_same_v<T, Bool_t>) {
     return 'B';
   } else {
-    static_assert(false, "unsupported type!");
+    static_assert(UnsupportedRootType<T>, "unsupported type!");
   }
 }
 } // namespace details

@@ -196,7 +196,37 @@ bool Propagator::propagateToZ(NA6PTrackParCov& track, float zToGo, const Propaga
       }
       return res;
     };
-    if (!(opt.byOnly ? track.propagateToZ(z, getBy(xyz0), opt.linRef) : track.propagateToZ(z, getFieldXYZ(xyz0), opt.linRef))) {
+    bool propagated = false;
+    if (opt.byOnly) {
+      propagated = track.propagateToZ(z, getBy(xyz0), opt.linRef);
+    } else {
+      const auto field = getFieldXYZ(xyz0);
+      if (opt.fullFieldJacobian && opt.fieldGradientJacobian) {
+        // Central finite differences of the field map at the reference state.
+        // The covariance state is defined on a fixed-Z plane, so only the X
+        // and Y field derivatives enter the local transport Jacobian.
+        constexpr float gradientStep = 0.1f; // cm
+        constexpr float inverseGradientSpan = 0.5f / gradientStep;
+        std::array<float, 6> dbdxy{}; // {dBx/dx,dBx/dy,dBy/dx,...}
+        for (int coordinate = 0; coordinate < 2; ++coordinate) {
+          auto xyzPlus = xyz0;
+          auto xyzMinus = xyz0;
+          xyzPlus[coordinate] += gradientStep;
+          xyzMinus[coordinate] -= gradientStep;
+          const auto fieldPlus = getFieldXYZ(xyzPlus);
+          const auto fieldMinus = getFieldXYZ(xyzMinus);
+          for (int component = 0; component < 3; ++component) {
+            dbdxy[2 * component + coordinate] =
+              (fieldPlus[component] - fieldMinus[component]) * inverseGradientSpan;
+          }
+        }
+        propagated = track.propagateToZ(z, field.data(), dbdxy.data(), opt.linRef);
+      } else {
+        propagated = opt.fullFieldJacobian ? track.propagateToZ(z, field, opt.linRef) :
+                                             track.propagateToZLegacy(z, field.data(), opt.linRef);
+      }
+    }
+    if (!propagated) {
       return false;
     }
     if (!correct()) {
