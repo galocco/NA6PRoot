@@ -29,8 +29,9 @@ class NA6PTrack : public NA6PTrackParCov
     kNotMS = 0,
     kFullMSMID = 1,
     kMSNotMatchedToMID = 2,
-    kMSMatchedToMIDnotRefitted = 3,
-    kMSMatchedToMIDRefitted = 4
+    kMSMatchedToMIDRefitFailed = 3,
+    kMSMatchedToMIDRefitted = 4,
+    kMSMatchedToMIDnotRefitted = 5
   };
 
   NA6PTrack();
@@ -99,7 +100,7 @@ class NA6PTrack : public NA6PTrackParCov
   short mStatusMS = kNotMS;                  // status of MS track
 
  private:
-  ClassDefNV(NA6PTrack, 3)
+  ClassDefNV(NA6PTrack, 4)
 };
 
 #endif
