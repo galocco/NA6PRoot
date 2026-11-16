@@ -8,7 +8,7 @@ set +u
 source /cvmfs/alice.cern.ch/etc/login.sh
 set -u
 export ALIBUILD_WORK_DIR="${ALIBUILD_WORK_DIR:-/cvmfs/alice.cern.ch/sw}"
-architecture="$(aliBuild architecture)"
+architecture="el9-$(uname -m)"
 source "${ALIBUILD_WORK_DIR}/${architecture}/O2/${o2_tag}/etc/profile.d/init.sh"
 
 build_dir="${repo_root}/build"
