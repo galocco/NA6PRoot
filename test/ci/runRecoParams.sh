@@ -7,8 +7,7 @@ o2_tag="${NA6P_CI_O2_TAG:-latest}"
 set +u
 source /cvmfs/alice.cern.ch/etc/login.sh
 set -u
-eval "$(alienv shell-helper)"
-alienv load "O2/${o2_tag}"
+eval "$(alienv load "O2/${o2_tag}")"
 
 export ALIBUILD_WORK_DIR="${ALIBUILD_WORK_DIR:-/cvmfs/alice.cern.ch/sw}"
 architecture="$(aliBuild architecture)"
