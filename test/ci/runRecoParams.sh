@@ -4,7 +4,9 @@ set -euo pipefail
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 o2_tag="${NA6P_CI_O2_TAG:-latest}"
 
+set +u
 source /cvmfs/alice.cern.ch/etc/login.sh
+set -u
 eval "$(alienv shell-helper)"
 alienv load "O2/${o2_tag}"
 
