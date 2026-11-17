@@ -3,6 +3,8 @@
 cmake_minimum_required(VERSION 3.16...3.27)
 project(NA6PROOT)
 
+include(CTest)
+
 # Set the C++ standard
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -130,6 +132,21 @@ target_include_directories(na6prec PRIVATE
   ${PROJECT_SOURCE_DIR}/sim/include
   ${PROJECT_SOURCE_DIR}/rec/include
 )
+
+if(BUILD_TESTING)
+  find_package(Python3 REQUIRED COMPONENTS Interpreter)
+  add_executable(na6p_check_reco_output test/checkRecoOutput.cxx)
+  target_link_libraries(na6p_check_reco_output PRIVATE ROOT::RIO ROOT::Tree)
+  add_test(NAME na6prec_params
+    COMMAND ${Python3_EXECUTABLE} ${PROJECT_SOURCE_DIR}/test/checkRecoParams.py
+      --sim $<TARGET_FILE:na6psim>
+      --rec $<TARGET_FILE:na6prec>
+      --params ${PROJECT_SOURCE_DIR}/params
+      --generator ${PROJECT_SOURCE_DIR}/test/genbox.C
+      --check-output $<TARGET_FILE:na6p_check_reco_output>
+      --work-dir ${PROJECT_BINARY_DIR}/Testing/params)
+  set_tests_properties(na6prec_params PROPERTIES LABELS "integration;reconstruction" TIMEOUT 600)
+endif()
 
 
 # Install instructions (optional)
