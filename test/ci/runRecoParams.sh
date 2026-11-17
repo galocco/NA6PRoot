@@ -14,7 +14,7 @@ fi
 
 # The compiled scientific libraries come from CVMFS. Only OS tools and runtime
 # libraries are installed into this disposable container.
-dnf install -y cmake make gcc gcc-c++ gcc-gfortran python3 which findutils \
+dnf install -y cmake make gcc gcc-c++ gcc-gfortran python3 which findutils tcl \
   git tar gzip bzip2 unzip file procps-ng perl \
   libX11 libXpm libXft libXext libXrender libSM libICE libXi libXmu \
   libXrandr libXinerama libXcursor mesa-libGL mesa-libGLU \
