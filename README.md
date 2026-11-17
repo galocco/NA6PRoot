@@ -45,6 +45,41 @@ na6psim -n 5 -g $NA6PROOT_ROOT/share/test/genbox.C+
 * \subpage refSIM
 /doxy -->
 
+## Reconstruction parameter checks
+
+GitHub Actions validates every `.ini` file under `params/`, including
+subdirectories, using Python's standard library. Run the same check locally:
+
+```bash
+bash test/ci/runRecoParams.sh
+```
+
+No build, ROOT, O2PDPSuite, CVMFS, Docker, or extra Python packages are required.
+The validator in `test/ci/checkRecoParams.py` checks INI syntax, duplicate keys,
+the `[reco]` section, case-sensitive parameter names, scalar types, and array
+indices against the declarations in `rec/include/NA6PRecoParam.h`. Partial
+configurations are allowed; omitted parameters retain their application defaults.
+It fails if no `.ini` files are found or any file is invalid, and reports errors
+in the workflow log. This static check does not run simulation or reconstruction,
+validate physical parameter choices, or inspect output trees.
+
+The full integration test remains available locally after loading the project's
+dependencies:
+
+```bash
+cmake -S . -B build -DBUILD_TESTING=ON -DCMAKE_INSTALL_PREFIX="$PWD/install"
+cmake --build build --parallel 5
+cmake --install build
+source install/init.sh
+ctest --test-dir build --output-on-failure -R '^na6prec_params$'
+```
+
+That test generates one event with a fixed random seed and runs `na6prec
+--load-recoparam` for every parameter file. A compiled checker verifies one event
+in each cluster, vertex, VT/MS track, and matched-track output tree; empty track
+collections are allowed. Failed runs keep their logs and outputs under
+`build/Testing/params/`; successful runs are removed.
+
 ## Reconstruction: [rec module](rec)
 <!-- doxy
 * \subpage refREC

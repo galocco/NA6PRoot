@@ -8,34 +8,15 @@ on:
 jobs:
   reco-params:
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    timeout-minutes: 5
     permissions:
       contents: read
     steps:
       - uses: actions/checkout@v4
-      - name: Mount CERN software repositories
-        uses: cvmfs-contrib/github-action-cvmfs@v5
+      - uses: actions/setup-python@v5
         with:
-          cvmfs_repositories: alice.cern.ch,sft.cern.ch
-      - name: Build, install, and test parameter files
-        shell: bash
-        env:
-          NA6P_CI_O2_TAG: ${{ vars.NA6P_CI_O2_TAG }}
-        run: |
-          set -eo pipefail
-          docker run --rm \
-            -v /cvmfs:/cvmfs:shared \
-            -v "$GITHUB_WORKSPACE:/workspace" \
-            -w /workspace \
-            -e NA6P_CI_O2_TAG \
-            almalinux:9 bash test/ci/runRecoParams.sh 2>&1 | tee reco-params-ci.log
-      - name: Upload failure logs
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: reco-params-logs
-          path: |
-            reco-params-ci.log
-            build/Testing/Temporary/LastTest.log
-            build/Testing/params/**/*.log
-          if-no-files-found: ignore
+          python-version: '3.12'
+      - name: Test parameter validator
+        run: python3 -m unittest discover -s test/ci -p 'test_*.py'
+      - name: Validate parameter files
+        run: bash test/ci/runRecoParams.sh
