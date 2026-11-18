@@ -51,7 +51,7 @@ GitHub Actions validates every `.ini` file under `params/`, including
 subdirectories, using Python's standard library. Run the same check locally:
 
 ```bash
-bash test/ci/runRecoParams.sh
+python3 test/ci/checkRecoParams.py
 ```
 
 No build, ROOT, O2PDPSuite, CVMFS, Docker, or extra Python packages are required.
@@ -84,5 +84,4 @@ collections are allowed. Failed runs keep their logs and outputs under
 <!-- doxy
 * \subpage refREC
 /doxy -->
-
 
