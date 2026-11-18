@@ -19,4 +19,4 @@ jobs:
       - name: Test parameter validator
         run: python3 -m unittest discover -s test/ci -p 'test_*.py'
       - name: Validate parameter files
-        run: bash test/ci/runRecoParams.sh
+        run: python3 test/ci/checkRecoParams.py
