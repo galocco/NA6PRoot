@@ -156,7 +156,7 @@ class NA6PVertexerTracks
   std::vector<TrackVF> mTracksPool;         ///< tracks in internal representation used for vertexing
   float mBeamX = 0.;                        ///< beam transverse coordinates
   float mBeamY = 0.;                        ///< beam transverse coordinates
-  float mMaxDCA = 0.05;                     ///< cut on DCA of track to beam line (cm)
+  float mMaxDCA = 0.15;                     ///< cut on DCA of track to beam line (cm)
   float mZMin = -20.0;                      ///< z range, min, cm
   float mZMax = 5.;                         ///< z range, max, cm
   int mNBinsForPeakFind = 250;              ///< 0.1 cm per bin
