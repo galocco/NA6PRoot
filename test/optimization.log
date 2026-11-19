@@ -1,0 +1,130 @@
+2026-01-16 15:55:37,746 - INFO - ============================================================
+2026-01-16 15:55:37,747 - INFO - Starting MS Track Finder CA optimization
+2026-01-16 15:55:37,747 - INFO - ============================================================
+2026-01-16 15:55:37,747 - ERROR - INI file not found: na6pMSCA.ini
+2026-01-16 15:55:37,747 - ERROR - File validation failed. Exiting.
+2026-01-16 15:55:42,233 - INFO - ============================================================
+2026-01-16 15:55:42,233 - INFO - Starting MS Track Finder CA optimization
+2026-01-16 15:55:42,233 - INFO - ============================================================
+2026-01-16 15:55:42,233 - ERROR - INI file not found: na6pMSCA.ini
+2026-01-16 15:55:42,233 - ERROR - File validation failed. Exiting.
+2026-01-16 15:56:10,033 - INFO - ============================================================
+2026-01-16 15:56:10,033 - INFO - Starting MS Track Finder CA optimization
+2026-01-16 15:56:10,033 - INFO - ============================================================
+2026-01-16 15:56:10,034 - INFO - Read 21 parameters from INI file
+2026-01-16 15:56:10,034 - INFO - First trial parameters:
+2026-01-16 15:56:10,034 - INFO -   nIterationsTrackerCA: 2
+2026-01-16 15:56:10,034 - INFO -   maxDeltaThetaTrackletsCA0: 0.0371393
+2026-01-16 15:56:10,034 - INFO -   maxDeltaPhiTrackletsCA0: 0.289054
+2026-01-16 15:56:10,034 - INFO -   maxDeltaTanLCellsCA0: 15.5462
+2026-01-16 15:56:10,034 - INFO -   maxDeltaPhiCellsCA0: 0.696066
+2026-01-16 15:56:10,034 - INFO -   maxDeltaPxPzCellsCA0: 0.0801119
+2026-01-16 15:56:10,034 - INFO -   maxDeltaPyPzCellsCA0: 0.0502876
+2026-01-16 15:56:10,034 - INFO -   maxChi2TrClCellsCA0: 17.2877
+2026-01-16 15:56:10,034 - INFO -   maxChi2ndfCellsCA0: 14.4872
+2026-01-16 15:56:10,034 - INFO -   maxChi2ndfTracksCA0: 19.9089
+2026-01-16 15:56:10,034 - INFO -   minNClusTracksCA0: 6
+2026-01-16 15:56:10,034 - INFO -   maxDeltaThetaTrackletsCA1: 0.469368
+2026-01-16 15:56:10,034 - INFO -   maxDeltaPhiTrackletsCA1: 0.223705
+2026-01-16 15:56:10,034 - INFO -   maxDeltaTanLCellsCA1: 13.8531
+2026-01-16 15:56:10,034 - INFO -   maxDeltaPhiCellsCA1: 2.35887
+2026-01-16 15:56:10,034 - INFO -   maxDeltaPxPzCellsCA1: 0.0516673
+2026-01-16 15:56:10,034 - INFO -   maxDeltaPyPzCellsCA1: 0.0321497
+2026-01-16 15:56:10,034 - INFO -   maxChi2TrClCellsCA1: 2.8387
+2026-01-16 15:56:10,034 - INFO -   maxChi2ndfCellsCA1: 7.76911
+2026-01-16 15:56:10,035 - INFO -   maxChi2ndfTracksCA1: 5.10287
+2026-01-16 15:56:10,035 - INFO -   minNClusTracksCA1: 6
+2026-01-16 15:56:10,781 - INFO - First trial enqueued
+2026-01-16 15:56:10,781 - INFO - Starting optimization with 10 trials...
+2026-01-16 15:56:11,150 - INFO - Trial 0: Running ROOT macro...
+2026-01-16 15:56:54,397 - INFO - Trial 0: Efficiency=0.6327, Purity=0.7774, Time=0.0034s, Metric=0.6327
+2026-01-16 15:56:54,401 - INFO - Trial 0: Metric = 0.6327
+2026-01-16 15:56:54,909 - INFO - Trial 1: Running ROOT macro...
+2026-01-16 15:57:35,903 - INFO - Trial 1: Efficiency=0.5833, Purity=0.7826, Time=0.0036s, Metric=0.5833
+2026-01-16 15:57:35,903 - INFO - Trial 1: Metric = 0.5833
+2026-01-16 15:57:36,430 - INFO - Trial 2: Running ROOT macro...
+2026-01-16 15:58:20,825 - INFO - Trial 2: Efficiency=0.6167, Purity=0.7820, Time=0.0040s, Metric=0.6167
+2026-01-16 15:58:20,826 - INFO - Trial 2: Metric = 0.6167
+2026-01-16 15:58:21,062 - INFO - Trial 3: Running ROOT macro...
+2026-01-16 15:58:53,899 - INFO - Trial 3: Efficiency=0.4740, Purity=0.7875, Time=0.0028s, Metric=0.4740
+2026-01-16 15:58:53,899 - INFO - Trial 3: Metric = 0.4740
+2026-01-16 15:58:54,419 - INFO - Trial 4: Running ROOT macro...
+2026-01-16 15:59:42,228 - INFO - Trial 4: Efficiency=0.5727, Purity=0.7814, Time=0.0043s, Metric=0.5727
+2026-01-16 15:59:42,228 - INFO - Trial 4: Metric = 0.5727
+2026-01-16 15:59:42,897 - INFO - Trial 5: Running ROOT macro...
+2026-01-16 16:00:28,491 - INFO - Trial 5: Efficiency=0.5938, Purity=0.7897, Time=0.0041s, Metric=0.5938
+2026-01-16 16:00:28,492 - INFO - Trial 5: Metric = 0.5938
+2026-01-16 16:00:29,015 - INFO - Trial 6: Running ROOT macro...
+2026-01-16 16:01:11,610 - INFO - Trial 6: Efficiency=0.5880, Purity=0.7789, Time=0.0038s, Metric=0.5880
+2026-01-16 16:01:11,610 - INFO - Trial 6: Metric = 0.5880
+2026-01-16 16:01:12,288 - INFO - Trial 7: Running ROOT macro...
+2026-01-16 16:02:01,102 - INFO - Trial 7: Efficiency=0.6302, Purity=0.7933, Time=0.0044s, Metric=0.6302
+2026-01-16 16:02:01,102 - INFO - Trial 7: Metric = 0.6302
+2026-01-16 16:02:01,492 - INFO - Trial 8: Running ROOT macro...
+2026-01-16 16:02:35,634 - INFO - Trial 8: Efficiency=0.2682, Purity=0.7774, Time=0.0030s, Metric=0.2682
+2026-01-16 16:02:35,635 - INFO - Trial 8: Metric = 0.2682
+2026-01-16 16:02:35,990 - INFO - Trial 9: Running ROOT macro...
+2026-01-16 16:03:11,131 - INFO - Trial 9: Efficiency=0.5317, Purity=0.7809, Time=0.0031s, Metric=0.5317
+2026-01-16 16:03:11,131 - INFO - Trial 9: Metric = 0.5317
+2026-01-16 16:03:11,177 - INFO - Optimized configuration saved to optimized_config.ini
+2026-01-16 16:03:11,177 - INFO - Optimization completed successfully!
+2026-01-19 11:39:06,960 - INFO - ============================================================
+2026-01-19 11:39:06,961 - INFO - Starting MS Track Finder CA optimization
+2026-01-19 11:39:06,961 - INFO - ============================================================
+2026-01-19 11:39:06,962 - INFO - Read 21 parameters from INI file
+2026-01-19 11:39:06,962 - INFO - First trial parameters:
+2026-01-19 11:39:06,962 - INFO -   nIterationsTrackerCA: 2
+2026-01-19 11:39:06,962 - INFO -   maxDeltaThetaTrackletsCA0: 0.0371393
+2026-01-19 11:39:06,962 - INFO -   maxDeltaPhiTrackletsCA0: 0.289054
+2026-01-19 11:39:06,962 - INFO -   maxDeltaTanLCellsCA0: 15.5462
+2026-01-19 11:39:06,962 - INFO -   maxDeltaPhiCellsCA0: 0.696066
+2026-01-19 11:39:06,962 - INFO -   maxDeltaPxPzCellsCA0: 0.0801119
+2026-01-19 11:39:06,962 - INFO -   maxDeltaPyPzCellsCA0: 0.0502876
+2026-01-19 11:39:06,962 - INFO -   maxChi2TrClCellsCA0: 17.2877
+2026-01-19 11:39:06,962 - INFO -   maxChi2ndfCellsCA0: 14.4872
+2026-01-19 11:39:06,962 - INFO -   maxChi2ndfTracksCA0: 19.9089
+2026-01-19 11:39:06,962 - INFO -   minNClusTracksCA0: 6
+2026-01-19 11:39:06,962 - INFO -   maxDeltaThetaTrackletsCA1: 0.469368
+2026-01-19 11:39:06,962 - INFO -   maxDeltaPhiTrackletsCA1: 0.223705
+2026-01-19 11:39:06,962 - INFO -   maxDeltaTanLCellsCA1: 13.8531
+2026-01-19 11:39:06,962 - INFO -   maxDeltaPhiCellsCA1: 2.35887
+2026-01-19 11:39:06,962 - INFO -   maxDeltaPxPzCellsCA1: 0.0516673
+2026-01-19 11:39:06,962 - INFO -   maxDeltaPyPzCellsCA1: 0.0321497
+2026-01-19 11:39:06,962 - INFO -   maxChi2TrClCellsCA1: 2.8387
+2026-01-19 11:39:06,963 - INFO -   maxChi2ndfCellsCA1: 7.76911
+2026-01-19 11:39:06,963 - INFO -   maxChi2ndfTracksCA1: 5.10287
+2026-01-19 11:39:06,963 - INFO -   minNClusTracksCA1: 6
+2026-01-19 11:39:07,373 - INFO - Resuming existing study with 10 completed trials
+2026-01-19 11:39:07,374 - INFO - Starting optimization with 10 trials...
+2026-01-19 11:39:07,546 - INFO - Trial 10: Running ROOT macro...
+2026-01-19 11:39:22,461 - INFO - Trial 10: Efficiency=0.0007, Purity=0.9000, Time=0.0006s, Metric=0.1293
+2026-01-19 11:39:22,464 - INFO - Trial 10: Metric = 0.1293
+2026-01-19 11:39:23,003 - INFO - Trial 11: Running ROOT macro...
+2026-01-19 11:40:02,997 - INFO - Trial 11: Efficiency=0.6426, Purity=0.7806, Time=0.0035s, Metric=0.7541
+2026-01-19 11:40:02,997 - INFO - Trial 11: Metric = 0.7541
+2026-01-19 11:40:03,315 - INFO - Trial 12: Running ROOT macro...
+2026-01-19 11:40:40,228 - INFO - Trial 12: Efficiency=0.6301, Purity=0.7824, Time=0.0033s, Metric=0.7419
+2026-01-19 11:40:40,228 - INFO - Trial 12: Metric = 0.7419
+2026-01-19 11:40:40,811 - INFO - Trial 13: Running ROOT macro...
+2026-01-19 11:41:18,813 - INFO - Trial 13: Efficiency=0.6120, Purity=0.7838, Time=0.0034s, Metric=0.7240
+2026-01-19 11:41:18,813 - INFO - Trial 13: Metric = 0.7240
+2026-01-19 11:41:19,151 - INFO - Trial 14: Running ROOT macro...
+2026-01-19 11:41:38,917 - INFO - Trial 14: Efficiency=0.2319, Purity=0.7683, Time=0.0015s, Metric=0.3417
+2026-01-19 11:41:38,917 - INFO - Trial 14: Metric = 0.3417
+2026-01-19 11:41:39,126 - INFO - Trial 15: Running ROOT macro...
+2026-01-19 11:42:14,641 - INFO - Trial 15: Efficiency=0.5235, Purity=0.7836, Time=0.0031s, Metric=0.6354
+2026-01-19 11:42:14,641 - INFO - Trial 15: Metric = 0.6354
+2026-01-19 11:42:15,224 - INFO - Trial 16: Running ROOT macro...
+2026-01-19 11:42:49,495 - INFO - Trial 16: Efficiency=0.5744, Purity=0.7873, Time=0.0030s, Metric=0.6869
+2026-01-19 11:42:49,495 - INFO - Trial 16: Metric = 0.6869
+2026-01-19 11:42:49,946 - INFO - Trial 17: Running ROOT macro...
+2026-01-19 11:43:27,843 - INFO - Trial 17: Efficiency=0.5900, Purity=0.7836, Time=0.0034s, Metric=0.7019
+2026-01-19 11:43:27,843 - INFO - Trial 17: Metric = 0.7019
+2026-01-19 11:43:28,178 - INFO - Trial 18: Running ROOT macro...
+2026-01-19 11:43:41,095 - INFO - Trial 18: Efficiency=0.0549, Purity=0.7539, Time=0.0009s, Metric=0.1626
+2026-01-19 11:43:41,095 - INFO - Trial 18: Metric = 0.1626
+2026-01-19 11:43:41,298 - INFO - Trial 19: Running ROOT macro...
+2026-01-19 11:44:05,342 - INFO - Trial 19: Efficiency=0.3294, Purity=0.7859, Time=0.0020s, Metric=0.4417
+2026-01-19 11:44:05,343 - INFO - Trial 19: Metric = 0.4417
+2026-01-19 11:44:05,387 - INFO - Optimized configuration saved to optimized_config.ini
+2026-01-19 11:44:05,387 - INFO - Optimization completed successfully!

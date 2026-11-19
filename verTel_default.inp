@@ -1,0 +1,125 @@
+* NA6P VerTel default FLUKA geometry: silicon, carbon fibre and carbon foam
+* Units: cm. Default plane z: 7.1175, 15.1175, 20.1175, 25.1175, 38.1175.
+* The silicon is represented by front/back sensor envelopes; carbon-fibre
+* plates and the outer-station carbon foam. Cooling, aluminium and steel are omitted.
+* Window corners are represented by their rectangular bounding boxes.
+GLOBAL           1.0                                     1.0                    
+TITLE
+NA6P VerTel: Si and C-fibre
+DEFAULTS                                                              PRECISIOn 
+BEAM             1.0                                                  MUON-     
+BEAMPOS          0.0       0.0     -50.0       0.0       0.0       1.0          
+MATERIAL         6.0                1.91                              CCFIBER   
+MATERIAL         6.0                0.50                              CFOAM     
+GEOBEGIN                                                              COMBNAME
+    0    0                 VerTel Si and carbon-fibre geometry
+RPP WORLD    -100.0 100.0  -100.0 100.0  -100.0 100.0
+RPP VTENV     -25.0  25.0   -22.0  22.0     5.0  41.0
+* Silicon sensors: four chips per station; chips 0/2 are back, 1/3 front.
+RPP B001     0.3100 13.9096 -0.3100 5.5592 8.0200 8.0250
+RPP B002     -9.0744 -3.2052 -3.5552 10.0444 7.1150 7.1200
+RPP B003     -13.9096 -0.3100 -5.5592 0.3100 8.0200 8.0250
+RPP B004     3.2052 9.0744 -10.0444 3.5552 7.1150 7.1200
+RPP B005     0.3100 13.9096 -0.3100 7.5156 16.0200 16.0250
+RPP B006     -10.0526 -2.2270 -2.5770 11.0226 15.1150 15.1200
+RPP B007     -13.9096 -0.3100 -7.5156 0.3100 16.0200 16.0250
+RPP B008     2.2270 10.0526 -11.0226 2.5770 15.1150 15.1200
+RPP B009     0.3100 13.9096 -0.3100 9.4720 20.8230 20.8280
+RPP B010     -11.0308 -1.2488 -1.5988 12.0008 20.3120 20.3170
+RPP B011     -13.9096 -0.3100 -9.4720 0.3100 20.8230 20.8280
+RPP B012     1.2488 11.0308 -12.0008 1.5988 20.3120 20.3170
+RPP B013     0.3100 13.9096 -0.3100 11.4284 25.8230 25.8280
+RPP B014     -12.0090 -0.2706 -0.6206 12.9790 25.3120 25.3170
+RPP B015     -13.9096 -0.3100 -11.4284 0.3100 25.8230 25.8280
+RPP B016     0.2706 12.0090 -12.9790 0.6206 25.3120 25.3170
+RPP B017     0.3100 13.9096 -0.3100 13.3848 38.8230 38.8280
+RPP B018     -12.9872 0.7076 0.3576 13.9572 38.3120 38.3170
+RPP B019     -13.9096 -0.3100 -13.3848 0.3100 38.8230 38.8280
+RPP B020     -0.7076 12.9872 -13.9572 -0.3576 38.3120 38.3170
+* Carbon-fibre plates: two per station, 0.04 cm thick.
+RPP CF01      -18.0 18.0  -8.5 8.5   7.1300  7.1700
+RPP CF02      -18.0 18.0  -8.5 8.5   7.9700  8.0100
+RPP CF03      -18.0 18.0  -8.5 8.5  15.1300 15.1700
+RPP CF04      -18.0 18.0  -8.5 8.5  15.9700 16.0100
+RPP CF05      -16.1 16.1  -14.6 14.6  20.3270 20.3670
+RPP CF06      -16.1 16.1  -14.6 14.6  20.7730 20.8130
+RPP CF07      -16.1 16.1  -14.6 14.6  25.3270 25.3670
+RPP CF08      -16.1 16.1  -14.6 14.6  25.7730 25.8130
+RPP CF09      -16.1 16.1  -14.6 14.6  38.3270 38.3670
+RPP CF10      -16.1 16.1  -14.6 14.6  38.7730 38.8130
+* Carbon foam is present only in the three outer stations (layers 2--4).
+RPP FOAM05    -12.9 12.9  -13.5 13.5  20.3670 20.7730
+RPP FOAM06    -12.9 12.9  -13.5 13.5  25.3670 25.7730
+RPP FOAM07    -12.9 12.9  -13.5 13.5  38.3670 38.7730
+* Carbon-fibre centre holes and window cut-outs (two windows per plate).
+RCC FC01       0.0 0.0  7.1300  0.0 0.0 0.0400 0.30
+RCC FC02       0.0 0.0  7.9700  0.0 0.0 0.0400 0.30
+RCC FC03       0.0 0.0 15.1300  0.0 0.0 0.0400 0.30
+RCC FC04       0.0 0.0 15.9700  0.0 0.0 0.0400 0.30
+RCC FC05       0.0 0.0 20.3270  0.0 0.0 0.0400 0.30
+RCC FC06       0.0 0.0 20.7730  0.0 0.0 0.0400 0.30
+RCC FC07       0.0 0.0 25.3270  0.0 0.0 0.0400 0.30
+RCC FC08       0.0 0.0 25.7730  0.0 0.0 0.0400 0.30
+RCC FC09       0.0 0.0 38.3270  0.0 0.0 0.0400 0.30
+RCC FC10       0.0 0.0 38.7730  0.0 0.0 0.0400 0.30
+RPP FW01A       0.67  6.67  -0.30  5.50   7.1300  7.1700
+RPP FW01B      -6.67 -0.67  -5.50  0.30   7.1300  7.1700
+RPP FW02A      -5.33  0.67   0.30  6.10   7.9700  8.0100
+RPP FW02B      -0.67  5.33  -6.10 -0.30   7.9700  8.0100
+RPP FW03A       0.67  6.67  -0.30  5.50  15.1300 15.1700
+RPP FW03B      -6.67 -0.67  -5.50  0.30  15.1300 15.1700
+RPP FW04A      -5.33  0.67   0.30  6.10  15.9700 16.0100
+RPP FW04B      -0.67  5.33  -6.10 -0.30  15.9700 16.0100
+RPP FW05A       0.67 11.67  -0.30 10.70  20.3270 20.3670
+RPP FW05B     -11.67 -0.67 -10.70  0.30  20.3270 20.3670
+RPP FW06A     -10.33  0.67   0.30 11.30  20.7730 20.8130
+RPP FW06B      -0.67 10.33 -11.30 -0.30  20.7730 20.8130
+RPP FW07A       0.67 11.67  -0.30 10.70  25.3270 25.3670
+RPP FW07B     -11.67 -0.67 -10.70  0.30  25.3270 25.3670
+RPP FW08A     -10.33  0.67   0.30 11.30  25.7730 25.8130
+RPP FW08B      -0.67 10.33 -11.30 -0.30  25.7730 25.8130
+RPP FW09A       0.67 11.67  -0.30 10.70  38.3270 38.3670
+RPP FW09B     -11.67 -0.67 -10.70  0.30  38.3270 38.3670
+RPP FW10A     -10.33  0.67   0.30 11.30  38.7730 38.8130
+RPP FW10B      -0.67 10.33 -11.30 -0.30  38.7730 38.8130
+* Central holes in the carbon foam layers.
+RCC FH05       0.0 0.0 20.3670  0.0 0.0 0.4060 10.0
+RCC FH06       0.0 0.0 25.3670  0.0 0.0 0.4060 10.0
+RCC FH07       0.0 0.0 38.3670  0.0 0.0 0.4060 10.0
+END
+BLACKHOL  1 +WORLD -VTENV
+VACUUM    2 +VTENV
+              -B001 -B002 -B003 -B004 -B005 -B006 -B007 -B008
+              -B009 -B010 -B011 -B012 -B013 -B014 -B015 -B016
+              -B017 -B018 -B019 -B020
+             -CF01 -CF02 -CF03 -CF04 -CF05 -CF06 -CF07 -CF08 -CF09 -CF10
+             -FOAM05 -FOAM06 -FOAM07
+             | +FC01 | +FC02 | +FC03 | +FC04 | +FC05 | +FC06 | +FC07 | +FC08 | +FC09 | +FC10
+             | +FW01A | +FW01B | +FW02A | +FW02B | +FW03A | +FW03B | +FW04A | +FW04B
+             | +FW05A | +FW05B | +FW06A | +FW06B | +FW07A | +FW07B | +FW08A | +FW08B
+             | +FW09A | +FW09B | +FW10A | +FW10B | +FH05 | +FH06 | +FH07
+SENSORS   3 +B001 | +B002 | +B003 | +B004 | +B005 | +B006 | +B007 | +B008
+             | +B009 | +B010 | +B011 | +B012 | +B013 | +B014 | +B015 | +B016
+             | +B017 | +B018 | +B019 | +B020
+CF01R     4 +CF01 -FC01 -FW01A -FW01B
+CF02R     5 +CF02 -FC02 -FW02A -FW02B
+CF03R     6 +CF03 -FC03 -FW03A -FW03B
+CF04R     7 +CF04 -FC04 -FW04A -FW04B
+CF05R     8 +CF05 -FC05 -FW05A -FW05B
+CF06R     9 +CF06 -FC06 -FW06A -FW06B
+CF07R    10 +CF07 -FC07 -FW07A -FW07B
+CF08R    11 +CF08 -FC08 -FW08A -FW08B
+CF09R    12 +CF09 -FC09 -FW09A -FW09B
+CF10R    13 +CF10 -FC10 -FW10A -FW10B
+FOAM05R  14 +FOAM05 -FH05
+FOAM06R  15 +FOAM06 -FH06
+FOAM07R  16 +FOAM07 -FH07
+END
+GEOEND
+ASSIGNMA    BLCKHOLE  BLACKHOL                                                  
+ASSIGNMA      VACUUM    VACUUM                                                  
+ASSIGNMA     SILICON   SENSORS                                                  
+ASSIGNMA     CCFIBER     CF01R     CF10R                                        
+ASSIGNMA       CFOAM   FOAM05R   FOAM07R                                        
+START         1000.0                                                            
+STOP

@@ -1,0 +1,2654 @@
+[INFO] Printing all configs
+####
+keyval.input_dir : none		[ RTF ]
+keyval.output_dir : none		[ RTF ]
+beam.particle : Lead		[ RTF ]
+beam.A : 208		[ RTF ]
+beam.Z : 82		[ RTF ]
+beam.PDG : 1.00082e+09		[ RTF ]
+beam.energyPerNucleon : 40		[ RTF ]
+beam.meanX : 0		[ RTF ]
+beam.meanY : 0		[ RTF ]
+beam.meanSlopeX : 0		[ RTF ]
+beam.meanSlopeY : 0		[ RTF ]
+beam.sigX : 0.05		[ RTF ]
+beam.sigY : 0.05		[ RTF ]
+beam.sigSlopeX : 0		[ RTF ]
+beam.sigSlopeY : 0		[ RTF ]
+beam.corrX : 0		[ RTF ]
+beam.corrY : 0		[ RTF ]
+beam.zFocus : 0		[ RTF ]
+layout.xMinFieldDump : -200		[ RTF ]
+layout.xMaxFieldDump : 200		[ RTF ]
+layout.yMinFieldDump : -200		[ RTF ]
+layout.yMaxFieldDump : 200		[ RTF ]
+layout.zMinFieldDump : -10		[ RTF ]
+layout.zMaxFieldDump : 900		[ RTF ]
+layout.stepFieldDump : 5		[ RTF ]
+layout.fieldMap : field_map.txt		[ RTF ]
+layout.posDipIP[0] : 0		[ RTF ]
+layout.posDipIP[1] : 0		[ RTF ]
+layout.posDipIP[2] : 34.5		[ RTF ]
+layout.fieldMapDipVT : $(NA6PROOT_ROOT)/share/data/MEP48_field_map.inp		[ RTF ]
+layout.posDipMS[0] : 0		[ RTF ]
+layout.posDipMS[1] : 0		[ RTF ]
+layout.posDipMS[2] : 445		[ RTF ]
+layout.fieldMapDipMS : $(NA6PROOT_ROOT)/share/data/mnp33_fieldmap_5cm.dat		[ RTF ]
+layout.gdmlMagPath : $(NA6PROOT_ROOT)/share/data/BothMagnets.gdml		[ RTF ]
+layout.use_gdml_magnets : true		[ RTF ]
+layout.nTargets : 5		[ RTF ]
+layout.shiftTargets[0] : 0		[ RTF ]
+layout.shiftTargets[1] : 0		[ RTF ]
+layout.shiftTargets[2] : 0		[ RTF ]
+layout.posTargetX[0] : 0		[ RTF ]
+layout.posTargetX[1] : 0		[ RTF ]
+layout.posTargetX[2] : 0		[ RTF ]
+layout.posTargetX[3] : 0		[ RTF ]
+layout.posTargetX[4] : 0		[ RTF ]
+layout.posTargetY[0] : 0		[ RTF ]
+layout.posTargetY[1] : 0		[ RTF ]
+layout.posTargetY[2] : 0		[ RTF ]
+layout.posTargetY[3] : 0		[ RTF ]
+layout.posTargetY[4] : 0		[ RTF ]
+layout.posTargetZ[0] : -5.3		[ RTF ]
+layout.posTargetZ[1] : -4.1		[ RTF ]
+layout.posTargetZ[2] : -2.9		[ RTF ]
+layout.posTargetZ[3] : -1.7		[ RTF ]
+layout.posTargetZ[4] : -0.5		[ RTF ]
+layout.thicknessTarget[0] : 0.15		[ RTF ]
+layout.thicknessTarget[1] : 0.15		[ RTF ]
+layout.thicknessTarget[2] : 0.15		[ RTF ]
+layout.thicknessTarget[3] : 0.15		[ RTF ]
+layout.thicknessTarget[4] : 0.15		[ RTF ]
+layout.radTarget[0] : 0.3		[ RTF ]
+layout.radTarget[1] : 0.1		[ RTF ]
+layout.radTarget[2] : 0.1		[ RTF ]
+layout.radTarget[3] : 0.1		[ RTF ]
+layout.radTarget[4] : 0.1		[ RTF ]
+layout.xsectionTarget[0] : 6.6		[ RTF ]
+layout.xsectionTarget[1] : 6.6		[ RTF ]
+layout.xsectionTarget[2] : 6.6		[ RTF ]
+layout.xsectionTarget[3] : 6.6		[ RTF ]
+layout.xsectionTarget[4] : 6.6		[ RTF ]
+layout.medTarget[0] : Lead		[ RTF ]
+layout.medTarget[1] : Lead		[ RTF ]
+layout.medTarget[2] : Lead		[ RTF ]
+layout.medTarget[3] : Lead		[ RTF ]
+layout.medTarget[4] : Lead		[ RTF ]
+layout.nVerTelPlanes : 5		[ RTF ]
+layout.shiftVerTel[0] : 0		[ RTF ]
+layout.shiftVerTel[1] : 0		[ RTF ]
+layout.shiftVerTel[2] : 0		[ RTF ]
+layout.posVerTelPlaneX[0] : 0		[ RTF ]
+layout.posVerTelPlaneX[1] : 0		[ RTF ]
+layout.posVerTelPlaneX[2] : 0		[ RTF ]
+layout.posVerTelPlaneX[3] : 0		[ RTF ]
+layout.posVerTelPlaneX[4] : 0		[ RTF ]
+layout.posVerTelPlaneX[5] : 0		[ RTF ]
+layout.posVerTelPlaneX[6] : 0		[ RTF ]
+layout.posVerTelPlaneY[0] : 0		[ RTF ]
+layout.posVerTelPlaneY[1] : 0		[ RTF ]
+layout.posVerTelPlaneY[2] : 0		[ RTF ]
+layout.posVerTelPlaneY[3] : 0		[ RTF ]
+layout.posVerTelPlaneY[4] : 0		[ RTF ]
+layout.posVerTelPlaneY[5] : 0		[ RTF ]
+layout.posVerTelPlaneY[6] : 0		[ RTF ]
+layout.posVerTelPlaneZ[0] : 7.1175		[ RTF ]
+layout.posVerTelPlaneZ[1] : 15.1175		[ RTF ]
+layout.posVerTelPlaneZ[2] : 20.1175		[ RTF ]
+layout.posVerTelPlaneZ[3] : 25.1175		[ RTF ]
+layout.posVerTelPlaneZ[4] : 38.1175		[ RTF ]
+layout.posVerTelPlaneZ[5] : 0		[ RTF ]
+layout.posVerTelPlaneZ[6] : 0		[ RTF ]
+layout.sensorsPerPlane[0] : 3		[ RTF ]
+layout.sensorsPerPlane[1] : 4		[ RTF ]
+layout.sensorsPerPlane[2] : 5		[ RTF ]
+layout.sensorsPerPlane[3] : 6		[ RTF ]
+layout.sensorsPerPlane[4] : 7		[ RTF ]
+layout.sensorsPerPlane[5] : 0		[ RTF ]
+layout.sensorsPerPlane[6] : 0		[ RTF ]
+layout.pixChipOffsXFront : 0.66		[ RTF ]
+layout.pixChipOffsXBack : 0.31		[ RTF ]
+layout.pixChipOffsY : 0.31		[ RTF ]
+layout.shiftFiberWindow : 0.67		[ RTF ]
+layout.nMSPlanes : 6		[ RTF ]
+layout.shiftMS[0] : 0		[ RTF ]
+layout.shiftMS[1] : 0		[ RTF ]
+layout.shiftMS[2] : 0		[ RTF ]
+layout.posMSPlaneX[0] : 0		[ RTF ]
+layout.posMSPlaneX[1] : 0		[ RTF ]
+layout.posMSPlaneX[2] : 0		[ RTF ]
+layout.posMSPlaneX[3] : 0		[ RTF ]
+layout.posMSPlaneX[4] : 0		[ RTF ]
+layout.posMSPlaneX[5] : 0		[ RTF ]
+layout.posMSPlaneX[6] : 0		[ RTF ]
+layout.posMSPlaneY[0] : 0		[ RTF ]
+layout.posMSPlaneY[1] : 0		[ RTF ]
+layout.posMSPlaneY[2] : 0		[ RTF ]
+layout.posMSPlaneY[3] : 0		[ RTF ]
+layout.posMSPlaneY[4] : 0		[ RTF ]
+layout.posMSPlaneY[5] : 0		[ RTF ]
+layout.posMSPlaneY[6] : 0		[ RTF ]
+layout.msChipDX[0] : 20		[ RTF ]
+layout.msChipDX[1] : 20		[ RTF ]
+layout.msChipDX[2] : 120		[ RTF ]
+layout.msChipDX[3] : 160		[ RTF ]
+layout.msChipDX[4] : 210		[ RTF ]
+layout.msChipDX[5] : 230		[ RTF ]
+layout.msChipDX[6] : 0		[ RTF ]
+layout.msChipDY[0] : 20		[ RTF ]
+layout.msChipDY[1] : 20		[ RTF ]
+layout.msChipDY[2] : 120		[ RTF ]
+layout.msChipDY[3] : 160		[ RTF ]
+layout.msChipDY[4] : 210		[ RTF ]
+layout.msChipDY[5] : 230		[ RTF ]
+layout.msChipDY[6] : 0		[ RTF ]
+layout.posMSPlaneZ[0] : 297		[ RTF ]
+layout.posMSPlaneZ[1] : 324		[ RTF ]
+layout.posMSPlaneZ[2] : 566		[ RTF ]
+layout.posMSPlaneZ[3] : 593		[ RTF ]
+layout.posMSPlaneZ[4] : 789.5		[ RTF ]
+layout.posMSPlaneZ[5] : 829.5		[ RTF ]
+layout.posMSPlaneZ[6] : 0		[ RTF ]
+layout.thicknessMSPlane[0] : 0.06		[ RTF ]
+layout.thicknessMSPlane[1] : 0.06		[ RTF ]
+layout.thicknessMSPlane[2] : 0.06		[ RTF ]
+layout.thicknessMSPlane[3] : 0.06		[ RTF ]
+layout.thicknessMSPlane[4] : 0.06		[ RTF ]
+layout.thicknessMSPlane[5] : 0.06		[ RTF ]
+layout.thicknessMSPlane[6] : 0		[ RTF ]
+layout.dimXMSPlane[0] : 160		[ RTF ]
+layout.dimXMSPlane[1] : 240		[ RTF ]
+layout.dimXMSPlane[2] : 240		[ RTF ]
+layout.dimXMSPlane[3] : 320		[ RTF ]
+layout.dimXMSPlane[4] : 440		[ RTF ]
+layout.dimXMSPlane[5] : 460		[ RTF ]
+layout.dimXMSPlane[6] : 0		[ RTF ]
+layout.dimYMSPlane[0] : 160		[ RTF ]
+layout.dimYMSPlane[1] : 240		[ RTF ]
+layout.dimYMSPlane[2] : 240		[ RTF ]
+layout.dimYMSPlane[3] : 320		[ RTF ]
+layout.dimYMSPlane[4] : 440		[ RTF ]
+layout.dimYMSPlane[5] : 460		[ RTF ]
+layout.dimYMSPlane[6] : 0		[ RTF ]
+layout.dimXMSPlaneHole[0] : 5		[ RTF ]
+layout.dimXMSPlaneHole[1] : 1		[ RTF ]
+layout.dimXMSPlaneHole[2] : 1		[ RTF ]
+layout.dimXMSPlaneHole[3] : 1		[ RTF ]
+layout.dimXMSPlaneHole[4] : 1		[ RTF ]
+layout.dimXMSPlaneHole[5] : 1		[ RTF ]
+layout.dimXMSPlaneHole[6] : 0		[ RTF ]
+layout.dimYMSPlaneHole[0] : 5		[ RTF ]
+layout.dimYMSPlaneHole[1] : 1		[ RTF ]
+layout.dimYMSPlaneHole[2] : 1		[ RTF ]
+layout.dimYMSPlaneHole[3] : 1		[ RTF ]
+layout.dimYMSPlaneHole[4] : 1		[ RTF ]
+layout.dimYMSPlaneHole[5] : 1		[ RTF ]
+layout.dimYMSPlaneHole[6] : 0		[ RTF ]
+layout.medMSPlane[0] : Silicon		[ RTF ]
+layout.medMSPlane[1] : Silicon		[ RTF ]
+layout.medMSPlane[2] : Silicon		[ RTF ]
+layout.medMSPlane[3] : Silicon		[ RTF ]
+layout.medMSPlane[4] : Silicon		[ RTF ]
+layout.medMSPlane[5] : Silicon		[ RTF ]
+layout.medMSPlane[6] : 		[ RTF ]
+layout.nAbsorberSlices : 34		[ RTF ]
+layout.nAbsorberSlicesWall : 1		[ RTF ]
+layout.posZStartAbsorber : 45		[ RTF ]
+layout.posMuonWall : 610		[ RTF ]
+layout.thicknessAbsorber[0] : 10		[ RTF ]
+layout.thicknessAbsorber[1] : 10		[ RTF ]
+layout.thicknessAbsorber[2] : 6		[ RTF ]
+layout.thicknessAbsorber[3] : 6		[ RTF ]
+layout.thicknessAbsorber[4] : 6		[ RTF ]
+layout.thicknessAbsorber[5] : 7		[ RTF ]
+layout.thicknessAbsorber[6] : 5		[ RTF ]
+layout.thicknessAbsorber[7] : 6		[ RTF ]
+layout.thicknessAbsorber[8] : 6		[ RTF ]
+layout.thicknessAbsorber[9] : 6		[ RTF ]
+layout.thicknessAbsorber[10] : 6		[ RTF ]
+layout.thicknessAbsorber[11] : 6		[ RTF ]
+layout.thicknessAbsorber[12] : 6		[ RTF ]
+layout.thicknessAbsorber[13] : 6		[ RTF ]
+layout.thicknessAbsorber[14] : 6		[ RTF ]
+layout.thicknessAbsorber[15] : 6		[ RTF ]
+layout.thicknessAbsorber[16] : 6		[ RTF ]
+layout.thicknessAbsorber[17] : 6		[ RTF ]
+layout.thicknessAbsorber[18] : 6		[ RTF ]
+layout.thicknessAbsorber[19] : 6		[ RTF ]
+layout.thicknessAbsorber[20] : 6		[ RTF ]
+layout.thicknessAbsorber[21] : 6		[ RTF ]
+layout.thicknessAbsorber[22] : 10		[ RTF ]
+layout.thicknessAbsorber[23] : 6		[ RTF ]
+layout.thicknessAbsorber[24] : 6		[ RTF ]
+layout.thicknessAbsorber[25] : 6		[ RTF ]
+layout.thicknessAbsorber[26] : 6		[ RTF ]
+layout.thicknessAbsorber[27] : 6		[ RTF ]
+layout.thicknessAbsorber[28] : 10		[ RTF ]
+layout.thicknessAbsorber[29] : 6		[ RTF ]
+layout.thicknessAbsorber[30] : 6		[ RTF ]
+layout.thicknessAbsorber[31] : 6		[ RTF ]
+layout.thicknessAbsorber[32] : 22		[ RTF ]
+layout.thicknessAbsorber[33] : 160		[ RTF ]
+layout.thicknessAbsorber[34] : 0		[ RTF ]
+layout.thicknessAbsorber[35] : 0		[ RTF ]
+layout.thicknessAbsorber[36] : 0		[ RTF ]
+layout.thicknessAbsorber[37] : 0		[ RTF ]
+layout.thicknessAbsorber[38] : 0		[ RTF ]
+layout.thicknessAbsorber[39] : 0		[ RTF ]
+layout.thicknessAbsorber[40] : 0		[ RTF ]
+layout.thicknessAbsorber[41] : 0		[ RTF ]
+layout.thicknessAbsorber[42] : 0		[ RTF ]
+layout.thicknessAbsorber[43] : 0		[ RTF ]
+layout.thicknessAbsorber[44] : 0		[ RTF ]
+layout.thicknessAbsorber[45] : 0		[ RTF ]
+layout.thicknessAbsorber[46] : 0		[ RTF ]
+layout.thicknessAbsorber[47] : 0		[ RTF ]
+layout.thicknessAbsorber[48] : 0		[ RTF ]
+layout.thicknessAbsorber[49] : 0		[ RTF ]
+layout.dimXAbsorber[0] : 48		[ RTF ]
+layout.dimXAbsorber[1] : 48		[ RTF ]
+layout.dimXAbsorber[2] : 48		[ RTF ]
+layout.dimXAbsorber[3] : 48		[ RTF ]
+layout.dimXAbsorber[4] : 48		[ RTF ]
+layout.dimXAbsorber[5] : 48		[ RTF ]
+layout.dimXAbsorber[6] : 68		[ RTF ]
+layout.dimXAbsorber[7] : 68		[ RTF ]
+layout.dimXAbsorber[8] : 68		[ RTF ]
+layout.dimXAbsorber[9] : 68		[ RTF ]
+layout.dimXAbsorber[10] : 68		[ RTF ]
+layout.dimXAbsorber[11] : 68		[ RTF ]
+layout.dimXAbsorber[12] : 84		[ RTF ]
+layout.dimXAbsorber[13] : 84		[ RTF ]
+layout.dimXAbsorber[14] : 84		[ RTF ]
+layout.dimXAbsorber[15] : 84		[ RTF ]
+layout.dimXAbsorber[16] : 84		[ RTF ]
+layout.dimXAbsorber[17] : 106		[ RTF ]
+layout.dimXAbsorber[18] : 106		[ RTF ]
+layout.dimXAbsorber[19] : 106		[ RTF ]
+layout.dimXAbsorber[20] : 106		[ RTF ]
+layout.dimXAbsorber[21] : 106		[ RTF ]
+layout.dimXAbsorber[22] : 106		[ RTF ]
+layout.dimXAbsorber[23] : 128		[ RTF ]
+layout.dimXAbsorber[24] : 128		[ RTF ]
+layout.dimXAbsorber[25] : 128		[ RTF ]
+layout.dimXAbsorber[26] : 128		[ RTF ]
+layout.dimXAbsorber[27] : 128		[ RTF ]
+layout.dimXAbsorber[28] : 128		[ RTF ]
+layout.dimXAbsorber[29] : 148		[ RTF ]
+layout.dimXAbsorber[30] : 148		[ RTF ]
+layout.dimXAbsorber[31] : 148		[ RTF ]
+layout.dimXAbsorber[32] : 148		[ RTF ]
+layout.dimXAbsorber[33] : 440		[ RTF ]
+layout.dimXAbsorber[34] : 0		[ RTF ]
+layout.dimXAbsorber[35] : 0		[ RTF ]
+layout.dimXAbsorber[36] : 0		[ RTF ]
+layout.dimXAbsorber[37] : 0		[ RTF ]
+layout.dimXAbsorber[38] : 0		[ RTF ]
+layout.dimXAbsorber[39] : 0		[ RTF ]
+layout.dimXAbsorber[40] : 0		[ RTF ]
+layout.dimXAbsorber[41] : 0		[ RTF ]
+layout.dimXAbsorber[42] : 0		[ RTF ]
+layout.dimXAbsorber[43] : 0		[ RTF ]
+layout.dimXAbsorber[44] : 0		[ RTF ]
+layout.dimXAbsorber[45] : 0		[ RTF ]
+layout.dimXAbsorber[46] : 0		[ RTF ]
+layout.dimXAbsorber[47] : 0		[ RTF ]
+layout.dimXAbsorber[48] : 0		[ RTF ]
+layout.dimXAbsorber[49] : 0		[ RTF ]
+layout.dimYAbsorber[0] : 39		[ RTF ]
+layout.dimYAbsorber[1] : 39		[ RTF ]
+layout.dimYAbsorber[2] : 39		[ RTF ]
+layout.dimYAbsorber[3] : 39		[ RTF ]
+layout.dimYAbsorber[4] : 39		[ RTF ]
+layout.dimYAbsorber[5] : 39		[ RTF ]
+layout.dimYAbsorber[6] : 52		[ RTF ]
+layout.dimYAbsorber[7] : 52		[ RTF ]
+layout.dimYAbsorber[8] : 52		[ RTF ]
+layout.dimYAbsorber[9] : 52		[ RTF ]
+layout.dimYAbsorber[10] : 52		[ RTF ]
+layout.dimYAbsorber[11] : 52		[ RTF ]
+layout.dimYAbsorber[12] : 84		[ RTF ]
+layout.dimYAbsorber[13] : 84		[ RTF ]
+layout.dimYAbsorber[14] : 84		[ RTF ]
+layout.dimYAbsorber[15] : 84		[ RTF ]
+layout.dimYAbsorber[16] : 84		[ RTF ]
+layout.dimYAbsorber[17] : 106		[ RTF ]
+layout.dimYAbsorber[18] : 106		[ RTF ]
+layout.dimYAbsorber[19] : 106		[ RTF ]
+layout.dimYAbsorber[20] : 106		[ RTF ]
+layout.dimYAbsorber[21] : 106		[ RTF ]
+layout.dimYAbsorber[22] : 106		[ RTF ]
+layout.dimYAbsorber[23] : 128		[ RTF ]
+layout.dimYAbsorber[24] : 128		[ RTF ]
+layout.dimYAbsorber[25] : 128		[ RTF ]
+layout.dimYAbsorber[26] : 128		[ RTF ]
+layout.dimYAbsorber[27] : 128		[ RTF ]
+layout.dimYAbsorber[28] : 128		[ RTF ]
+layout.dimYAbsorber[29] : 148		[ RTF ]
+layout.dimYAbsorber[30] : 148		[ RTF ]
+layout.dimYAbsorber[31] : 148		[ RTF ]
+layout.dimYAbsorber[32] : 148		[ RTF ]
+layout.dimYAbsorber[33] : 440		[ RTF ]
+layout.dimYAbsorber[34] : 0		[ RTF ]
+layout.dimYAbsorber[35] : 0		[ RTF ]
+layout.dimYAbsorber[36] : 0		[ RTF ]
+layout.dimYAbsorber[37] : 0		[ RTF ]
+layout.dimYAbsorber[38] : 0		[ RTF ]
+layout.dimYAbsorber[39] : 0		[ RTF ]
+layout.dimYAbsorber[40] : 0		[ RTF ]
+layout.dimYAbsorber[41] : 0		[ RTF ]
+layout.dimYAbsorber[42] : 0		[ RTF ]
+layout.dimYAbsorber[43] : 0		[ RTF ]
+layout.dimYAbsorber[44] : 0		[ RTF ]
+layout.dimYAbsorber[45] : 0		[ RTF ]
+layout.dimYAbsorber[46] : 0		[ RTF ]
+layout.dimYAbsorber[47] : 0		[ RTF ]
+layout.dimYAbsorber[48] : 0		[ RTF ]
+layout.dimYAbsorber[49] : 0		[ RTF ]
+layout.radPlug[0] : 2.9		[ RTF ]
+layout.radPlug[1] : 2.9		[ RTF ]
+layout.radPlug[2] : 4.55		[ RTF ]
+layout.radPlug[3] : 4.7		[ RTF ]
+layout.radPlug[4] : 4.85		[ RTF ]
+layout.radPlug[5] : 5		[ RTF ]
+layout.radPlug[6] : 5.15		[ RTF ]
+layout.radPlug[7] : 5.3		[ RTF ]
+layout.radPlug[8] : 5.45		[ RTF ]
+layout.radPlug[9] : 5.6		[ RTF ]
+layout.radPlug[10] : 5.75		[ RTF ]
+layout.radPlug[11] : 5.9		[ RTF ]
+layout.radPlug[12] : 6.05		[ RTF ]
+layout.radPlug[13] : 6.2		[ RTF ]
+layout.radPlug[14] : 6.35		[ RTF ]
+layout.radPlug[15] : 6.5		[ RTF ]
+layout.radPlug[16] : 6.65		[ RTF ]
+layout.radPlug[17] : 6.8		[ RTF ]
+layout.radPlug[18] : 6.95		[ RTF ]
+layout.radPlug[19] : 7.1		[ RTF ]
+layout.radPlug[20] : 7.25		[ RTF ]
+layout.radPlug[21] : 7.4		[ RTF ]
+layout.radPlug[22] : 7.75		[ RTF ]
+layout.radPlug[23] : 8		[ RTF ]
+layout.radPlug[24] : 8.3		[ RTF ]
+layout.radPlug[25] : 8.6		[ RTF ]
+layout.radPlug[26] : 8.9		[ RTF ]
+layout.radPlug[27] : 9.25		[ RTF ]
+layout.radPlug[28] : 9.55		[ RTF ]
+layout.radPlug[29] : 9.85		[ RTF ]
+layout.radPlug[30] : 10.15		[ RTF ]
+layout.radPlug[31] : 10.45		[ RTF ]
+layout.radPlug[32] : 10.75		[ RTF ]
+layout.radPlug[33] : 0		[ RTF ]
+layout.radPlug[34] : 0		[ RTF ]
+layout.radPlug[35] : 0		[ RTF ]
+layout.radPlug[36] : 0		[ RTF ]
+layout.radPlug[37] : 0		[ RTF ]
+layout.radPlug[38] : 0		[ RTF ]
+layout.radPlug[39] : 0		[ RTF ]
+layout.radPlug[40] : 0		[ RTF ]
+layout.radPlug[41] : 0		[ RTF ]
+layout.radPlug[42] : 0		[ RTF ]
+layout.radPlug[43] : 0		[ RTF ]
+layout.radPlug[44] : 0		[ RTF ]
+layout.radPlug[45] : 0		[ RTF ]
+layout.radPlug[46] : 0		[ RTF ]
+layout.radPlug[47] : 0		[ RTF ]
+layout.radPlug[48] : 0		[ RTF ]
+layout.radPlug[49] : 0		[ RTF ]
+layout.radPlugInt[0] : 0		[ RTF ]
+layout.radPlugInt[1] : 1		[ RTF ]
+layout.radPlugInt[2] : 0		[ RTF ]
+layout.radPlugInt[3] : 0		[ RTF ]
+layout.radPlugInt[4] : 0		[ RTF ]
+layout.radPlugInt[5] : 0		[ RTF ]
+layout.radPlugInt[6] : 0		[ RTF ]
+layout.radPlugInt[7] : 0		[ RTF ]
+layout.radPlugInt[8] : 0		[ RTF ]
+layout.radPlugInt[9] : 0		[ RTF ]
+layout.radPlugInt[10] : 0		[ RTF ]
+layout.radPlugInt[11] : 0		[ RTF ]
+layout.radPlugInt[12] : 0		[ RTF ]
+layout.radPlugInt[13] : 0		[ RTF ]
+layout.radPlugInt[14] : 0		[ RTF ]
+layout.radPlugInt[15] : 0		[ RTF ]
+layout.radPlugInt[16] : 0		[ RTF ]
+layout.radPlugInt[17] : 0		[ RTF ]
+layout.radPlugInt[18] : 0		[ RTF ]
+layout.radPlugInt[19] : 0		[ RTF ]
+layout.radPlugInt[20] : 0		[ RTF ]
+layout.radPlugInt[21] : 0		[ RTF ]
+layout.radPlugInt[22] : 0		[ RTF ]
+layout.radPlugInt[23] : 0		[ RTF ]
+layout.radPlugInt[24] : 0		[ RTF ]
+layout.radPlugInt[25] : 0		[ RTF ]
+layout.radPlugInt[26] : 0		[ RTF ]
+layout.radPlugInt[27] : 0		[ RTF ]
+layout.radPlugInt[28] : 0		[ RTF ]
+layout.radPlugInt[29] : 0		[ RTF ]
+layout.radPlugInt[30] : 0		[ RTF ]
+layout.radPlugInt[31] : 0		[ RTF ]
+layout.radPlugInt[32] : 0		[ RTF ]
+layout.radPlugInt[33] : 0		[ RTF ]
+layout.radPlugInt[34] : 0		[ RTF ]
+layout.radPlugInt[35] : 0		[ RTF ]
+layout.radPlugInt[36] : 0		[ RTF ]
+layout.radPlugInt[37] : 0		[ RTF ]
+layout.radPlugInt[38] : 0		[ RTF ]
+layout.radPlugInt[39] : 0		[ RTF ]
+layout.radPlugInt[40] : 0		[ RTF ]
+layout.radPlugInt[41] : 0		[ RTF ]
+layout.radPlugInt[42] : 0		[ RTF ]
+layout.radPlugInt[43] : 0		[ RTF ]
+layout.radPlugInt[44] : 0		[ RTF ]
+layout.radPlugInt[45] : 0		[ RTF ]
+layout.radPlugInt[46] : 0		[ RTF ]
+layout.radPlugInt[47] : 0		[ RTF ]
+layout.radPlugInt[48] : 0		[ RTF ]
+layout.radPlugInt[49] : 0		[ RTF ]
+layout.radAir[0] : 0		[ RTF ]
+layout.radAir[1] : 0		[ RTF ]
+layout.radAir[2] : 0		[ RTF ]
+layout.radAir[3] : 0		[ RTF ]
+layout.radAir[4] : 0		[ RTF ]
+layout.radAir[5] : 0		[ RTF ]
+layout.radAir[6] : 0		[ RTF ]
+layout.radAir[7] : 0		[ RTF ]
+layout.radAir[8] : 0		[ RTF ]
+layout.radAir[9] : 0		[ RTF ]
+layout.radAir[10] : 0		[ RTF ]
+layout.radAir[11] : 0		[ RTF ]
+layout.radAir[12] : 0		[ RTF ]
+layout.radAir[13] : 0		[ RTF ]
+layout.radAir[14] : 0		[ RTF ]
+layout.radAir[15] : 0		[ RTF ]
+layout.radAir[16] : 0		[ RTF ]
+layout.radAir[17] : 0		[ RTF ]
+layout.radAir[18] : 0		[ RTF ]
+layout.radAir[19] : 0		[ RTF ]
+layout.radAir[20] : 0		[ RTF ]
+layout.radAir[21] : 0		[ RTF ]
+layout.radAir[22] : 0		[ RTF ]
+layout.radAir[23] : 0		[ RTF ]
+layout.radAir[24] : 0		[ RTF ]
+layout.radAir[25] : 0		[ RTF ]
+layout.radAir[26] : 0		[ RTF ]
+layout.radAir[27] : 0		[ RTF ]
+layout.radAir[28] : 0		[ RTF ]
+layout.radAir[29] : 0		[ RTF ]
+layout.radAir[30] : 0		[ RTF ]
+layout.radAir[31] : 0		[ RTF ]
+layout.radAir[32] : 0		[ RTF ]
+layout.radAir[33] : 0		[ RTF ]
+layout.radAir[34] : 0		[ RTF ]
+layout.radAir[35] : 0		[ RTF ]
+layout.radAir[36] : 0		[ RTF ]
+layout.radAir[37] : 0		[ RTF ]
+layout.radAir[38] : 0		[ RTF ]
+layout.radAir[39] : 0		[ RTF ]
+layout.radAir[40] : 0		[ RTF ]
+layout.radAir[41] : 0		[ RTF ]
+layout.radAir[42] : 0		[ RTF ]
+layout.radAir[43] : 0		[ RTF ]
+layout.radAir[44] : 0		[ RTF ]
+layout.radAir[45] : 0		[ RTF ]
+layout.radAir[46] : 0		[ RTF ]
+layout.radAir[47] : 0		[ RTF ]
+layout.radAir[48] : 0		[ RTF ]
+layout.radAir[49] : 0		[ RTF ]
+layout.killParticlesBelowEAbsorber[0] : 0.1		[ RTF ]
+layout.killParticlesBelowEAbsorber[1] : 0.1		[ RTF ]
+layout.killParticlesBelowEAbsorber[2] : 0.1		[ RTF ]
+layout.killParticlesBelowEAbsorber[3] : 0.1		[ RTF ]
+layout.killParticlesBelowEAbsorber[4] : 0.1		[ RTF ]
+layout.killParticlesBelowEAbsorber[5] : 0.1		[ RTF ]
+layout.killParticlesBelowEAbsorber[6] : 0.1		[ RTF ]
+layout.killParticlesBelowEAbsorber[7] : 0.1		[ RTF ]
+layout.killParticlesBelowEAbsorber[8] : 0.1		[ RTF ]
+layout.killParticlesBelowEAbsorber[9] : 0.1		[ RTF ]
+layout.killParticlesBelowEAbsorber[10] : 0.1		[ RTF ]
+layout.killParticlesBelowEAbsorber[11] : 0.1		[ RTF ]
+layout.killParticlesBelowEAbsorber[12] : 0.1		[ RTF ]
+layout.killParticlesBelowEAbsorber[13] : 0.1		[ RTF ]
+layout.killParticlesBelowEAbsorber[14] : 0.1		[ RTF ]
+layout.killParticlesBelowEAbsorber[15] : 0.1		[ RTF ]
+layout.killParticlesBelowEAbsorber[16] : 0.1		[ RTF ]
+layout.killParticlesBelowEAbsorber[17] : 0.1		[ RTF ]
+layout.killParticlesBelowEAbsorber[18] : 0.1		[ RTF ]
+layout.killParticlesBelowEAbsorber[19] : 0.1		[ RTF ]
+layout.killParticlesBelowEAbsorber[20] : 0.1		[ RTF ]
+layout.killParticlesBelowEAbsorber[21] : 0.1		[ RTF ]
+layout.killParticlesBelowEAbsorber[22] : 0.1		[ RTF ]
+layout.killParticlesBelowEAbsorber[23] : 0.1		[ RTF ]
+layout.killParticlesBelowEAbsorber[24] : 0.1		[ RTF ]
+layout.killParticlesBelowEAbsorber[25] : 0.1		[ RTF ]
+layout.killParticlesBelowEAbsorber[26] : 0.1		[ RTF ]
+layout.killParticlesBelowEAbsorber[27] : 0.1		[ RTF ]
+layout.killParticlesBelowEAbsorber[28] : 0.1		[ RTF ]
+layout.killParticlesBelowEAbsorber[29] : 0.1		[ RTF ]
+layout.killParticlesBelowEAbsorber[30] : 0.1		[ RTF ]
+layout.killParticlesBelowEAbsorber[31] : 0.1		[ RTF ]
+layout.killParticlesBelowEAbsorber[32] : 0.1		[ RTF ]
+layout.killParticlesBelowEAbsorber[33] : 0.1		[ RTF ]
+layout.killParticlesBelowEAbsorber[34] : 0		[ RTF ]
+layout.killParticlesBelowEAbsorber[35] : 0		[ RTF ]
+layout.killParticlesBelowEAbsorber[36] : 0		[ RTF ]
+layout.killParticlesBelowEAbsorber[37] : 0		[ RTF ]
+layout.killParticlesBelowEAbsorber[38] : 0		[ RTF ]
+layout.killParticlesBelowEAbsorber[39] : 0		[ RTF ]
+layout.killParticlesBelowEAbsorber[40] : 0		[ RTF ]
+layout.killParticlesBelowEAbsorber[41] : 0		[ RTF ]
+layout.killParticlesBelowEAbsorber[42] : 0		[ RTF ]
+layout.killParticlesBelowEAbsorber[43] : 0		[ RTF ]
+layout.killParticlesBelowEAbsorber[44] : 0		[ RTF ]
+layout.killParticlesBelowEAbsorber[45] : 0		[ RTF ]
+layout.killParticlesBelowEAbsorber[46] : 0		[ RTF ]
+layout.killParticlesBelowEAbsorber[47] : 0		[ RTF ]
+layout.killParticlesBelowEAbsorber[48] : 0		[ RTF ]
+layout.killParticlesBelowEAbsorber[49] : 0		[ RTF ]
+layout.medAbsorber[0] : BeO		[ RTF ]
+layout.medAbsorber[1] : BeO		[ RTF ]
+layout.medAbsorber[2] : BeO		[ RTF ]
+layout.medAbsorber[3] : BeO		[ RTF ]
+layout.medAbsorber[4] : BeO		[ RTF ]
+layout.medAbsorber[5] : BeO		[ RTF ]
+layout.medAbsorber[6] : BeO		[ RTF ]
+layout.medAbsorber[7] : BeO		[ RTF ]
+layout.medAbsorber[8] : BeO		[ RTF ]
+layout.medAbsorber[9] : BeO		[ RTF ]
+layout.medAbsorber[10] : BeO		[ RTF ]
+layout.medAbsorber[11] : BeO		[ RTF ]
+layout.medAbsorber[12] : Al2O3		[ RTF ]
+layout.medAbsorber[13] : Al2O3		[ RTF ]
+layout.medAbsorber[14] : Al2O3		[ RTF ]
+layout.medAbsorber[15] : Al2O3		[ RTF ]
+layout.medAbsorber[16] : Al2O3		[ RTF ]
+layout.medAbsorber[17] : Graphite		[ RTF ]
+layout.medAbsorber[18] : Graphite		[ RTF ]
+layout.medAbsorber[19] : Graphite		[ RTF ]
+layout.medAbsorber[20] : Graphite		[ RTF ]
+layout.medAbsorber[21] : Graphite		[ RTF ]
+layout.medAbsorber[22] : Graphite		[ RTF ]
+layout.medAbsorber[23] : Graphite		[ RTF ]
+layout.medAbsorber[24] : Graphite		[ RTF ]
+layout.medAbsorber[25] : Graphite		[ RTF ]
+layout.medAbsorber[26] : Graphite		[ RTF ]
+layout.medAbsorber[27] : Graphite		[ RTF ]
+layout.medAbsorber[28] : Graphite		[ RTF ]
+layout.medAbsorber[29] : Graphite		[ RTF ]
+layout.medAbsorber[30] : Graphite		[ RTF ]
+layout.medAbsorber[31] : Graphite		[ RTF ]
+layout.medAbsorber[32] : Graphite		[ RTF ]
+layout.medAbsorber[33] : Concrete		[ RTF ]
+layout.medAbsorber[34] : 		[ RTF ]
+layout.medAbsorber[35] : 		[ RTF ]
+layout.medAbsorber[36] : 		[ RTF ]
+layout.medAbsorber[37] : 		[ RTF ]
+layout.medAbsorber[38] : 		[ RTF ]
+layout.medAbsorber[39] : 		[ RTF ]
+layout.medAbsorber[40] : 		[ RTF ]
+layout.medAbsorber[41] : 		[ RTF ]
+layout.medAbsorber[42] : 		[ RTF ]
+layout.medAbsorber[43] : 		[ RTF ]
+layout.medAbsorber[44] : 		[ RTF ]
+layout.medAbsorber[45] : 		[ RTF ]
+layout.medAbsorber[46] : 		[ RTF ]
+layout.medAbsorber[47] : 		[ RTF ]
+layout.medAbsorber[48] : 		[ RTF ]
+layout.medAbsorber[49] : 		[ RTF ]
+layout.medAbsorberPlug[0] : Air		[ RTF ]
+layout.medAbsorberPlug[1] : Tungsten		[ RTF ]
+layout.medAbsorberPlug[2] : Tungsten		[ RTF ]
+layout.medAbsorberPlug[3] : Tungsten		[ RTF ]
+layout.medAbsorberPlug[4] : Tungsten		[ RTF ]
+layout.medAbsorberPlug[5] : Tungsten		[ RTF ]
+layout.medAbsorberPlug[6] : Tungsten		[ RTF ]
+layout.medAbsorberPlug[7] : Tungsten		[ RTF ]
+layout.medAbsorberPlug[8] : Tungsten		[ RTF ]
+layout.medAbsorberPlug[9] : Tungsten		[ RTF ]
+layout.medAbsorberPlug[10] : Tungsten		[ RTF ]
+layout.medAbsorberPlug[11] : Tungsten		[ RTF ]
+layout.medAbsorberPlug[12] : Tungsten		[ RTF ]
+layout.medAbsorberPlug[13] : Tungsten		[ RTF ]
+layout.medAbsorberPlug[14] : Tungsten		[ RTF ]
+layout.medAbsorberPlug[15] : Tungsten		[ RTF ]
+layout.medAbsorberPlug[16] : Tungsten		[ RTF ]
+layout.medAbsorberPlug[17] : Tungsten		[ RTF ]
+layout.medAbsorberPlug[18] : Tungsten		[ RTF ]
+layout.medAbsorberPlug[19] : Tungsten		[ RTF ]
+layout.medAbsorberPlug[20] : Tungsten		[ RTF ]
+layout.medAbsorberPlug[21] : Tungsten		[ RTF ]
+layout.medAbsorberPlug[22] : Tungsten		[ RTF ]
+layout.medAbsorberPlug[23] : Tungsten		[ RTF ]
+layout.medAbsorberPlug[24] : Tungsten		[ RTF ]
+layout.medAbsorberPlug[25] : Tungsten		[ RTF ]
+layout.medAbsorberPlug[26] : Tungsten		[ RTF ]
+layout.medAbsorberPlug[27] : Tungsten		[ RTF ]
+layout.medAbsorberPlug[28] : Tungsten		[ RTF ]
+layout.medAbsorberPlug[29] : Tungsten		[ RTF ]
+layout.medAbsorberPlug[30] : Tungsten		[ RTF ]
+layout.medAbsorberPlug[31] : Tungsten		[ RTF ]
+layout.medAbsorberPlug[32] : Tungsten		[ RTF ]
+layout.medAbsorberPlug[33] : 		[ RTF ]
+layout.medAbsorberPlug[34] : 		[ RTF ]
+layout.medAbsorberPlug[35] : 		[ RTF ]
+layout.medAbsorberPlug[36] : 		[ RTF ]
+layout.medAbsorberPlug[37] : 		[ RTF ]
+layout.medAbsorberPlug[38] : 		[ RTF ]
+layout.medAbsorberPlug[39] : 		[ RTF ]
+layout.medAbsorberPlug[40] : 		[ RTF ]
+layout.medAbsorberPlug[41] : 		[ RTF ]
+layout.medAbsorberPlug[42] : 		[ RTF ]
+layout.medAbsorberPlug[43] : 		[ RTF ]
+layout.medAbsorberPlug[44] : 		[ RTF ]
+layout.medAbsorberPlug[45] : 		[ RTF ]
+layout.medAbsorberPlug[46] : 		[ RTF ]
+layout.medAbsorberPlug[47] : 		[ RTF ]
+layout.medAbsorberPlug[48] : 		[ RTF ]
+layout.medAbsorberPlug[49] : 		[ RTF ]
+layout.materialsCutsFile : $(NA6PROOT_ROOT)/share/data/simcuts.dat		[ RTF ]
+gencut.maxTrialsPerParticle : 1000000		[ RTF ]
+gencut.etaMin : 0		[ RTF ]
+gencut.etaMax : 6		[ RTF ]
+gencut.ptMin : 0		[ RTF ]
+gencut.ptMax : 4		[ RTF ]
+gencut.phiMin : 0		[ RTF ]
+gencut.phiMax : 6.28319		[ RTF ]
+gencut.transportMaxAbsZ : -1		[ RTF ]
+gencut.transportMaxR : -1		[ RTF ]
+reco.maxPropagationStep : 2		[ RTF ]
+reco.caPropagateCellTrackForChi2 : false		[ RT ]
+reco.vtNLayers : 5		[ RTF ]
+reco.vertexerLayerToStart : 0		[ RTF ]
+reco.vertexerMaxDeltaThetaTracklet : 0.6		[ RTF ]
+reco.vertexerMaxDeltaPhiTracklet : 0.05		[ RTF ]
+reco.vertexerMaxDeltaTanLamInOut : 1		[ RTF ]
+reco.vertexerMaxDeltaPhiInOut : 0.2		[ RTF ]
+reco.vertexerMaxDeltaPxPzInOut : 99		[ RTF ]
+reco.vertexerMaxDeltaPyPzInOut : 0.005		[ RTF ]
+reco.vertexerRecoType : YZ		[ RTF ]
+reco.vertexerMaxDCAxy : 0.25		[ RTF ]
+reco.vertexerPeakMethod : KDE		[ RTF ]
+reco.vertexerWeightedMeanOption : NoWeight		[ RTF ]
+reco.vertexerZMin : -20		[ RTF ]
+reco.vertexerZMax : 5		[ RTF ]
+reco.vertexerZWindowWidth : 1.25		[ RTF ]
+reco.vertexerNBinsForPeakFind : 250		[ RTF ]
+reco.vertexerPeakWidthBins : 3		[ RTF ]
+reco.vertexerMinCountsInPeak : 3		[ RTF ]
+reco.vertexerKDEOption : Standard		[ RTF ]
+reco.vertexerNGridKDE : 500		[ RTF ]
+reco.vertexerKDEBandwidth : 0.5		[ RTF ]
+reco.vertexerMaxPairDCA : 0.1		[ RTF ]
+reco.vertexerMaxPairVertRadius : 0.5		[ RTF ]
+reco.vertexerMinCandidateDistanceZ : 0.1		[ RTF ]
+reco.vertexerMinCandidateDistance3D : 0.2		[ RTF ]
+reco.vertexerMultiVertexMode : Iterative		[ RTF ]
+reco.vertexerAllowSingleConstribClusters : false		[ RTF ]
+reco.useLinRefVT : true		[ RTF ]
+reco.vtDoOutwardPropagation : true		[ RTF ]
+reco.vtZOutProp : 40		[ RTF ]
+reco.vtDoInwardRefit : false		[ RTF ]
+reco.vtPropagateTracksToPV : true		[ RTF ]
+reco.vtDoConstrainedTrack : false		[ RTF ]
+reco.vtNIterationsTrackerCA : 2		[ RTF ]
+reco.seedImprovePrecVT : 0.02		[ RTF ]
+reco.vtMaxDeltaThetaTrackletsCA[0] : 0.04		[ RTF ]
+reco.vtMaxDeltaThetaTrackletsCA[1] : 0.1		[ RTF ]
+reco.vtMaxDeltaThetaTrackletsCA[2] : 0.15		[ RTF ]
+reco.vtMaxDeltaThetaTrackletsCA[3] : 0.3		[ RTF ]
+reco.vtMaxDeltaThetaTrackletsCA[4] : 999		[ RTF ]
+reco.vtMaxDeltaThetaTrackletsCA[5] : 999		[ RTF ]
+reco.vtMaxDeltaThetaTrackletsCA[6] : 999		[ RTF ]
+reco.vtMaxDeltaThetaTrackletsCA[7] : 999		[ RTF ]
+reco.vtMaxDeltaThetaTrackletsCA[8] : 999		[ RTF ]
+reco.vtMaxDeltaThetaTrackletsCA[9] : 999		[ RTF ]
+reco.vtMaxDeltaPhiTrackletsCA[0] : 0.1		[ RTF ]
+reco.vtMaxDeltaPhiTrackletsCA[1] : 0.2		[ RTF ]
+reco.vtMaxDeltaPhiTrackletsCA[2] : 0.25		[ RTF ]
+reco.vtMaxDeltaPhiTrackletsCA[3] : 0.5		[ RTF ]
+reco.vtMaxDeltaPhiTrackletsCA[4] : 999		[ RTF ]
+reco.vtMaxDeltaPhiTrackletsCA[5] : 999		[ RTF ]
+reco.vtMaxDeltaPhiTrackletsCA[6] : 999		[ RTF ]
+reco.vtMaxDeltaPhiTrackletsCA[7] : 999		[ RTF ]
+reco.vtMaxDeltaPhiTrackletsCA[8] : 999		[ RTF ]
+reco.vtMaxDeltaPhiTrackletsCA[9] : 999		[ RTF ]
+reco.vtMaxDeltaTanLCellsCA[0] : 4		[ RTF ]
+reco.vtMaxDeltaTanLCellsCA[1] : 9		[ RTF ]
+reco.vtMaxDeltaTanLCellsCA[2] : 18		[ RTF ]
+reco.vtMaxDeltaTanLCellsCA[3] : 40		[ RTF ]
+reco.vtMaxDeltaTanLCellsCA[4] : 999		[ RTF ]
+reco.vtMaxDeltaTanLCellsCA[5] : 999		[ RTF ]
+reco.vtMaxDeltaTanLCellsCA[6] : 999		[ RTF ]
+reco.vtMaxDeltaTanLCellsCA[7] : 999		[ RTF ]
+reco.vtMaxDeltaTanLCellsCA[8] : 999		[ RTF ]
+reco.vtMaxDeltaTanLCellsCA[9] : 999		[ RTF ]
+reco.vtMaxDeltaPhiCellsCA[0] : 0.4		[ RTF ]
+reco.vtMaxDeltaPhiCellsCA[1] : 0.6		[ RTF ]
+reco.vtMaxDeltaPhiCellsCA[2] : 1.2		[ RTF ]
+reco.vtMaxDeltaPhiCellsCA[3] : 2.4		[ RTF ]
+reco.vtMaxDeltaPhiCellsCA[4] : 999		[ RTF ]
+reco.vtMaxDeltaPhiCellsCA[5] : 999		[ RTF ]
+reco.vtMaxDeltaPhiCellsCA[6] : 999		[ RTF ]
+reco.vtMaxDeltaPhiCellsCA[7] : 999		[ RTF ]
+reco.vtMaxDeltaPhiCellsCA[8] : 999		[ RTF ]
+reco.vtMaxDeltaPhiCellsCA[9] : 999		[ RTF ]
+reco.vtMaxDeltaPxPzCellsCA[0] : 0.02		[ RTF ]
+reco.vtMaxDeltaPxPzCellsCA[1] : 0.05		[ RTF ]
+reco.vtMaxDeltaPxPzCellsCA[2] : 0.1		[ RTF ]
+reco.vtMaxDeltaPxPzCellsCA[3] : 0.2		[ RTF ]
+reco.vtMaxDeltaPxPzCellsCA[4] : 999		[ RTF ]
+reco.vtMaxDeltaPxPzCellsCA[5] : 999		[ RTF ]
+reco.vtMaxDeltaPxPzCellsCA[6] : 999		[ RTF ]
+reco.vtMaxDeltaPxPzCellsCA[7] : 999		[ RTF ]
+reco.vtMaxDeltaPxPzCellsCA[8] : 999		[ RTF ]
+reco.vtMaxDeltaPxPzCellsCA[9] : 999		[ RTF ]
+reco.vtMaxDeltaPyPzCellsCA[0] : 0.002		[ RTF ]
+reco.vtMaxDeltaPyPzCellsCA[1] : 0.0075		[ RTF ]
+reco.vtMaxDeltaPyPzCellsCA[2] : 0.015		[ RTF ]
+reco.vtMaxDeltaPyPzCellsCA[3] : 0.03		[ RTF ]
+reco.vtMaxDeltaPyPzCellsCA[4] : 999		[ RTF ]
+reco.vtMaxDeltaPyPzCellsCA[5] : 999		[ RTF ]
+reco.vtMaxDeltaPyPzCellsCA[6] : 999		[ RTF ]
+reco.vtMaxDeltaPyPzCellsCA[7] : 999		[ RTF ]
+reco.vtMaxDeltaPyPzCellsCA[8] : 999		[ RTF ]
+reco.vtMaxDeltaPyPzCellsCA[9] : 999		[ RTF ]
+reco.vtMaxChi2TrClCellsCA[0] : 15		[ RTF ]
+reco.vtMaxChi2TrClCellsCA[1] : 15		[ RTF ]
+reco.vtMaxChi2TrClCellsCA[2] : 999		[ RTF ]
+reco.vtMaxChi2TrClCellsCA[3] : 999		[ RTF ]
+reco.vtMaxChi2TrClCellsCA[4] : 999		[ RTF ]
+reco.vtMaxChi2TrClCellsCA[5] : 999		[ RTF ]
+reco.vtMaxChi2TrClCellsCA[6] : 999		[ RTF ]
+reco.vtMaxChi2TrClCellsCA[7] : 999		[ RTF ]
+reco.vtMaxChi2TrClCellsCA[8] : 999		[ RTF ]
+reco.vtMaxChi2TrClCellsCA[9] : 999		[ RTF ]
+reco.vtMaxChi2ndfCellsCA[0] : 15		[ RTF ]
+reco.vtMaxChi2ndfCellsCA[1] : 15		[ RTF ]
+reco.vtMaxChi2ndfCellsCA[2] : 999		[ RTF ]
+reco.vtMaxChi2ndfCellsCA[3] : 999		[ RTF ]
+reco.vtMaxChi2ndfCellsCA[4] : 999		[ RTF ]
+reco.vtMaxChi2ndfCellsCA[5] : 999		[ RTF ]
+reco.vtMaxChi2ndfCellsCA[6] : 999		[ RTF ]
+reco.vtMaxChi2ndfCellsCA[7] : 999		[ RTF ]
+reco.vtMaxChi2ndfCellsCA[8] : 999		[ RTF ]
+reco.vtMaxChi2ndfCellsCA[9] : 999		[ RTF ]
+reco.vtMaxChi2ndfTracksCA[0] : 5		[ RTF ]
+reco.vtMaxChi2ndfTracksCA[1] : 5		[ RTF ]
+reco.vtMaxChi2ndfTracksCA[2] : 999		[ RTF ]
+reco.vtMaxChi2ndfTracksCA[3] : 999		[ RTF ]
+reco.vtMaxChi2ndfTracksCA[4] : 999		[ RTF ]
+reco.vtMaxChi2ndfTracksCA[5] : 999		[ RTF ]
+reco.vtMaxChi2ndfTracksCA[6] : 999		[ RTF ]
+reco.vtMaxChi2ndfTracksCA[7] : 999		[ RTF ]
+reco.vtMaxChi2ndfTracksCA[8] : 999		[ RTF ]
+reco.vtMaxChi2ndfTracksCA[9] : 999		[ RTF ]
+reco.vtMinNClusTracksCA[0] : 5		[ RTF ]
+reco.vtMinNClusTracksCA[1] : 3		[ RTF ]
+reco.vtMinNClusTracksCA[2] : 0		[ RTF ]
+reco.vtMinNClusTracksCA[3] : 0		[ RTF ]
+reco.vtMinNClusTracksCA[4] : 0		[ RTF ]
+reco.vtMinNClusTracksCA[5] : 0		[ RTF ]
+reco.vtMinNClusTracksCA[6] : 0		[ RTF ]
+reco.vtMinNClusTracksCA[7] : 0		[ RTF ]
+reco.vtMinNClusTracksCA[8] : 0		[ RTF ]
+reco.vtMinNClusTracksCA[9] : 0		[ RTF ]
+reco.msNLayers : 4		[ RTF ]
+reco.msDoTrackMSTrackletMIDMatching : false		[ RTF ]
+reco.msDoRefitMSTrackletMID : false		[ RTF ]
+reco.msZForMSMIDmatch : 810		[ RTF ]
+reco.msMaxDistTrackMSTrackletMID : 7.5		[ RTF ]
+reco.msMinCosThetaTrackMSTrackletMID : 0.999		[ RTF ]
+reco.msMaxDeltaThetaTrackletMID : 0.1		[ RTF ]
+reco.msMaxDeltaPhiTrackletMID : 0.6		[ RTF ]
+reco.msMaxChi2TrClMSTrackletMID : 20		[ RTF ]
+reco.msNIterationsTrackerCA : 2		[ RTF ]
+reco.useLinRefMS : false		[ RTF ]
+reco.seedImprovePrecMS : 0.02		[ RTF ]
+reco.msMaxDeltaThetaTrackletsCA[0] : 0.06		[ RTF ]
+reco.msMaxDeltaThetaTrackletsCA[1] : 0.1		[ RTF ]
+reco.msMaxDeltaThetaTrackletsCA[2] : 999		[ RTF ]
+reco.msMaxDeltaThetaTrackletsCA[3] : 999		[ RTF ]
+reco.msMaxDeltaThetaTrackletsCA[4] : 999		[ RTF ]
+reco.msMaxDeltaThetaTrackletsCA[5] : 999		[ RTF ]
+reco.msMaxDeltaThetaTrackletsCA[6] : 999		[ RTF ]
+reco.msMaxDeltaThetaTrackletsCA[7] : 999		[ RTF ]
+reco.msMaxDeltaThetaTrackletsCA[8] : 999		[ RTF ]
+reco.msMaxDeltaThetaTrackletsCA[9] : 999		[ RTF ]
+reco.msMaxDeltaPhiTrackletsCA[0] : 0.1		[ RTF ]
+reco.msMaxDeltaPhiTrackletsCA[1] : 0.6		[ RTF ]
+reco.msMaxDeltaPhiTrackletsCA[2] : 999		[ RTF ]
+reco.msMaxDeltaPhiTrackletsCA[3] : 999		[ RTF ]
+reco.msMaxDeltaPhiTrackletsCA[4] : 999		[ RTF ]
+reco.msMaxDeltaPhiTrackletsCA[5] : 999		[ RTF ]
+reco.msMaxDeltaPhiTrackletsCA[6] : 999		[ RTF ]
+reco.msMaxDeltaPhiTrackletsCA[7] : 999		[ RTF ]
+reco.msMaxDeltaPhiTrackletsCA[8] : 999		[ RTF ]
+reco.msMaxDeltaPhiTrackletsCA[9] : 999		[ RTF ]
+reco.msMaxDeltaTanLCellsCA[0] : 6		[ RTF ]
+reco.msMaxDeltaTanLCellsCA[1] : 9		[ RTF ]
+reco.msMaxDeltaTanLCellsCA[2] : 999		[ RTF ]
+reco.msMaxDeltaTanLCellsCA[3] : 999		[ RTF ]
+reco.msMaxDeltaTanLCellsCA[4] : 999		[ RTF ]
+reco.msMaxDeltaTanLCellsCA[5] : 999		[ RTF ]
+reco.msMaxDeltaTanLCellsCA[6] : 999		[ RTF ]
+reco.msMaxDeltaTanLCellsCA[7] : 999		[ RTF ]
+reco.msMaxDeltaTanLCellsCA[8] : 999		[ RTF ]
+reco.msMaxDeltaTanLCellsCA[9] : 999		[ RTF ]
+reco.msMaxDeltaPhiCellsCA[0] : 0.6		[ RTF ]
+reco.msMaxDeltaPhiCellsCA[1] : 0.8		[ RTF ]
+reco.msMaxDeltaPhiCellsCA[2] : 999		[ RTF ]
+reco.msMaxDeltaPhiCellsCA[3] : 999		[ RTF ]
+reco.msMaxDeltaPhiCellsCA[4] : 999		[ RTF ]
+reco.msMaxDeltaPhiCellsCA[5] : 999		[ RTF ]
+reco.msMaxDeltaPhiCellsCA[6] : 999		[ RTF ]
+reco.msMaxDeltaPhiCellsCA[7] : 999		[ RTF ]
+reco.msMaxDeltaPhiCellsCA[8] : 999		[ RTF ]
+reco.msMaxDeltaPhiCellsCA[9] : 999		[ RTF ]
+reco.msMaxDeltaPxPzCellsCA[0] : 0.05		[ RTF ]
+reco.msMaxDeltaPxPzCellsCA[1] : 0.08		[ RTF ]
+reco.msMaxDeltaPxPzCellsCA[2] : 999		[ RTF ]
+reco.msMaxDeltaPxPzCellsCA[3] : 999		[ RTF ]
+reco.msMaxDeltaPxPzCellsCA[4] : 999		[ RTF ]
+reco.msMaxDeltaPxPzCellsCA[5] : 999		[ RTF ]
+reco.msMaxDeltaPxPzCellsCA[6] : 999		[ RTF ]
+reco.msMaxDeltaPxPzCellsCA[7] : 999		[ RTF ]
+reco.msMaxDeltaPxPzCellsCA[8] : 999		[ RTF ]
+reco.msMaxDeltaPxPzCellsCA[9] : 999		[ RTF ]
+reco.msMaxDeltaPyPzCellsCA[0] : 0.05		[ RTF ]
+reco.msMaxDeltaPyPzCellsCA[1] : 0.08		[ RTF ]
+reco.msMaxDeltaPyPzCellsCA[2] : 999		[ RTF ]
+reco.msMaxDeltaPyPzCellsCA[3] : 999		[ RTF ]
+reco.msMaxDeltaPyPzCellsCA[4] : 999		[ RTF ]
+reco.msMaxDeltaPyPzCellsCA[5] : 999		[ RTF ]
+reco.msMaxDeltaPyPzCellsCA[6] : 999		[ RTF ]
+reco.msMaxDeltaPyPzCellsCA[7] : 999		[ RTF ]
+reco.msMaxDeltaPyPzCellsCA[8] : 999		[ RTF ]
+reco.msMaxDeltaPyPzCellsCA[9] : 999		[ RTF ]
+reco.msMaxChi2TrClCellsCA[0] : 10		[ RTF ]
+reco.msMaxChi2TrClCellsCA[1] : 20		[ RTF ]
+reco.msMaxChi2TrClCellsCA[2] : 999		[ RTF ]
+reco.msMaxChi2TrClCellsCA[3] : 999		[ RTF ]
+reco.msMaxChi2TrClCellsCA[4] : 999		[ RTF ]
+reco.msMaxChi2TrClCellsCA[5] : 999		[ RTF ]
+reco.msMaxChi2TrClCellsCA[6] : 999		[ RTF ]
+reco.msMaxChi2TrClCellsCA[7] : 999		[ RTF ]
+reco.msMaxChi2TrClCellsCA[8] : 999		[ RTF ]
+reco.msMaxChi2TrClCellsCA[9] : 999		[ RTF ]
+reco.msMaxChi2ndfCellsCA[0] : 10		[ RTF ]
+reco.msMaxChi2ndfCellsCA[1] : 20		[ RTF ]
+reco.msMaxChi2ndfCellsCA[2] : 999		[ RTF ]
+reco.msMaxChi2ndfCellsCA[3] : 999		[ RTF ]
+reco.msMaxChi2ndfCellsCA[4] : 999		[ RTF ]
+reco.msMaxChi2ndfCellsCA[5] : 999		[ RTF ]
+reco.msMaxChi2ndfCellsCA[6] : 999		[ RTF ]
+reco.msMaxChi2ndfCellsCA[7] : 999		[ RTF ]
+reco.msMaxChi2ndfCellsCA[8] : 999		[ RTF ]
+reco.msMaxChi2ndfCellsCA[9] : 999		[ RTF ]
+reco.msMaxChi2ndfTracksCA[0] : 5		[ RTF ]
+reco.msMaxChi2ndfTracksCA[1] : 10		[ RTF ]
+reco.msMaxChi2ndfTracksCA[2] : 999		[ RTF ]
+reco.msMaxChi2ndfTracksCA[3] : 999		[ RTF ]
+reco.msMaxChi2ndfTracksCA[4] : 999		[ RTF ]
+reco.msMaxChi2ndfTracksCA[5] : 999		[ RTF ]
+reco.msMaxChi2ndfTracksCA[6] : 999		[ RTF ]
+reco.msMaxChi2ndfTracksCA[7] : 999		[ RTF ]
+reco.msMaxChi2ndfTracksCA[8] : 999		[ RTF ]
+reco.msMaxChi2ndfTracksCA[9] : 999		[ RTF ]
+reco.msMinNClusTracksCA[0] : 4		[ RTF ]
+reco.msMinNClusTracksCA[1] : 4		[ RTF ]
+reco.msMinNClusTracksCA[2] : 0		[ RTF ]
+reco.msMinNClusTracksCA[3] : 0		[ RTF ]
+reco.msMinNClusTracksCA[4] : 0		[ RTF ]
+reco.msMinNClusTracksCA[5] : 0		[ RTF ]
+reco.msMinNClusTracksCA[6] : 0		[ RTF ]
+reco.msMinNClusTracksCA[7] : 0		[ RTF ]
+reco.msMinNClusTracksCA[8] : 0		[ RTF ]
+reco.msMinNClusTracksCA[9] : 0		[ RTF ]
+reco.msDoConstrainedTrack : true		[ RTF ]
+reco.mtDoOutwardInwardFit : true		[ RTF ]
+reco.mtPropagateMatchedTracksToPV : true		[ RTF ]
+reco.mtZMatching : 40		[ RTF ]
+reco.mtIsZMatchingSet : false		[ RTF ]
+reco.mtMCMatching : true		[ RTF ]
+reco.mtMinVTHits : 4		[ RTF ]
+reco.mtMinMSHits : 6		[ RTF ]
+reco.mtMaxChi2TrCl : 12		[ RTF ]
+reco.mtPrelCurveNSigma : 16		[ RTF ]
+reco.mtNSigma2Crude[0] : 9		[ RTF ]
+reco.mtNSigma2Crude[1] : 9		[ RTF ]
+reco.mtNSigma2Crude[2] : 9		[ RTF ]
+reco.mtNSigma2Crude[3] : 9		[ RTF ]
+reco.mtNSigma2Crude[4] : 9		[ RTF ]
+reco.mtPrelDiffMargin2[0] : 0		[ RTF ]
+reco.mtPrelDiffMargin2[1] : 0		[ RTF ]
+reco.mtPrelDiffMargin2[2] : 0		[ RTF ]
+reco.mtPrelDiffMargin2[3] : 0		[ RTF ]
+reco.mtPrelDiffMargin2[4] : 0		[ RTF ]
+reco.mtMaxMatchesPerTrack : 15		[ RTF ]
+reco.mtMaxChi2NormRefit : 2.5		[ RTF ]
+reco.mtMaxChi2Crude : 25		[ RTF ]
+reco.mtMaxChi2Match : 6		[ RTF ]
+reco.mtUseLinRefOut : true		[ RTF ]
+reco.mtUseLinRefInw : false		[ RTF ]
+----
+[INFO] Adding Field /home/galocco/NA6PRoot/install/share/data/MEP48_field_map.inp in -100.0<X<250.0 -150.0<Y<150.0 -115.5<Z<184.5 
+[INFO] Loaded symmetric field from /home/galocco/NA6PRoot/install/share/data/mnp33_fieldmap_5cm.dat with extended grid 121x121x201 (from original 61x61x101)
+[INFO] Extended bounds: -300< X <300, -300< Y <300, -500< Z <500
+[INFO] Adding Field /home/galocco/NA6PRoot/install/share/data/mnp33_fieldmap_5cm.dat in -300.0<X<300.0 -300.0<Y<300.0 -55.0<Z<945.0 
+Info in <TGeoGlobalMagField::SetField>: Global magnetic field set to <NA6PMagField>
+Info in <TGeoManager::CloseGeometry>: Geometry loaded from file...
+Info in <TGeoManager::SetTopVolume>: Top volume is World. Master volume is World
+Info in <TGeoNavigator::BuildCache>: --- Maximum geometry depth set to 100
+Info in <TGeoManager::CloseGeometry>: Voxelization retrieved from file
+Info in <TGeoManager::CountLevels>: max level = 3, max placements = 144
+Info in <TGeoManager::CloseGeometry>: 571 nodes/ 327 volume UID's in NA6P TGeometry
+Info in <TGeoManager::CloseGeometry>: ----------------modeler ready----------------
+[INFO] Target configuration from geometry.root
+[INFO] Target 0: z = -5.3 cm  thickness = 0.15 cm
+[INFO] Target 1: z = -4.1 cm  thickness = 0.15 cm
+[INFO] Target 2: z = -2.9 cm  thickness = 0.15 cm
+[INFO] Target 3: z = -1.7 cm  thickness = 0.15 cm
+[INFO] Target 4: z = -0.5 cm  thickness = 0.15 cm
+[INFO] Will store VerTel vertices in VerticesVerTel.root
+[INFO] Will store VerTel tracks in TracksVerTel.root
+[INFO] Load geometry info for 244 alignable volumes
+[INFO] Module 0 Txyz 7.109799861907959 2.6246001720428467 8.022500038146973 size 13.5996 5.8692
+[INFO] Module 1 Txyz -6.139800071716309 3.2446000576019287 7.117500305175781 size 13.5996 5.8692
+[INFO] Module 2 Txyz -7.109799861907959 -2.6246001720428467 8.022500038146973 size 13.5996 5.8692
+[INFO] Module 3 Txyz 6.139800071716309 -3.2446000576019287 7.117500305175781 size 13.5996 5.8692
+[INFO] Module 4 Txyz 7.109799861907959 3.602800130844116 16.022500038146973 size 13.5996 7.8256
+[INFO] Module 5 Txyz -6.139800071716309 4.222800254821777 15.117500305175781 size 13.5996 7.8256
+[INFO] Module 6 Txyz -7.109799861907959 -3.602800130844116 16.022500038146973 size 13.5996 7.8256
+[INFO] Module 7 Txyz 6.139800071716309 -4.222800254821777 15.117500305175781 size 13.5996 7.8256
+[INFO] Module 8 Txyz 7.109799861907959 4.581000328063965 20.82550024986267 size 13.5996 9.782001
+[INFO] Module 9 Txyz -6.139800071716309 5.201000213623047 20.314500093460083 size 13.5996 9.782001
+[INFO] Module 10 Txyz -7.109799861907959 -4.581000328063965 20.82550024986267 size 13.5996 9.782001
+[INFO] Module 11 Txyz 6.139800071716309 -5.201000213623047 20.314500093460083 size 13.5996 9.782001
+[INFO] Module 12 Txyz 7.109799861907959 5.559200286865234 25.82550024986267 size 13.5996 11.7384
+[INFO] Module 13 Txyz -6.139800071716309 6.179200172424316 25.314500093460083 size 13.5996 11.7384
+[INFO] Module 14 Txyz -7.109799861907959 -5.559200286865234 25.82550024986267 size 13.5996 11.7384
+[INFO] Module 15 Txyz 6.139800071716309 -6.179200172424316 25.314500093460083 size 13.5996 11.7384
+[INFO] Module 16 Txyz 7.109799861907959 6.537400245666504 38.82550048828125 size 13.5996 13.6948
+[INFO] Module 17 Txyz -6.139800071716309 7.157400131225586 38.31450080871582 size 13.5996 13.6948
+[INFO] Module 18 Txyz -7.109799861907959 -6.537400245666504 38.82550048828125 size 13.5996 13.6948
+[INFO] Module 19 Txyz 6.139800071716309 -7.157400131225586 38.31450080871582 size 13.5996 13.6948
+[INFO] Module 20 Txyz -72.5 -67.5 297 size 20 20
+[INFO] Module 21 Txyz -52.5 -67.5 297 size 20 20
+[INFO] Module 22 Txyz -32.5 -67.5 297 size 20 20
+[INFO] Module 23 Txyz -12.5 -67.5 297 size 20 20
+[INFO] Module 24 Txyz 7.5 -72.5 297 size 20 20
+[INFO] Module 25 Txyz 27.5 -72.5 297 size 20 20
+[INFO] Module 26 Txyz 47.5 -72.5 297 size 20 20
+[INFO] Module 27 Txyz 67.5 -72.5 297 size 20 20
+[INFO] Module 28 Txyz -72.5 -47.5 297 size 20 20
+[INFO] Module 29 Txyz -52.5 -47.5 297 size 20 20
+[INFO] Module 30 Txyz -32.5 -47.5 297 size 20 20
+[INFO] Module 31 Txyz -12.5 -47.5 297 size 20 20
+[INFO] Module 32 Txyz 7.5 -52.5 297 size 20 20
+[INFO] Module 33 Txyz 27.5 -52.5 297 size 20 20
+[INFO] Module 34 Txyz 47.5 -52.5 297 size 20 20
+[INFO] Module 35 Txyz 67.5 -52.5 297 size 20 20
+[INFO] Module 36 Txyz -72.5 -27.5 297 size 20 20
+[INFO] Module 37 Txyz -52.5 -27.5 297 size 20 20
+[INFO] Module 38 Txyz -32.5 -27.5 297 size 20 20
+[INFO] Module 39 Txyz -12.5 -27.5 297 size 20 20
+[INFO] Module 40 Txyz 7.5 -32.5 297 size 20 20
+[INFO] Module 41 Txyz 27.5 -32.5 297 size 20 20
+[INFO] Module 42 Txyz 47.5 -32.5 297 size 20 20
+[INFO] Module 43 Txyz 67.5 -32.5 297 size 20 20
+[INFO] Module 44 Txyz -72.5 -7.5 297 size 20 20
+[INFO] Module 45 Txyz -52.5 -7.5 297 size 20 20
+[INFO] Module 46 Txyz -32.5 -7.5 297 size 20 20
+[INFO] Module 47 Txyz -12.5 -7.5 297 size 20 20
+[INFO] Module 48 Txyz 7.5 -12.5 297 size 20 20
+[INFO] Module 49 Txyz 27.5 -12.5 297 size 20 20
+[INFO] Module 50 Txyz 47.5 -12.5 297 size 20 20
+[INFO] Module 51 Txyz 67.5 -12.5 297 size 20 20
+[INFO] Module 52 Txyz -67.5 12.5 297 size 20 20
+[INFO] Module 53 Txyz -47.5 12.5 297 size 20 20
+[INFO] Module 54 Txyz -27.5 12.5 297 size 20 20
+[INFO] Module 55 Txyz -7.5 12.5 297 size 20 20
+[INFO] Module 56 Txyz 12.5 7.5 297 size 20 20
+[INFO] Module 57 Txyz 32.5 7.5 297 size 20 20
+[INFO] Module 58 Txyz 52.5 7.5 297 size 20 20
+[INFO] Module 59 Txyz 72.5 7.5 297 size 20 20
+[INFO] Module 60 Txyz -67.5 32.5 297 size 20 20
+[INFO] Module 61 Txyz -47.5 32.5 297 size 20 20
+[INFO] Module 62 Txyz -27.5 32.5 297 size 20 20
+[INFO] Module 63 Txyz -7.5 32.5 297 size 20 20
+[INFO] Module 64 Txyz 12.5 27.5 297 size 20 20
+[INFO] Module 65 Txyz 32.5 27.5 297 size 20 20
+[INFO] Module 66 Txyz 52.5 27.5 297 size 20 20
+[INFO] Module 67 Txyz 72.5 27.5 297 size 20 20
+[INFO] Module 68 Txyz -67.5 52.5 297 size 20 20
+[INFO] Module 69 Txyz -47.5 52.5 297 size 20 20
+[INFO] Module 70 Txyz -27.5 52.5 297 size 20 20
+[INFO] Module 71 Txyz -7.5 52.5 297 size 20 20
+[INFO] Module 72 Txyz 12.5 47.5 297 size 20 20
+[INFO] Module 73 Txyz 32.5 47.5 297 size 20 20
+[INFO] Module 74 Txyz 52.5 47.5 297 size 20 20
+[INFO] Module 75 Txyz 72.5 47.5 297 size 20 20
+[INFO] Module 76 Txyz -67.5 72.5 297 size 20 20
+[INFO] Module 77 Txyz -47.5 72.5 297 size 20 20
+[INFO] Module 78 Txyz -27.5 72.5 297 size 20 20
+[INFO] Module 79 Txyz -7.5 72.5 297 size 20 20
+[INFO] Module 80 Txyz 12.5 67.5 297 size 20 20
+[INFO] Module 81 Txyz 32.5 67.5 297 size 20 20
+[INFO] Module 82 Txyz 52.5 67.5 297 size 20 20
+[INFO] Module 83 Txyz 72.5 67.5 297 size 20 20
+[INFO] Module 84 Txyz -110.5 -109.5 324 size 20 20
+[INFO] Module 85 Txyz -90.5 -109.5 324 size 20 20
+[INFO] Module 86 Txyz -70.5 -109.5 324 size 20 20
+[INFO] Module 87 Txyz -50.5 -109.5 324 size 20 20
+[INFO] Module 88 Txyz -30.5 -109.5 324 size 20 20
+[INFO] Module 89 Txyz -10.5 -109.5 324 size 20 20
+[INFO] Module 90 Txyz 9.5 -110.5 324 size 20 20
+[INFO] Module 91 Txyz 29.5 -110.5 324 size 20 20
+[INFO] Module 92 Txyz 49.5 -110.5 324 size 20 20
+[INFO] Module 93 Txyz 69.5 -110.5 324 size 20 20
+[INFO] Module 94 Txyz 89.5 -110.5 324 size 20 20
+[INFO] Module 95 Txyz 109.5 -110.5 324 size 20 20
+[INFO] Module 96 Txyz -110.5 -89.5 324 size 20 20
+[INFO] Module 97 Txyz -90.5 -89.5 324 size 20 20
+[INFO] Module 98 Txyz -70.5 -89.5 324 size 20 20
+[INFO] Module 99 Txyz -50.5 -89.5 324 size 20 20
+[INFO] Module 100 Txyz -30.5 -89.5 324 size 20 20
+[INFO] Module 101 Txyz -10.5 -89.5 324 size 20 20
+[INFO] Module 102 Txyz 9.5 -90.5 324 size 20 20
+[INFO] Module 103 Txyz 29.5 -90.5 324 size 20 20
+[INFO] Module 104 Txyz 49.5 -90.5 324 size 20 20
+[INFO] Module 105 Txyz 69.5 -90.5 324 size 20 20
+[INFO] Module 106 Txyz 89.5 -90.5 324 size 20 20
+[INFO] Module 107 Txyz 109.5 -90.5 324 size 20 20
+[INFO] Module 108 Txyz -110.5 -69.5 324 size 20 20
+[INFO] Module 109 Txyz -90.5 -69.5 324 size 20 20
+[INFO] Module 110 Txyz -70.5 -69.5 324 size 20 20
+[INFO] Module 111 Txyz -50.5 -69.5 324 size 20 20
+[INFO] Module 112 Txyz -30.5 -69.5 324 size 20 20
+[INFO] Module 113 Txyz -10.5 -69.5 324 size 20 20
+[INFO] Module 114 Txyz 9.5 -70.5 324 size 20 20
+[INFO] Module 115 Txyz 29.5 -70.5 324 size 20 20
+[INFO] Module 116 Txyz 49.5 -70.5 324 size 20 20
+[INFO] Module 117 Txyz 69.5 -70.5 324 size 20 20
+[INFO] Module 118 Txyz 89.5 -70.5 324 size 20 20
+[INFO] Module 119 Txyz 109.5 -70.5 324 size 20 20
+[INFO] Module 120 Txyz -110.5 -49.5 324 size 20 20
+[INFO] Module 121 Txyz -90.5 -49.5 324 size 20 20
+[INFO] Module 122 Txyz -70.5 -49.5 324 size 20 20
+[INFO] Module 123 Txyz -50.5 -49.5 324 size 20 20
+[INFO] Module 124 Txyz -30.5 -49.5 324 size 20 20
+[INFO] Module 125 Txyz -10.5 -49.5 324 size 20 20
+[INFO] Module 126 Txyz 9.5 -50.5 324 size 20 20
+[INFO] Module 127 Txyz 29.5 -50.5 324 size 20 20
+[INFO] Module 128 Txyz 49.5 -50.5 324 size 20 20
+[INFO] Module 129 Txyz 69.5 -50.5 324 size 20 20
+[INFO] Module 130 Txyz 89.5 -50.5 324 size 20 20
+[INFO] Module 131 Txyz 109.5 -50.5 324 size 20 20
+[INFO] Module 132 Txyz -110.5 -29.5 324 size 20 20
+[INFO] Module 133 Txyz -90.5 -29.5 324 size 20 20
+[INFO] Module 134 Txyz -70.5 -29.5 324 size 20 20
+[INFO] Module 135 Txyz -50.5 -29.5 324 size 20 20
+[INFO] Module 136 Txyz -30.5 -29.5 324 size 20 20
+[INFO] Module 137 Txyz -10.5 -29.5 324 size 20 20
+[INFO] Module 138 Txyz 9.5 -30.5 324 size 20 20
+[INFO] Module 139 Txyz 29.5 -30.5 324 size 20 20
+[INFO] Module 140 Txyz 49.5 -30.5 324 size 20 20
+[INFO] Module 141 Txyz 69.5 -30.5 324 size 20 20
+[INFO] Module 142 Txyz 89.5 -30.5 324 size 20 20
+[INFO] Module 143 Txyz 109.5 -30.5 324 size 20 20
+[INFO] Module 144 Txyz -110.5 -9.5 324 size 20 20
+[INFO] Module 145 Txyz -90.5 -9.5 324 size 20 20
+[INFO] Module 146 Txyz -70.5 -9.5 324 size 20 20
+[INFO] Module 147 Txyz -50.5 -9.5 324 size 20 20
+[INFO] Module 148 Txyz -30.5 -9.5 324 size 20 20
+[INFO] Module 149 Txyz -10.5 -9.5 324 size 20 20
+[INFO] Module 150 Txyz 9.5 -10.5 324 size 20 20
+[INFO] Module 151 Txyz 29.5 -10.5 324 size 20 20
+[INFO] Module 152 Txyz 49.5 -10.5 324 size 20 20
+[INFO] Module 153 Txyz 69.5 -10.5 324 size 20 20
+[INFO] Module 154 Txyz 89.5 -10.5 324 size 20 20
+[INFO] Module 155 Txyz 109.5 -10.5 324 size 20 20
+[INFO] Module 156 Txyz -109.5 10.5 324 size 20 20
+[INFO] Module 157 Txyz -89.5 10.5 324 size 20 20
+[INFO] Module 158 Txyz -69.5 10.5 324 size 20 20
+[INFO] Module 159 Txyz -49.5 10.5 324 size 20 20
+[INFO] Module 160 Txyz -29.5 10.5 324 size 20 20
+[INFO] Module 161 Txyz -9.5 10.5 324 size 20 20
+[INFO] Module 162 Txyz 10.5 9.5 324 size 20 20
+[INFO] Module 163 Txyz 30.5 9.5 324 size 20 20
+[INFO] Module 164 Txyz 50.5 9.5 324 size 20 20
+[INFO] Module 165 Txyz 70.5 9.5 324 size 20 20
+[INFO] Module 166 Txyz 90.5 9.5 324 size 20 20
+[INFO] Module 167 Txyz 110.5 9.5 324 size 20 20
+[INFO] Module 168 Txyz -109.5 30.5 324 size 20 20
+[INFO] Module 169 Txyz -89.5 30.5 324 size 20 20
+[INFO] Module 170 Txyz -69.5 30.5 324 size 20 20
+[INFO] Module 171 Txyz -49.5 30.5 324 size 20 20
+[INFO] Module 172 Txyz -29.5 30.5 324 size 20 20
+[INFO] Module 173 Txyz -9.5 30.5 324 size 20 20
+[INFO] Module 174 Txyz 10.5 29.5 324 size 20 20
+[INFO] Module 175 Txyz 30.5 29.5 324 size 20 20
+[INFO] Module 176 Txyz 50.5 29.5 324 size 20 20
+[INFO] Module 177 Txyz 70.5 29.5 324 size 20 20
+[INFO] Module 178 Txyz 90.5 29.5 324 size 20 20
+[INFO] Module 179 Txyz 110.5 29.5 324 size 20 20
+[INFO] Module 180 Txyz -109.5 50.5 324 size 20 20
+[INFO] Module 181 Txyz -89.5 50.5 324 size 20 20
+[INFO] Module 182 Txyz -69.5 50.5 324 size 20 20
+[INFO] Module 183 Txyz -49.5 50.5 324 size 20 20
+[INFO] Module 184 Txyz -29.5 50.5 324 size 20 20
+[INFO] Module 185 Txyz -9.5 50.5 324 size 20 20
+[INFO] Module 186 Txyz 10.5 49.5 324 size 20 20
+[INFO] Module 187 Txyz 30.5 49.5 324 size 20 20
+[INFO] Module 188 Txyz 50.5 49.5 324 size 20 20
+[INFO] Module 189 Txyz 70.5 49.5 324 size 20 20
+[INFO] Module 190 Txyz 90.5 49.5 324 size 20 20
+[INFO] Module 191 Txyz 110.5 49.5 324 size 20 20
+[INFO] Module 192 Txyz -109.5 70.5 324 size 20 20
+[INFO] Module 193 Txyz -89.5 70.5 324 size 20 20
+[INFO] Module 194 Txyz -69.5 70.5 324 size 20 20
+[INFO] Module 195 Txyz -49.5 70.5 324 size 20 20
+[INFO] Module 196 Txyz -29.5 70.5 324 size 20 20
+[INFO] Module 197 Txyz -9.5 70.5 324 size 20 20
+[INFO] Module 198 Txyz 10.5 69.5 324 size 20 20
+[INFO] Module 199 Txyz 30.5 69.5 324 size 20 20
+[INFO] Module 200 Txyz 50.5 69.5 324 size 20 20
+[INFO] Module 201 Txyz 70.5 69.5 324 size 20 20
+[INFO] Module 202 Txyz 90.5 69.5 324 size 20 20
+[INFO] Module 203 Txyz 110.5 69.5 324 size 20 20
+[INFO] Module 204 Txyz -109.5 90.5 324 size 20 20
+[INFO] Module 205 Txyz -89.5 90.5 324 size 20 20
+[INFO] Module 206 Txyz -69.5 90.5 324 size 20 20
+[INFO] Module 207 Txyz -49.5 90.5 324 size 20 20
+[INFO] Module 208 Txyz -29.5 90.5 324 size 20 20
+[INFO] Module 209 Txyz -9.5 90.5 324 size 20 20
+[INFO] Module 210 Txyz 10.5 89.5 324 size 20 20
+[INFO] Module 211 Txyz 30.5 89.5 324 size 20 20
+[INFO] Module 212 Txyz 50.5 89.5 324 size 20 20
+[INFO] Module 213 Txyz 70.5 89.5 324 size 20 20
+[INFO] Module 214 Txyz 90.5 89.5 324 size 20 20
+[INFO] Module 215 Txyz 110.5 89.5 324 size 20 20
+[INFO] Module 216 Txyz -109.5 110.5 324 size 20 20
+[INFO] Module 217 Txyz -89.5 110.5 324 size 20 20
+[INFO] Module 218 Txyz -69.5 110.5 324 size 20 20
+[INFO] Module 219 Txyz -49.5 110.5 324 size 20 20
+[INFO] Module 220 Txyz -29.5 110.5 324 size 20 20
+[INFO] Module 221 Txyz -9.5 110.5 324 size 20 20
+[INFO] Module 222 Txyz 10.5 109.5 324 size 20 20
+[INFO] Module 223 Txyz 30.5 109.5 324 size 20 20
+[INFO] Module 224 Txyz 50.5 109.5 324 size 20 20
+[INFO] Module 225 Txyz 70.5 109.5 324 size 20 20
+[INFO] Module 226 Txyz 90.5 109.5 324 size 20 20
+[INFO] Module 227 Txyz 110.5 109.5 324 size 20 20
+[INFO] Module 228 Txyz -60.5 -59.5 566 size 120 120
+[INFO] Module 229 Txyz 59.5 -60.5 566 size 120 120
+[INFO] Module 230 Txyz -59.5 60.5 566 size 120 120
+[INFO] Module 231 Txyz 60.5 59.5 566 size 120 120
+[INFO] Module 232 Txyz -80.5 -79.5 593 size 160 160
+[INFO] Module 233 Txyz 79.5 -80.5 593 size 160 160
+[INFO] Module 234 Txyz -79.5 80.5 593 size 160 160
+[INFO] Module 235 Txyz 80.5 79.5 593 size 160 160
+[INFO] Module 236 Txyz -105.5 -104.5 789.5 size 210 210
+[INFO] Module 237 Txyz 104.5 -105.5 789.5 size 210 210
+[INFO] Module 238 Txyz -104.5 105.5 789.5 size 210 210
+[INFO] Module 239 Txyz 105.5 104.5 789.5 size 210 210
+[INFO] Module 240 Txyz -115.5 -114.5 829.5 size 230 230
+[INFO] Module 241 Txyz 114.5 -115.5 829.5 size 230 230
+[INFO] Module 242 Txyz -114.5 115.5 829.5 size 230 230
+[INFO] Module 243 Txyz 115.5 114.5 829.5 size 230 230
+[INFO] Load geometry info for 244 alignable volumes
+[INFO] Module 0 Txyz 7.109799861907959 2.6246001720428467 8.022500038146973 size 13.5996 5.8692
+[INFO] Module 1 Txyz -6.139800071716309 3.2446000576019287 7.117500305175781 size 13.5996 5.8692
+[INFO] Module 2 Txyz -7.109799861907959 -2.6246001720428467 8.022500038146973 size 13.5996 5.8692
+[INFO] Module 3 Txyz 6.139800071716309 -3.2446000576019287 7.117500305175781 size 13.5996 5.8692
+[INFO] Module 4 Txyz 7.109799861907959 3.602800130844116 16.022500038146973 size 13.5996 7.8256
+[INFO] Module 5 Txyz -6.139800071716309 4.222800254821777 15.117500305175781 size 13.5996 7.8256
+[INFO] Module 6 Txyz -7.109799861907959 -3.602800130844116 16.022500038146973 size 13.5996 7.8256
+[INFO] Module 7 Txyz 6.139800071716309 -4.222800254821777 15.117500305175781 size 13.5996 7.8256
+[INFO] Module 8 Txyz 7.109799861907959 4.581000328063965 20.82550024986267 size 13.5996 9.782001
+[INFO] Module 9 Txyz -6.139800071716309 5.201000213623047 20.314500093460083 size 13.5996 9.782001
+[INFO] Module 10 Txyz -7.109799861907959 -4.581000328063965 20.82550024986267 size 13.5996 9.782001
+[INFO] Module 11 Txyz 6.139800071716309 -5.201000213623047 20.314500093460083 size 13.5996 9.782001
+[INFO] Module 12 Txyz 7.109799861907959 5.559200286865234 25.82550024986267 size 13.5996 11.7384
+[INFO] Module 13 Txyz -6.139800071716309 6.179200172424316 25.314500093460083 size 13.5996 11.7384
+[INFO] Module 14 Txyz -7.109799861907959 -5.559200286865234 25.82550024986267 size 13.5996 11.7384
+[INFO] Module 15 Txyz 6.139800071716309 -6.179200172424316 25.314500093460083 size 13.5996 11.7384
+[INFO] Module 16 Txyz 7.109799861907959 6.537400245666504 38.82550048828125 size 13.5996 13.6948
+[INFO] Module 17 Txyz -6.139800071716309 7.157400131225586 38.31450080871582 size 13.5996 13.6948
+[INFO] Module 18 Txyz -7.109799861907959 -6.537400245666504 38.82550048828125 size 13.5996 13.6948
+[INFO] Module 19 Txyz 6.139800071716309 -7.157400131225586 38.31450080871582 size 13.5996 13.6948
+[INFO] Module 20 Txyz -72.5 -67.5 297 size 20 20
+[INFO] Module 21 Txyz -52.5 -67.5 297 size 20 20
+[INFO] Module 22 Txyz -32.5 -67.5 297 size 20 20
+[INFO] Module 23 Txyz -12.5 -67.5 297 size 20 20
+[INFO] Module 24 Txyz 7.5 -72.5 297 size 20 20
+[INFO] Module 25 Txyz 27.5 -72.5 297 size 20 20
+[INFO] Module 26 Txyz 47.5 -72.5 297 size 20 20
+[INFO] Module 27 Txyz 67.5 -72.5 297 size 20 20
+[INFO] Module 28 Txyz -72.5 -47.5 297 size 20 20
+[INFO] Module 29 Txyz -52.5 -47.5 297 size 20 20
+[INFO] Module 30 Txyz -32.5 -47.5 297 size 20 20
+[INFO] Module 31 Txyz -12.5 -47.5 297 size 20 20
+[INFO] Module 32 Txyz 7.5 -52.5 297 size 20 20
+[INFO] Module 33 Txyz 27.5 -52.5 297 size 20 20
+[INFO] Module 34 Txyz 47.5 -52.5 297 size 20 20
+[INFO] Module 35 Txyz 67.5 -52.5 297 size 20 20
+[INFO] Module 36 Txyz -72.5 -27.5 297 size 20 20
+[INFO] Module 37 Txyz -52.5 -27.5 297 size 20 20
+[INFO] Module 38 Txyz -32.5 -27.5 297 size 20 20
+[INFO] Module 39 Txyz -12.5 -27.5 297 size 20 20
+[INFO] Module 40 Txyz 7.5 -32.5 297 size 20 20
+[INFO] Module 41 Txyz 27.5 -32.5 297 size 20 20
+[INFO] Module 42 Txyz 47.5 -32.5 297 size 20 20
+[INFO] Module 43 Txyz 67.5 -32.5 297 size 20 20
+[INFO] Module 44 Txyz -72.5 -7.5 297 size 20 20
+[INFO] Module 45 Txyz -52.5 -7.5 297 size 20 20
+[INFO] Module 46 Txyz -32.5 -7.5 297 size 20 20
+[INFO] Module 47 Txyz -12.5 -7.5 297 size 20 20
+[INFO] Module 48 Txyz 7.5 -12.5 297 size 20 20
+[INFO] Module 49 Txyz 27.5 -12.5 297 size 20 20
+[INFO] Module 50 Txyz 47.5 -12.5 297 size 20 20
+[INFO] Module 51 Txyz 67.5 -12.5 297 size 20 20
+[INFO] Module 52 Txyz -67.5 12.5 297 size 20 20
+[INFO] Module 53 Txyz -47.5 12.5 297 size 20 20
+[INFO] Module 54 Txyz -27.5 12.5 297 size 20 20
+[INFO] Module 55 Txyz -7.5 12.5 297 size 20 20
+[INFO] Module 56 Txyz 12.5 7.5 297 size 20 20
+[INFO] Module 57 Txyz 32.5 7.5 297 size 20 20
+[INFO] Module 58 Txyz 52.5 7.5 297 size 20 20
+[INFO] Module 59 Txyz 72.5 7.5 297 size 20 20
+[INFO] Module 60 Txyz -67.5 32.5 297 size 20 20
+[INFO] Module 61 Txyz -47.5 32.5 297 size 20 20
+[INFO] Module 62 Txyz -27.5 32.5 297 size 20 20
+[INFO] Module 63 Txyz -7.5 32.5 297 size 20 20
+[INFO] Module 64 Txyz 12.5 27.5 297 size 20 20
+[INFO] Module 65 Txyz 32.5 27.5 297 size 20 20
+[INFO] Module 66 Txyz 52.5 27.5 297 size 20 20
+[INFO] Module 67 Txyz 72.5 27.5 297 size 20 20
+[INFO] Module 68 Txyz -67.5 52.5 297 size 20 20
+[INFO] Module 69 Txyz -47.5 52.5 297 size 20 20
+[INFO] Module 70 Txyz -27.5 52.5 297 size 20 20
+[INFO] Module 71 Txyz -7.5 52.5 297 size 20 20
+[INFO] Module 72 Txyz 12.5 47.5 297 size 20 20
+[INFO] Module 73 Txyz 32.5 47.5 297 size 20 20
+[INFO] Module 74 Txyz 52.5 47.5 297 size 20 20
+[INFO] Module 75 Txyz 72.5 47.5 297 size 20 20
+[INFO] Module 76 Txyz -67.5 72.5 297 size 20 20
+[INFO] Module 77 Txyz -47.5 72.5 297 size 20 20
+[INFO] Module 78 Txyz -27.5 72.5 297 size 20 20
+[INFO] Module 79 Txyz -7.5 72.5 297 size 20 20
+[INFO] Module 80 Txyz 12.5 67.5 297 size 20 20
+[INFO] Module 81 Txyz 32.5 67.5 297 size 20 20
+[INFO] Module 82 Txyz 52.5 67.5 297 size 20 20
+[INFO] Module 83 Txyz 72.5 67.5 297 size 20 20
+[INFO] Module 84 Txyz -110.5 -109.5 324 size 20 20
+[INFO] Module 85 Txyz -90.5 -109.5 324 size 20 20
+[INFO] Module 86 Txyz -70.5 -109.5 324 size 20 20
+[INFO] Module 87 Txyz -50.5 -109.5 324 size 20 20
+[INFO] Module 88 Txyz -30.5 -109.5 324 size 20 20
+[INFO] Module 89 Txyz -10.5 -109.5 324 size 20 20
+[INFO] Module 90 Txyz 9.5 -110.5 324 size 20 20
+[INFO] Module 91 Txyz 29.5 -110.5 324 size 20 20
+[INFO] Module 92 Txyz 49.5 -110.5 324 size 20 20
+[INFO] Module 93 Txyz 69.5 -110.5 324 size 20 20
+[INFO] Module 94 Txyz 89.5 -110.5 324 size 20 20
+[INFO] Module 95 Txyz 109.5 -110.5 324 size 20 20
+[INFO] Module 96 Txyz -110.5 -89.5 324 size 20 20
+[INFO] Module 97 Txyz -90.5 -89.5 324 size 20 20
+[INFO] Module 98 Txyz -70.5 -89.5 324 size 20 20
+[INFO] Module 99 Txyz -50.5 -89.5 324 size 20 20
+[INFO] Module 100 Txyz -30.5 -89.5 324 size 20 20
+[INFO] Module 101 Txyz -10.5 -89.5 324 size 20 20
+[INFO] Module 102 Txyz 9.5 -90.5 324 size 20 20
+[INFO] Module 103 Txyz 29.5 -90.5 324 size 20 20
+[INFO] Module 104 Txyz 49.5 -90.5 324 size 20 20
+[INFO] Module 105 Txyz 69.5 -90.5 324 size 20 20
+[INFO] Module 106 Txyz 89.5 -90.5 324 size 20 20
+[INFO] Module 107 Txyz 109.5 -90.5 324 size 20 20
+[INFO] Module 108 Txyz -110.5 -69.5 324 size 20 20
+[INFO] Module 109 Txyz -90.5 -69.5 324 size 20 20
+[INFO] Module 110 Txyz -70.5 -69.5 324 size 20 20
+[INFO] Module 111 Txyz -50.5 -69.5 324 size 20 20
+[INFO] Module 112 Txyz -30.5 -69.5 324 size 20 20
+[INFO] Module 113 Txyz -10.5 -69.5 324 size 20 20
+[INFO] Module 114 Txyz 9.5 -70.5 324 size 20 20
+[INFO] Module 115 Txyz 29.5 -70.5 324 size 20 20
+[INFO] Module 116 Txyz 49.5 -70.5 324 size 20 20
+[INFO] Module 117 Txyz 69.5 -70.5 324 size 20 20
+[INFO] Module 118 Txyz 89.5 -70.5 324 size 20 20
+[INFO] Module 119 Txyz 109.5 -70.5 324 size 20 20
+[INFO] Module 120 Txyz -110.5 -49.5 324 size 20 20
+[INFO] Module 121 Txyz -90.5 -49.5 324 size 20 20
+[INFO] Module 122 Txyz -70.5 -49.5 324 size 20 20
+[INFO] Module 123 Txyz -50.5 -49.5 324 size 20 20
+[INFO] Module 124 Txyz -30.5 -49.5 324 size 20 20
+[INFO] Module 125 Txyz -10.5 -49.5 324 size 20 20
+[INFO] Module 126 Txyz 9.5 -50.5 324 size 20 20
+[INFO] Module 127 Txyz 29.5 -50.5 324 size 20 20
+[INFO] Module 128 Txyz 49.5 -50.5 324 size 20 20
+[INFO] Module 129 Txyz 69.5 -50.5 324 size 20 20
+[INFO] Module 130 Txyz 89.5 -50.5 324 size 20 20
+[INFO] Module 131 Txyz 109.5 -50.5 324 size 20 20
+[INFO] Module 132 Txyz -110.5 -29.5 324 size 20 20
+[INFO] Module 133 Txyz -90.5 -29.5 324 size 20 20
+[INFO] Module 134 Txyz -70.5 -29.5 324 size 20 20
+[INFO] Module 135 Txyz -50.5 -29.5 324 size 20 20
+[INFO] Module 136 Txyz -30.5 -29.5 324 size 20 20
+[INFO] Module 137 Txyz -10.5 -29.5 324 size 20 20
+[INFO] Module 138 Txyz 9.5 -30.5 324 size 20 20
+[INFO] Module 139 Txyz 29.5 -30.5 324 size 20 20
+[INFO] Module 140 Txyz 49.5 -30.5 324 size 20 20
+[INFO] Module 141 Txyz 69.5 -30.5 324 size 20 20
+[INFO] Module 142 Txyz 89.5 -30.5 324 size 20 20
+[INFO] Module 143 Txyz 109.5 -30.5 324 size 20 20
+[INFO] Module 144 Txyz -110.5 -9.5 324 size 20 20
+[INFO] Module 145 Txyz -90.5 -9.5 324 size 20 20
+[INFO] Module 146 Txyz -70.5 -9.5 324 size 20 20
+[INFO] Module 147 Txyz -50.5 -9.5 324 size 20 20
+[INFO] Module 148 Txyz -30.5 -9.5 324 size 20 20
+[INFO] Module 149 Txyz -10.5 -9.5 324 size 20 20
+[INFO] Module 150 Txyz 9.5 -10.5 324 size 20 20
+[INFO] Module 151 Txyz 29.5 -10.5 324 size 20 20
+[INFO] Module 152 Txyz 49.5 -10.5 324 size 20 20
+[INFO] Module 153 Txyz 69.5 -10.5 324 size 20 20
+[INFO] Module 154 Txyz 89.5 -10.5 324 size 20 20
+[INFO] Module 155 Txyz 109.5 -10.5 324 size 20 20
+[INFO] Module 156 Txyz -109.5 10.5 324 size 20 20
+[INFO] Module 157 Txyz -89.5 10.5 324 size 20 20
+[INFO] Module 158 Txyz -69.5 10.5 324 size 20 20
+[INFO] Module 159 Txyz -49.5 10.5 324 size 20 20
+[INFO] Module 160 Txyz -29.5 10.5 324 size 20 20
+[INFO] Module 161 Txyz -9.5 10.5 324 size 20 20
+[INFO] Module 162 Txyz 10.5 9.5 324 size 20 20
+[INFO] Module 163 Txyz 30.5 9.5 324 size 20 20
+[INFO] Module 164 Txyz 50.5 9.5 324 size 20 20
+[INFO] Module 165 Txyz 70.5 9.5 324 size 20 20
+[INFO] Module 166 Txyz 90.5 9.5 324 size 20 20
+[INFO] Module 167 Txyz 110.5 9.5 324 size 20 20
+[INFO] Module 168 Txyz -109.5 30.5 324 size 20 20
+[INFO] Module 169 Txyz -89.5 30.5 324 size 20 20
+[INFO] Module 170 Txyz -69.5 30.5 324 size 20 20
+[INFO] Module 171 Txyz -49.5 30.5 324 size 20 20
+[INFO] Module 172 Txyz -29.5 30.5 324 size 20 20
+[INFO] Module 173 Txyz -9.5 30.5 324 size 20 20
+[INFO] Module 174 Txyz 10.5 29.5 324 size 20 20
+[INFO] Module 175 Txyz 30.5 29.5 324 size 20 20
+[INFO] Module 176 Txyz 50.5 29.5 324 size 20 20
+[INFO] Module 177 Txyz 70.5 29.5 324 size 20 20
+[INFO] Module 178 Txyz 90.5 29.5 324 size 20 20
+[INFO] Module 179 Txyz 110.5 29.5 324 size 20 20
+[INFO] Module 180 Txyz -109.5 50.5 324 size 20 20
+[INFO] Module 181 Txyz -89.5 50.5 324 size 20 20
+[INFO] Module 182 Txyz -69.5 50.5 324 size 20 20
+[INFO] Module 183 Txyz -49.5 50.5 324 size 20 20
+[INFO] Module 184 Txyz -29.5 50.5 324 size 20 20
+[INFO] Module 185 Txyz -9.5 50.5 324 size 20 20
+[INFO] Module 186 Txyz 10.5 49.5 324 size 20 20
+[INFO] Module 187 Txyz 30.5 49.5 324 size 20 20
+[INFO] Module 188 Txyz 50.5 49.5 324 size 20 20
+[INFO] Module 189 Txyz 70.5 49.5 324 size 20 20
+[INFO] Module 190 Txyz 90.5 49.5 324 size 20 20
+[INFO] Module 191 Txyz 110.5 49.5 324 size 20 20
+[INFO] Module 192 Txyz -109.5 70.5 324 size 20 20
+[INFO] Module 193 Txyz -89.5 70.5 324 size 20 20
+[INFO] Module 194 Txyz -69.5 70.5 324 size 20 20
+[INFO] Module 195 Txyz -49.5 70.5 324 size 20 20
+[INFO] Module 196 Txyz -29.5 70.5 324 size 20 20
+[INFO] Module 197 Txyz -9.5 70.5 324 size 20 20
+[INFO] Module 198 Txyz 10.5 69.5 324 size 20 20
+[INFO] Module 199 Txyz 30.5 69.5 324 size 20 20
+[INFO] Module 200 Txyz 50.5 69.5 324 size 20 20
+[INFO] Module 201 Txyz 70.5 69.5 324 size 20 20
+[INFO] Module 202 Txyz 90.5 69.5 324 size 20 20
+[INFO] Module 203 Txyz 110.5 69.5 324 size 20 20
+[INFO] Module 204 Txyz -109.5 90.5 324 size 20 20
+[INFO] Module 205 Txyz -89.5 90.5 324 size 20 20
+[INFO] Module 206 Txyz -69.5 90.5 324 size 20 20
+[INFO] Module 207 Txyz -49.5 90.5 324 size 20 20
+[INFO] Module 208 Txyz -29.5 90.5 324 size 20 20
+[INFO] Module 209 Txyz -9.5 90.5 324 size 20 20
+[INFO] Module 210 Txyz 10.5 89.5 324 size 20 20
+[INFO] Module 211 Txyz 30.5 89.5 324 size 20 20
+[INFO] Module 212 Txyz 50.5 89.5 324 size 20 20
+[INFO] Module 213 Txyz 70.5 89.5 324 size 20 20
+[INFO] Module 214 Txyz 90.5 89.5 324 size 20 20
+[INFO] Module 215 Txyz 110.5 89.5 324 size 20 20
+[INFO] Module 216 Txyz -109.5 110.5 324 size 20 20
+[INFO] Module 217 Txyz -89.5 110.5 324 size 20 20
+[INFO] Module 218 Txyz -69.5 110.5 324 size 20 20
+[INFO] Module 219 Txyz -49.5 110.5 324 size 20 20
+[INFO] Module 220 Txyz -29.5 110.5 324 size 20 20
+[INFO] Module 221 Txyz -9.5 110.5 324 size 20 20
+[INFO] Module 222 Txyz 10.5 109.5 324 size 20 20
+[INFO] Module 223 Txyz 30.5 109.5 324 size 20 20
+[INFO] Module 224 Txyz 50.5 109.5 324 size 20 20
+[INFO] Module 225 Txyz 70.5 109.5 324 size 20 20
+[INFO] Module 226 Txyz 90.5 109.5 324 size 20 20
+[INFO] Module 227 Txyz 110.5 109.5 324 size 20 20
+[INFO] Module 228 Txyz -60.5 -59.5 566 size 120 120
+[INFO] Module 229 Txyz 59.5 -60.5 566 size 120 120
+[INFO] Module 230 Txyz -59.5 60.5 566 size 120 120
+[INFO] Module 231 Txyz 60.5 59.5 566 size 120 120
+[INFO] Module 232 Txyz -80.5 -79.5 593 size 160 160
+[INFO] Module 233 Txyz 79.5 -80.5 593 size 160 160
+[INFO] Module 234 Txyz -79.5 80.5 593 size 160 160
+[INFO] Module 235 Txyz 80.5 79.5 593 size 160 160
+[INFO] Module 236 Txyz -105.5 -104.5 789.5 size 210 210
+[INFO] Module 237 Txyz 104.5 -105.5 789.5 size 210 210
+[INFO] Module 238 Txyz -104.5 105.5 789.5 size 210 210
+[INFO] Module 239 Txyz 105.5 104.5 789.5 size 210 210
+[INFO] Module 240 Txyz -115.5 -114.5 829.5 size 230 230
+[INFO] Module 241 Txyz 114.5 -115.5 829.5 size 230 230
+[INFO] Module 242 Txyz -114.5 115.5 829.5 size 230 230
+[INFO] Module 243 Txyz 115.5 114.5 829.5 size 230 230
+[INFO] Will store MuonSpec tracks in TracksMuonSpec.root
+[INFO] Will store Matching tracks in TracksMatching.root
+[INFO] Will store VerTel clusters in ClustersVerTel.root
+[INFO] VerTel Event 0 nHits= 3672
+[INFO] Saved 3189 clusters in tree with 1 entries
+[INFO] VerTel Event 1 nHits= 4028
+[INFO] Saved 3476 clusters in tree with 2 entries
+[INFO] VerTel Event 2 nHits= 4015
+[INFO] Saved 3421 clusters in tree with 3 entries
+[INFO] VerTel Event 3 nHits= 4043
+[INFO] Saved 3398 clusters in tree with 4 entries
+[INFO] VerTel Event 4 nHits= 3630
+[INFO] Saved 3095 clusters in tree with 5 entries
+[INFO] VerTel Event 5 nHits= 3499
+[INFO] Saved 3012 clusters in tree with 6 entries
+[INFO] VerTel Event 6 nHits= 3708
+[INFO] Saved 3170 clusters in tree with 7 entries
+[INFO] VerTel Event 7 nHits= 3618
+[INFO] Saved 3096 clusters in tree with 8 entries
+[INFO] VerTel Event 8 nHits= 3516
+[INFO] Saved 3094 clusters in tree with 9 entries
+[INFO] VerTel Event 9 nHits= 4130
+[INFO] Saved 3559 clusters in tree with 10 entries
+[INFO] VerTel Event 10 nHits= 3736
+[INFO] Saved 3241 clusters in tree with 11 entries
+[INFO] VerTel Event 11 nHits= 3754
+[INFO] Saved 3259 clusters in tree with 12 entries
+[INFO] VerTel Event 12 nHits= 3673
+[INFO] Saved 3142 clusters in tree with 13 entries
+[INFO] VerTel Event 13 nHits= 3833
+[INFO] Saved 3257 clusters in tree with 14 entries
+[INFO] VerTel Event 14 nHits= 3933
+[INFO] Saved 3388 clusters in tree with 15 entries
+[INFO] VerTel Event 15 nHits= 3642
+[INFO] Saved 3161 clusters in tree with 16 entries
+[INFO] VerTel Event 16 nHits= 4097
+[INFO] Saved 3548 clusters in tree with 17 entries
+[INFO] VerTel Event 17 nHits= 3779
+[INFO] Saved 3197 clusters in tree with 18 entries
+[INFO] VerTel Event 18 nHits= 3830
+[INFO] Saved 3268 clusters in tree with 19 entries
+[INFO] VerTel Event 19 nHits= 3983
+[INFO] Saved 3474 clusters in tree with 20 entries
+[INFO] VerTel Event 20 nHits= 3941
+[INFO] Saved 3433 clusters in tree with 21 entries
+[INFO] VerTel Event 21 nHits= 3824
+[INFO] Saved 3313 clusters in tree with 22 entries
+[INFO] VerTel Event 22 nHits= 3750
+[INFO] Saved 3277 clusters in tree with 23 entries
+[INFO] VerTel Event 23 nHits= 3873
+[INFO] Saved 3387 clusters in tree with 24 entries
+[INFO] VerTel Event 24 nHits= 4167
+[INFO] Saved 3632 clusters in tree with 25 entries
+[INFO] VerTel Event 25 nHits= 3744
+[INFO] Saved 3227 clusters in tree with 26 entries
+[INFO] VerTel Event 26 nHits= 3880
+[INFO] Saved 3371 clusters in tree with 27 entries
+[INFO] VerTel Event 27 nHits= 3787
+[INFO] Saved 3261 clusters in tree with 28 entries
+[INFO] VerTel Event 28 nHits= 3777
+[INFO] Saved 3231 clusters in tree with 29 entries
+[INFO] VerTel Event 29 nHits= 4074
+[INFO] Saved 3482 clusters in tree with 30 entries
+[INFO] VerTel Event 30 nHits= 3924
+[INFO] Saved 3365 clusters in tree with 31 entries
+[INFO] VerTel Event 31 nHits= 3572
+[INFO] Saved 3101 clusters in tree with 32 entries
+[INFO] VerTel Event 32 nHits= 3881
+[INFO] Saved 3395 clusters in tree with 33 entries
+[INFO] VerTel Event 33 nHits= 3542
+[INFO] Saved 3050 clusters in tree with 34 entries
+[INFO] VerTel Event 34 nHits= 4027
+[INFO] Saved 3422 clusters in tree with 35 entries
+[INFO] VerTel Event 35 nHits= 3932
+[INFO] Saved 3367 clusters in tree with 36 entries
+[INFO] VerTel Event 36 nHits= 3638
+[INFO] Saved 3129 clusters in tree with 37 entries
+[INFO] VerTel Event 37 nHits= 3849
+[INFO] Saved 3340 clusters in tree with 38 entries
+[INFO] VerTel Event 38 nHits= 3761
+[INFO] Saved 3236 clusters in tree with 39 entries
+[INFO] VerTel Event 39 nHits= 3553
+[INFO] Saved 3067 clusters in tree with 40 entries
+[INFO] VerTel Event 40 nHits= 4000
+[INFO] Saved 3390 clusters in tree with 41 entries
+[INFO] VerTel Event 41 nHits= 3658
+[INFO] Saved 3141 clusters in tree with 42 entries
+[INFO] VerTel Event 42 nHits= 3581
+[INFO] Saved 3106 clusters in tree with 43 entries
+[INFO] VerTel Event 43 nHits= 3903
+[INFO] Saved 3402 clusters in tree with 44 entries
+[INFO] VerTel Event 44 nHits= 3810
+[INFO] Saved 3293 clusters in tree with 45 entries
+[INFO] VerTel Event 45 nHits= 3528
+[INFO] Saved 3070 clusters in tree with 46 entries
+[INFO] VerTel Event 46 nHits= 3745
+[INFO] Saved 3252 clusters in tree with 47 entries
+[INFO] VerTel Event 47 nHits= 3798
+[INFO] Saved 3225 clusters in tree with 48 entries
+[INFO] VerTel Event 48 nHits= 3857
+[INFO] Saved 3286 clusters in tree with 49 entries
+[INFO] VerTel Event 49 nHits= 3709
+[INFO] Saved 3156 clusters in tree with 50 entries
+[INFO] VerTel Event 50 nHits= 3909
+[INFO] Saved 3394 clusters in tree with 51 entries
+[INFO] VerTel Event 51 nHits= 4171
+[INFO] Saved 3521 clusters in tree with 52 entries
+[INFO] VerTel Event 52 nHits= 4255
+[INFO] Saved 3664 clusters in tree with 53 entries
+[INFO] VerTel Event 53 nHits= 4011
+[INFO] Saved 3442 clusters in tree with 54 entries
+[INFO] VerTel Event 54 nHits= 3697
+[INFO] Saved 3219 clusters in tree with 55 entries
+[INFO] VerTel Event 55 nHits= 4097
+[INFO] Saved 3575 clusters in tree with 56 entries
+[INFO] VerTel Event 56 nHits= 3693
+[INFO] Saved 3155 clusters in tree with 57 entries
+[INFO] VerTel Event 57 nHits= 3679
+[INFO] Saved 3184 clusters in tree with 58 entries
+[INFO] VerTel Event 58 nHits= 3580
+[INFO] Saved 3131 clusters in tree with 59 entries
+[INFO] VerTel Event 59 nHits= 4138
+[INFO] Saved 3574 clusters in tree with 60 entries
+[INFO] VerTel Event 60 nHits= 3817
+[INFO] Saved 3291 clusters in tree with 61 entries
+[INFO] VerTel Event 61 nHits= 3995
+[INFO] Saved 3481 clusters in tree with 62 entries
+[INFO] VerTel Event 62 nHits= 4007
+[INFO] Saved 3487 clusters in tree with 63 entries
+[INFO] VerTel Event 63 nHits= 3823
+[INFO] Saved 3290 clusters in tree with 64 entries
+[INFO] VerTel Event 64 nHits= 4031
+[INFO] Saved 3445 clusters in tree with 65 entries
+[INFO] VerTel Event 65 nHits= 3877
+[INFO] Saved 3371 clusters in tree with 66 entries
+[INFO] VerTel Event 66 nHits= 3950
+[INFO] Saved 3478 clusters in tree with 67 entries
+[INFO] VerTel Event 67 nHits= 3811
+[INFO] Saved 3238 clusters in tree with 68 entries
+[INFO] VerTel Event 68 nHits= 3724
+[INFO] Saved 3201 clusters in tree with 69 entries
+[INFO] VerTel Event 69 nHits= 3958
+[INFO] Saved 3388 clusters in tree with 70 entries
+[INFO] VerTel Event 70 nHits= 3445
+[INFO] Saved 2968 clusters in tree with 71 entries
+[INFO] VerTel Event 71 nHits= 4025
+[INFO] Saved 3523 clusters in tree with 72 entries
+[INFO] VerTel Event 72 nHits= 3936
+[INFO] Saved 3376 clusters in tree with 73 entries
+[INFO] VerTel Event 73 nHits= 3900
+[INFO] Saved 3367 clusters in tree with 74 entries
+[INFO] VerTel Event 74 nHits= 3869
+[INFO] Saved 3339 clusters in tree with 75 entries
+[INFO] VerTel Event 75 nHits= 3710
+[INFO] Saved 3236 clusters in tree with 76 entries
+[INFO] VerTel Event 76 nHits= 4049
+[INFO] Saved 3498 clusters in tree with 77 entries
+[INFO] VerTel Event 77 nHits= 3824
+[INFO] Saved 3316 clusters in tree with 78 entries
+[INFO] VerTel Event 78 nHits= 4085
+[INFO] Saved 3467 clusters in tree with 79 entries
+[INFO] VerTel Event 79 nHits= 3587
+[INFO] Saved 3086 clusters in tree with 80 entries
+[INFO] VerTel Event 80 nHits= 3730
+[INFO] Saved 3198 clusters in tree with 81 entries
+[INFO] VerTel Event 81 nHits= 3769
+[INFO] Saved 3230 clusters in tree with 82 entries
+[INFO] VerTel Event 82 nHits= 3894
+[INFO] Saved 3384 clusters in tree with 83 entries
+[INFO] VerTel Event 83 nHits= 3658
+[INFO] Saved 3129 clusters in tree with 84 entries
+[INFO] VerTel Event 84 nHits= 3849
+[INFO] Saved 3268 clusters in tree with 85 entries
+[INFO] VerTel Event 85 nHits= 3755
+[INFO] Saved 3219 clusters in tree with 86 entries
+[INFO] VerTel Event 86 nHits= 3728
+[INFO] Saved 3278 clusters in tree with 87 entries
+[INFO] VerTel Event 87 nHits= 3785
+[INFO] Saved 3233 clusters in tree with 88 entries
+[INFO] VerTel Event 88 nHits= 4057
+[INFO] Saved 3548 clusters in tree with 89 entries
+[INFO] VerTel Event 89 nHits= 3891
+[INFO] Saved 3338 clusters in tree with 90 entries
+[INFO] VerTel Event 90 nHits= 3862
+[INFO] Saved 3326 clusters in tree with 91 entries
+[INFO] VerTel Event 91 nHits= 3704
+[INFO] Saved 3194 clusters in tree with 92 entries
+[INFO] VerTel Event 92 nHits= 3982
+[INFO] Saved 3429 clusters in tree with 93 entries
+[INFO] VerTel Event 93 nHits= 3701
+[INFO] Saved 3200 clusters in tree with 94 entries
+[INFO] VerTel Event 94 nHits= 3820
+[INFO] Saved 3313 clusters in tree with 95 entries
+[INFO] VerTel Event 95 nHits= 3704
+[INFO] Saved 3210 clusters in tree with 96 entries
+[INFO] VerTel Event 96 nHits= 3923
+[INFO] Saved 3391 clusters in tree with 97 entries
+[INFO] VerTel Event 97 nHits= 3843
+[INFO] Saved 3320 clusters in tree with 98 entries
+[INFO] VerTel Event 98 nHits= 3960
+[INFO] Saved 3394 clusters in tree with 99 entries
+[INFO] VerTel Event 99 nHits= 3557
+[INFO] Saved 3079 clusters in tree with 100 entries
+[INFO] Will store MuonSpec clusters in ClustersMuonSpec.root
+[INFO] MuonSpec Event 0 nHits= 280
+[INFO] Saved 280 clusters in tree with 1 entries
+[INFO] MuonSpec Event 1 nHits= 283
+[INFO] Saved 283 clusters in tree with 2 entries
+[INFO] MuonSpec Event 2 nHits= 214
+[INFO] Saved 214 clusters in tree with 3 entries
+[INFO] MuonSpec Event 3 nHits= 309
+[INFO] Saved 309 clusters in tree with 4 entries
+[INFO] MuonSpec Event 4 nHits= 292
+[INFO] Saved 292 clusters in tree with 5 entries
+[INFO] MuonSpec Event 5 nHits= 224
+[INFO] Saved 224 clusters in tree with 6 entries
+[INFO] MuonSpec Event 6 nHits= 280
+[INFO] Saved 280 clusters in tree with 7 entries
+[INFO] MuonSpec Event 7 nHits= 402
+[INFO] Saved 402 clusters in tree with 8 entries
+[INFO] MuonSpec Event 8 nHits= 360
+[INFO] Saved 360 clusters in tree with 9 entries
+[INFO] MuonSpec Event 9 nHits= 353
+[INFO] Saved 353 clusters in tree with 10 entries
+[INFO] MuonSpec Event 10 nHits= 153
+[INFO] Saved 153 clusters in tree with 11 entries
+[INFO] MuonSpec Event 11 nHits= 202
+[INFO] Saved 202 clusters in tree with 12 entries
+[INFO] MuonSpec Event 12 nHits= 307
+[INFO] Saved 307 clusters in tree with 13 entries
+[INFO] MuonSpec Event 13 nHits= 296
+[INFO] Saved 296 clusters in tree with 14 entries
+[INFO] MuonSpec Event 14 nHits= 366
+[INFO] Saved 366 clusters in tree with 15 entries
+[INFO] MuonSpec Event 15 nHits= 238
+[INFO] Saved 238 clusters in tree with 16 entries
+[INFO] MuonSpec Event 16 nHits= 320
+[INFO] Saved 320 clusters in tree with 17 entries
+[INFO] MuonSpec Event 17 nHits= 248
+[INFO] Saved 248 clusters in tree with 18 entries
+[INFO] MuonSpec Event 18 nHits= 315
+[INFO] Saved 315 clusters in tree with 19 entries
+[INFO] MuonSpec Event 19 nHits= 298
+[INFO] Saved 298 clusters in tree with 20 entries
+[INFO] MuonSpec Event 20 nHits= 220
+[INFO] Saved 220 clusters in tree with 21 entries
+[INFO] MuonSpec Event 21 nHits= 308
+[INFO] Saved 308 clusters in tree with 22 entries
+[INFO] MuonSpec Event 22 nHits= 229
+[INFO] Saved 229 clusters in tree with 23 entries
+[INFO] MuonSpec Event 23 nHits= 214
+[INFO] Saved 214 clusters in tree with 24 entries
+[INFO] MuonSpec Event 24 nHits= 327
+[INFO] Saved 327 clusters in tree with 25 entries
+[INFO] MuonSpec Event 25 nHits= 335
+[INFO] Saved 335 clusters in tree with 26 entries
+[INFO] MuonSpec Event 26 nHits= 262
+[INFO] Saved 262 clusters in tree with 27 entries
+[INFO] MuonSpec Event 27 nHits= 234
+[INFO] Saved 234 clusters in tree with 28 entries
+[INFO] MuonSpec Event 28 nHits= 236
+[INFO] Saved 236 clusters in tree with 29 entries
+[INFO] MuonSpec Event 29 nHits= 288
+[INFO] Saved 288 clusters in tree with 30 entries
+[INFO] MuonSpec Event 30 nHits= 332
+[INFO] Saved 332 clusters in tree with 31 entries
+[INFO] MuonSpec Event 31 nHits= 225
+[INFO] Saved 225 clusters in tree with 32 entries
+[INFO] MuonSpec Event 32 nHits= 273
+[INFO] Saved 273 clusters in tree with 33 entries
+[INFO] MuonSpec Event 33 nHits= 261
+[INFO] Saved 261 clusters in tree with 34 entries
+[INFO] MuonSpec Event 34 nHits= 338
+[INFO] Saved 338 clusters in tree with 35 entries
+[INFO] MuonSpec Event 35 nHits= 330
+[INFO] Saved 330 clusters in tree with 36 entries
+[INFO] MuonSpec Event 36 nHits= 190
+[INFO] Saved 190 clusters in tree with 37 entries
+[INFO] MuonSpec Event 37 nHits= 294
+[INFO] Saved 294 clusters in tree with 38 entries
+[INFO] MuonSpec Event 38 nHits= 382
+[INFO] Saved 382 clusters in tree with 39 entries
+[INFO] MuonSpec Event 39 nHits= 414
+[INFO] Saved 414 clusters in tree with 40 entries
+[INFO] MuonSpec Event 40 nHits= 369
+[INFO] Saved 369 clusters in tree with 41 entries
+[INFO] MuonSpec Event 41 nHits= 260
+[INFO] Saved 260 clusters in tree with 42 entries
+[INFO] MuonSpec Event 42 nHits= 198
+[INFO] Saved 198 clusters in tree with 43 entries
+[INFO] MuonSpec Event 43 nHits= 175
+[INFO] Saved 175 clusters in tree with 44 entries
+[INFO] MuonSpec Event 44 nHits= 233
+[INFO] Saved 233 clusters in tree with 45 entries
+[INFO] MuonSpec Event 45 nHits= 251
+[INFO] Saved 251 clusters in tree with 46 entries
+[INFO] MuonSpec Event 46 nHits= 379
+[INFO] Saved 379 clusters in tree with 47 entries
+[INFO] MuonSpec Event 47 nHits= 266
+[INFO] Saved 266 clusters in tree with 48 entries
+[INFO] MuonSpec Event 48 nHits= 186
+[INFO] Saved 186 clusters in tree with 49 entries
+[INFO] MuonSpec Event 49 nHits= 431
+[INFO] Saved 431 clusters in tree with 50 entries
+[INFO] MuonSpec Event 50 nHits= 378
+[INFO] Saved 378 clusters in tree with 51 entries
+[INFO] MuonSpec Event 51 nHits= 418
+[INFO] Saved 418 clusters in tree with 52 entries
+[INFO] MuonSpec Event 52 nHits= 326
+[INFO] Saved 326 clusters in tree with 53 entries
+[INFO] MuonSpec Event 53 nHits= 223
+[INFO] Saved 223 clusters in tree with 54 entries
+[INFO] MuonSpec Event 54 nHits= 411
+[INFO] Saved 411 clusters in tree with 55 entries
+[INFO] MuonSpec Event 55 nHits= 425
+[INFO] Saved 425 clusters in tree with 56 entries
+[INFO] MuonSpec Event 56 nHits= 186
+[INFO] Saved 186 clusters in tree with 57 entries
+[INFO] MuonSpec Event 57 nHits= 263
+[INFO] Saved 263 clusters in tree with 58 entries
+[INFO] MuonSpec Event 58 nHits= 219
+[INFO] Saved 219 clusters in tree with 59 entries
+[INFO] MuonSpec Event 59 nHits= 260
+[INFO] Saved 260 clusters in tree with 60 entries
+[INFO] MuonSpec Event 60 nHits= 368
+[INFO] Saved 368 clusters in tree with 61 entries
+[INFO] MuonSpec Event 61 nHits= 357
+[INFO] Saved 357 clusters in tree with 62 entries
+[INFO] MuonSpec Event 62 nHits= 331
+[INFO] Saved 331 clusters in tree with 63 entries
+[INFO] MuonSpec Event 63 nHits= 218
+[INFO] Saved 218 clusters in tree with 64 entries
+[INFO] MuonSpec Event 64 nHits= 153
+[INFO] Saved 153 clusters in tree with 65 entries
+[INFO] MuonSpec Event 65 nHits= 234
+[INFO] Saved 234 clusters in tree with 66 entries
+[INFO] MuonSpec Event 66 nHits= 238
+[INFO] Saved 238 clusters in tree with 67 entries
+[INFO] MuonSpec Event 67 nHits= 256
+[INFO] Saved 256 clusters in tree with 68 entries
+[INFO] MuonSpec Event 68 nHits= 214
+[INFO] Saved 214 clusters in tree with 69 entries
+[INFO] MuonSpec Event 69 nHits= 266
+[INFO] Saved 266 clusters in tree with 70 entries
+[INFO] MuonSpec Event 70 nHits= 327
+[INFO] Saved 327 clusters in tree with 71 entries
+[INFO] MuonSpec Event 71 nHits= 242
+[INFO] Saved 242 clusters in tree with 72 entries
+[INFO] MuonSpec Event 72 nHits= 170
+[INFO] Saved 170 clusters in tree with 73 entries
+[INFO] MuonSpec Event 73 nHits= 208
+[INFO] Saved 208 clusters in tree with 74 entries
+[INFO] MuonSpec Event 74 nHits= 249
+[INFO] Saved 249 clusters in tree with 75 entries
+[INFO] MuonSpec Event 75 nHits= 318
+[INFO] Saved 318 clusters in tree with 76 entries
+[INFO] MuonSpec Event 76 nHits= 326
+[INFO] Saved 326 clusters in tree with 77 entries
+[INFO] MuonSpec Event 77 nHits= 251
+[INFO] Saved 251 clusters in tree with 78 entries
+[INFO] MuonSpec Event 78 nHits= 315
+[INFO] Saved 315 clusters in tree with 79 entries
+[INFO] MuonSpec Event 79 nHits= 254
+[INFO] Saved 254 clusters in tree with 80 entries
+[INFO] MuonSpec Event 80 nHits= 233
+[INFO] Saved 233 clusters in tree with 81 entries
+[INFO] MuonSpec Event 81 nHits= 297
+[INFO] Saved 297 clusters in tree with 82 entries
+[INFO] MuonSpec Event 82 nHits= 255
+[INFO] Saved 255 clusters in tree with 83 entries
+[INFO] MuonSpec Event 83 nHits= 269
+[INFO] Saved 269 clusters in tree with 84 entries
+[INFO] MuonSpec Event 84 nHits= 302
+[INFO] Saved 302 clusters in tree with 85 entries
+[INFO] MuonSpec Event 85 nHits= 156
+[INFO] Saved 156 clusters in tree with 86 entries
+[INFO] MuonSpec Event 86 nHits= 396
+[INFO] Saved 396 clusters in tree with 87 entries
+[INFO] MuonSpec Event 87 nHits= 221
+[INFO] Saved 221 clusters in tree with 88 entries
+[INFO] MuonSpec Event 88 nHits= 295
+[INFO] Saved 295 clusters in tree with 89 entries
+[INFO] MuonSpec Event 89 nHits= 297
+[INFO] Saved 297 clusters in tree with 90 entries
+[INFO] MuonSpec Event 90 nHits= 303
+[INFO] Saved 303 clusters in tree with 91 entries
+[INFO] MuonSpec Event 91 nHits= 283
+[INFO] Saved 283 clusters in tree with 92 entries
+[INFO] MuonSpec Event 92 nHits= 252
+[INFO] Saved 252 clusters in tree with 93 entries
+[INFO] MuonSpec Event 93 nHits= 326
+[INFO] Saved 326 clusters in tree with 94 entries
+[INFO] MuonSpec Event 94 nHits= 350
+[INFO] Saved 350 clusters in tree with 95 entries
+[INFO] MuonSpec Event 95 nHits= 361
+[INFO] Saved 361 clusters in tree with 96 entries
+[INFO] MuonSpec Event 96 nHits= 332
+[INFO] Saved 332 clusters in tree with 97 entries
+[INFO] MuonSpec Event 97 nHits= 239
+[INFO] Saved 239 clusters in tree with 98 entries
+[INFO] MuonSpec Event 98 nHits= 238
+[INFO] Saved 238 clusters in tree with 99 entries
+[INFO] MuonSpec Event 99 nHits= 312
+[INFO] Saved 312 clusters in tree with 100 entries
+[INFO] Will store VerTel tracks in TracksVerTel.root
+[INFO] Will store MuonSpec tracks in TracksMuonSpec.root
+[INFO] Process event 0
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3189, primary vertex in z = -4.1634283 cm
+[INFO] Saved 436 tracks in tree with 1 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 280, primary vertex in z = -4.1634283 cm
+[INFO] Saved 1 tracks in tree with 1 entries
+[INFO] Process event 1
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3476, primary vertex in z = -5.277714 cm
+[INFO] Saved 435 tracks in tree with 2 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 283, primary vertex in z = -5.277714 cm
+[INFO] Saved 3 tracks in tree with 2 entries
+[INFO] Process event 2
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3421, primary vertex in z = -0.50838184 cm
+[INFO] Saved 450 tracks in tree with 3 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 214, primary vertex in z = -0.50838184 cm
+[INFO] Saved 2 tracks in tree with 3 entries
+[INFO] Process event 3
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3398, primary vertex in z = -0.5094055 cm
+[INFO] Saved 433 tracks in tree with 4 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 309, primary vertex in z = -0.5094055 cm
+[INFO] Saved 4 tracks in tree with 4 entries
+[INFO] Process event 4
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3095, primary vertex in z = -1.6853744 cm
+[INFO] Saved 404 tracks in tree with 5 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 292, primary vertex in z = -1.6853744 cm
+[INFO] Saved 3 tracks in tree with 5 entries
+[INFO] Process event 5
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3012, primary vertex in z = -1.7516214 cm
+[INFO] Saved 386 tracks in tree with 6 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 224, primary vertex in z = -1.7516214 cm
+[INFO] Saved 2 tracks in tree with 6 entries
+[INFO] Process event 6
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3170, primary vertex in z = -0.5212291 cm
+[INFO] Saved 394 tracks in tree with 7 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 280, primary vertex in z = -0.5212291 cm
+[INFO] Saved 2 tracks in tree with 7 entries
+[INFO] Process event 7
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3096, primary vertex in z = -5.3164487 cm
+[INFO] Saved 422 tracks in tree with 8 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 402, primary vertex in z = -5.3164487 cm
+[INFO] Saved 4 tracks in tree with 8 entries
+[INFO] Process event 8
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3094, primary vertex in z = -5.307484 cm
+[INFO] Saved 430 tracks in tree with 9 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 360, primary vertex in z = -5.307484 cm
+[INFO] Saved 3 tracks in tree with 9 entries
+[INFO] Process event 9
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3559, primary vertex in z = -5.352562 cm
+[INFO] Saved 473 tracks in tree with 10 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 353, primary vertex in z = -5.352562 cm
+[INFO] Saved 1 tracks in tree with 10 entries
+[INFO] Process event 10
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3241, primary vertex in z = -4.0653358 cm
+[INFO] Saved 446 tracks in tree with 11 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 153, primary vertex in z = -4.0653358 cm
+[INFO] Saved 5 tracks in tree with 11 entries
+[INFO] Process event 11
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3259, primary vertex in z = -5.309357 cm
+[INFO] Saved 435 tracks in tree with 12 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 202, primary vertex in z = -5.309357 cm
+[INFO] Saved 3 tracks in tree with 12 entries
+[INFO] Process event 12
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3142, primary vertex in z = -1.6644827 cm
+[INFO] Saved 409 tracks in tree with 13 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 307, primary vertex in z = -1.6644827 cm
+[INFO] Saved 2 tracks in tree with 13 entries
+[INFO] Process event 13
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3257, primary vertex in z = -5.2610235 cm
+[INFO] Saved 447 tracks in tree with 14 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 296, primary vertex in z = -5.2610235 cm
+[INFO] Saved 6 tracks in tree with 14 entries
+[INFO] Process event 14
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3388, primary vertex in z = -4.1713977 cm
+[INFO] Saved 457 tracks in tree with 15 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 366, primary vertex in z = -4.1713977 cm
+[INFO] Saved 1 tracks in tree with 15 entries
+[INFO] Process event 15
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3161, primary vertex in z = -5.3420496 cm
+[INFO] Saved 427 tracks in tree with 16 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 238, primary vertex in z = -5.3420496 cm
+[INFO] Saved 3 tracks in tree with 16 entries
+[INFO] Process event 16
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3548, primary vertex in z = -1.7125369 cm
+[INFO] Saved 470 tracks in tree with 17 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 320, primary vertex in z = -1.7125369 cm
+[INFO] Saved 4 tracks in tree with 17 entries
+[INFO] Process event 17
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3197, primary vertex in z = -0.54315567 cm
+[INFO] Saved 409 tracks in tree with 18 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 248, primary vertex in z = -0.54315567 cm
+[INFO] Saved 2 tracks in tree with 18 entries
+[INFO] Process event 18
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3268, primary vertex in z = -0.5546719 cm
+[INFO] Saved 425 tracks in tree with 19 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 315, primary vertex in z = -0.5546719 cm
+[INFO] Saved 3 tracks in tree with 19 entries
+[INFO] Process event 19
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3474, primary vertex in z = -2.9504929 cm
+[INFO] Saved 428 tracks in tree with 20 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 298, primary vertex in z = -2.9504929 cm
+[INFO] Saved 6 tracks in tree with 20 entries
+[INFO] Process event 20
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3433, primary vertex in z = -2.9707465 cm
+[INFO] Saved 477 tracks in tree with 21 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 220, primary vertex in z = -2.9707465 cm
+[INFO] Saved 6 tracks in tree with 21 entries
+[INFO] Process event 21
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3313, primary vertex in z = -5.280456 cm
+[INFO] Saved 434 tracks in tree with 22 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 308, primary vertex in z = -5.280456 cm
+[INFO] Saved 4 tracks in tree with 22 entries
+[INFO] Process event 22
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3277, primary vertex in z = -2.8915527 cm
+[INFO] Saved 452 tracks in tree with 23 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 229, primary vertex in z = -2.8915527 cm
+[INFO] Saved 5 tracks in tree with 23 entries
+[INFO] Process event 23
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3387, primary vertex in z = -5.2922497 cm
+[INFO] Saved 460 tracks in tree with 24 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 214, primary vertex in z = -5.2922497 cm
+[INFO] Saved 3 tracks in tree with 24 entries
+[INFO] Process event 24
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3632, primary vertex in z = -4.1419587 cm
+[INFO] Saved 481 tracks in tree with 25 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 327, primary vertex in z = -4.1419587 cm
+[INFO] Saved 2 tracks in tree with 25 entries
+[INFO] Process event 25
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3227, primary vertex in z = -2.8282466 cm
+[INFO] Saved 413 tracks in tree with 26 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 335, primary vertex in z = -2.8282466 cm
+[INFO] Saved 4 tracks in tree with 26 entries
+[INFO] Process event 26
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3371, primary vertex in z = -5.35969 cm
+[INFO] Saved 450 tracks in tree with 27 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 262, primary vertex in z = -5.35969 cm
+[INFO] Saved 4 tracks in tree with 27 entries
+[INFO] Process event 27
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3261, primary vertex in z = -1.730184 cm
+[INFO] Saved 436 tracks in tree with 28 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 234, primary vertex in z = -1.730184 cm
+[INFO] Saved 3 tracks in tree with 28 entries
+[INFO] Process event 28
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3231, primary vertex in z = -1.7619053 cm
+[INFO] Saved 432 tracks in tree with 29 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 236, primary vertex in z = -1.7619053 cm
+[INFO] Saved 0 tracks in tree with 29 entries
+[INFO] Process event 29
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3482, primary vertex in z = -4.0576234 cm
+[INFO] Saved 447 tracks in tree with 30 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 288, primary vertex in z = -4.0576234 cm
+[INFO] Saved 7 tracks in tree with 30 entries
+[INFO] Process event 30
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3365, primary vertex in z = -0.4768674 cm
+[INFO] Saved 452 tracks in tree with 31 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 332, primary vertex in z = -0.4768674 cm
+[INFO] Saved 3 tracks in tree with 31 entries
+[INFO] Process event 31
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3101, primary vertex in z = -2.944162 cm
+[INFO] Saved 429 tracks in tree with 32 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 225, primary vertex in z = -2.944162 cm
+[INFO] Saved 4 tracks in tree with 32 entries
+[INFO] Process event 32
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3395, primary vertex in z = -5.2819114 cm
+[INFO] Saved 460 tracks in tree with 33 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 273, primary vertex in z = -5.2819114 cm
+[INFO] Saved 1 tracks in tree with 33 entries
+[INFO] Process event 33
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3050, primary vertex in z = -0.42986405 cm
+[INFO] Saved 395 tracks in tree with 34 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 261, primary vertex in z = -0.42986405 cm
+[INFO] Saved 3 tracks in tree with 34 entries
+[INFO] Process event 34
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3422, primary vertex in z = -0.48482046 cm
+[INFO] Saved 439 tracks in tree with 35 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 338, primary vertex in z = -0.48482046 cm
+[INFO] Saved 1 tracks in tree with 35 entries
+[INFO] Process event 35
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3367, primary vertex in z = -0.5676879 cm
+[INFO] Saved 464 tracks in tree with 36 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 330, primary vertex in z = -0.5676879 cm
+[INFO] Saved 4 tracks in tree with 36 entries
+[INFO] Process event 36
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3129, primary vertex in z = -0.53097945 cm
+[INFO] Saved 405 tracks in tree with 37 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 190, primary vertex in z = -0.53097945 cm
+[INFO] Saved 2 tracks in tree with 37 entries
+[INFO] Process event 37
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3340, primary vertex in z = -1.6748565 cm
+[INFO] Saved 449 tracks in tree with 38 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 294, primary vertex in z = -1.6748565 cm
+[INFO] Saved 2 tracks in tree with 38 entries
+[INFO] Process event 38
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3236, primary vertex in z = -1.753397 cm
+[INFO] Saved 409 tracks in tree with 39 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 382, primary vertex in z = -1.753397 cm
+[INFO] Saved 3 tracks in tree with 39 entries
+[INFO] Process event 39
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3067, primary vertex in z = -5.31823 cm
+[INFO] Saved 429 tracks in tree with 40 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 414, primary vertex in z = -5.31823 cm
+[INFO] Saved 4 tracks in tree with 40 entries
+[INFO] Process event 40
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3390, primary vertex in z = -0.45895517 cm
+[INFO] Saved 439 tracks in tree with 41 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 369, primary vertex in z = -0.45895517 cm
+[INFO] Saved 2 tracks in tree with 41 entries
+[INFO] Process event 41
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3141, primary vertex in z = -2.8866932 cm
+[INFO] Saved 405 tracks in tree with 42 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 260, primary vertex in z = -2.8866932 cm
+[INFO] Saved 3 tracks in tree with 42 entries
+[INFO] Process event 42
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3106, primary vertex in z = -4.0326667 cm
+[INFO] Saved 413 tracks in tree with 43 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 198, primary vertex in z = -4.0326667 cm
+[INFO] Saved 2 tracks in tree with 43 entries
+[INFO] Process event 43
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3402, primary vertex in z = -5.245602 cm
+[INFO] Saved 460 tracks in tree with 44 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 175, primary vertex in z = -5.245602 cm
+[INFO] Saved 2 tracks in tree with 44 entries
+[INFO] Process event 44
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3293, primary vertex in z = -4.142207 cm
+[INFO] Saved 407 tracks in tree with 45 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 233, primary vertex in z = -4.142207 cm
+[INFO] Saved 1 tracks in tree with 45 entries
+[INFO] Process event 45
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3070, primary vertex in z = -2.8958895 cm
+[INFO] Saved 412 tracks in tree with 46 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 251, primary vertex in z = -2.8958895 cm
+[INFO] Saved 1 tracks in tree with 46 entries
+[INFO] Process event 46
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3252, primary vertex in z = -5.355393 cm
+[INFO] Saved 430 tracks in tree with 47 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 379, primary vertex in z = -5.355393 cm
+[INFO] Saved 2 tracks in tree with 47 entries
+[INFO] Process event 47
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3225, primary vertex in z = -0.43642977 cm
+[INFO] Saved 422 tracks in tree with 48 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 266, primary vertex in z = -0.43642977 cm
+[INFO] Saved 3 tracks in tree with 48 entries
+[INFO] Process event 48
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3286, primary vertex in z = -1.6512815 cm
+[INFO] Saved 429 tracks in tree with 49 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 186, primary vertex in z = -1.6512815 cm
+[INFO] Saved 2 tracks in tree with 49 entries
+[INFO] Process event 49
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3156, primary vertex in z = -0.484755 cm
+[INFO] Saved 415 tracks in tree with 50 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 431, primary vertex in z = -0.484755 cm
+[INFO] Saved 3 tracks in tree with 50 entries
+[INFO] Process event 50
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3394, primary vertex in z = -4.103937 cm
+[INFO] Saved 460 tracks in tree with 51 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 378, primary vertex in z = -4.103937 cm
+[INFO] Saved 6 tracks in tree with 51 entries
+[INFO] Process event 51
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3521, primary vertex in z = -0.5299514 cm
+[INFO] Saved 456 tracks in tree with 52 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 418, primary vertex in z = -0.5299514 cm
+[INFO] Saved 3 tracks in tree with 52 entries
+[INFO] Process event 52
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3664, primary vertex in z = -0.502748 cm
+[INFO] Saved 482 tracks in tree with 53 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 326, primary vertex in z = -0.502748 cm
+[INFO] Saved 5 tracks in tree with 53 entries
+[INFO] Process event 53
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3442, primary vertex in z = -2.9468696 cm
+[INFO] Saved 426 tracks in tree with 54 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 223, primary vertex in z = -2.9468696 cm
+[INFO] Saved 2 tracks in tree with 54 entries
+[INFO] Process event 54
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3219, primary vertex in z = -5.356412 cm
+[INFO] Saved 448 tracks in tree with 55 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 411, primary vertex in z = -5.356412 cm
+[INFO] Saved 1 tracks in tree with 55 entries
+[INFO] Process event 55
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3575, primary vertex in z = -4.1110487 cm
+[INFO] Saved 461 tracks in tree with 56 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 425, primary vertex in z = -4.1110487 cm
+[INFO] Saved 2 tracks in tree with 56 entries
+[INFO] Process event 56
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3155, primary vertex in z = -0.43344694 cm
+[INFO] Saved 418 tracks in tree with 57 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 186, primary vertex in z = -0.43344694 cm
+[INFO] Saved 2 tracks in tree with 57 entries
+[INFO] Process event 57
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3184, primary vertex in z = -5.339091 cm
+[INFO] Saved 425 tracks in tree with 58 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 263, primary vertex in z = -5.339091 cm
+[INFO] Saved 3 tracks in tree with 58 entries
+[INFO] Process event 58
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3131, primary vertex in z = -5.2785826 cm
+[INFO] Saved 427 tracks in tree with 59 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 219, primary vertex in z = -5.2785826 cm
+[INFO] Saved 3 tracks in tree with 59 entries
+[INFO] Process event 59
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3574, primary vertex in z = -1.7169977 cm
+[INFO] Saved 469 tracks in tree with 60 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 260, primary vertex in z = -1.7169977 cm
+[INFO] Saved 3 tracks in tree with 60 entries
+[INFO] Process event 60
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3291, primary vertex in z = -2.9322565 cm
+[INFO] Saved 439 tracks in tree with 61 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 368, primary vertex in z = -2.9322565 cm
+[INFO] Saved 1 tracks in tree with 61 entries
+[INFO] Process event 61
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3481, primary vertex in z = -4.173488 cm
+[INFO] Saved 469 tracks in tree with 62 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 357, primary vertex in z = -4.173488 cm
+[INFO] Saved 5 tracks in tree with 62 entries
+[INFO] Process event 62
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3487, primary vertex in z = -4.130385 cm
+[INFO] Saved 459 tracks in tree with 63 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 331, primary vertex in z = -4.130385 cm
+[INFO] Saved 2 tracks in tree with 63 entries
+[INFO] Process event 63
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3290, primary vertex in z = -1.694694 cm
+[INFO] Saved 430 tracks in tree with 64 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 218, primary vertex in z = -1.694694 cm
+[INFO] Saved 1 tracks in tree with 64 entries
+[INFO] Process event 64
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3445, primary vertex in z = -0.491249 cm
+[INFO] Saved 456 tracks in tree with 65 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 153, primary vertex in z = -0.491249 cm
+[INFO] Saved 2 tracks in tree with 65 entries
+[INFO] Process event 65
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3371, primary vertex in z = -2.9635165 cm
+[INFO] Saved 436 tracks in tree with 66 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 234, primary vertex in z = -2.9635165 cm
+[INFO] Saved 1 tracks in tree with 66 entries
+[INFO] Process event 66
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3478, primary vertex in z = -5.256377 cm
+[INFO] Saved 467 tracks in tree with 67 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 238, primary vertex in z = -5.256377 cm
+[INFO] Saved 3 tracks in tree with 67 entries
+[INFO] Process event 67
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3238, primary vertex in z = -1.7041436 cm
+[INFO] Saved 412 tracks in tree with 68 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 256, primary vertex in z = -1.7041436 cm
+[INFO] Saved 4 tracks in tree with 68 entries
+[INFO] Process event 68
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3201, primary vertex in z = -2.8916368 cm
+[INFO] Saved 419 tracks in tree with 69 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 214, primary vertex in z = -2.8916368 cm
+[INFO] Saved 3 tracks in tree with 69 entries
+[INFO] Process event 69
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3388, primary vertex in z = -2.870682 cm
+[INFO] Saved 434 tracks in tree with 70 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 266, primary vertex in z = -2.870682 cm
+[INFO] Saved 5 tracks in tree with 70 entries
+[INFO] Process event 70
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 2968, primary vertex in z = -5.2678013 cm
+[INFO] Saved 413 tracks in tree with 71 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 327, primary vertex in z = -5.2678013 cm
+[INFO] Saved 4 tracks in tree with 71 entries
+[INFO] Process event 71
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3523, primary vertex in z = -5.2506585 cm
+[INFO] Saved 462 tracks in tree with 72 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 242, primary vertex in z = -5.2506585 cm
+[INFO] Saved 2 tracks in tree with 72 entries
+[INFO] Process event 72
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3376, primary vertex in z = -1.7370421 cm
+[INFO] Saved 435 tracks in tree with 73 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 170, primary vertex in z = -1.7370421 cm
+[INFO] Saved 4 tracks in tree with 73 entries
+[INFO] Process event 73
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3367, primary vertex in z = -0.4611959 cm
+[INFO] Saved 447 tracks in tree with 74 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 208, primary vertex in z = -0.4611959 cm
+[INFO] Saved 1 tracks in tree with 74 entries
+[INFO] Process event 74
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3339, primary vertex in z = -0.52242404 cm
+[INFO] Saved 461 tracks in tree with 75 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 249, primary vertex in z = -0.52242404 cm
+[INFO] Saved 4 tracks in tree with 75 entries
+[INFO] Process event 75
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3236, primary vertex in z = -5.290981 cm
+[INFO] Saved 436 tracks in tree with 76 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 318, primary vertex in z = -5.290981 cm
+[INFO] Saved 2 tracks in tree with 76 entries
+[INFO] Process event 76
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3498, primary vertex in z = -1.6516486 cm
+[INFO] Saved 484 tracks in tree with 77 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 326, primary vertex in z = -1.6516486 cm
+[INFO] Saved 3 tracks in tree with 77 entries
+[INFO] Process event 77
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3316, primary vertex in z = -2.9390554 cm
+[INFO] Saved 434 tracks in tree with 78 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 251, primary vertex in z = -2.9390554 cm
+[INFO] Saved 4 tracks in tree with 78 entries
+[INFO] Process event 78
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3467, primary vertex in z = -0.43031877 cm
+[INFO] Saved 455 tracks in tree with 79 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 315, primary vertex in z = -0.43031877 cm
+[INFO] Saved 1 tracks in tree with 79 entries
+[INFO] Process event 79
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3086, primary vertex in z = -0.55033505 cm
+[INFO] Saved 396 tracks in tree with 80 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 254, primary vertex in z = -0.55033505 cm
+[INFO] Saved 3 tracks in tree with 80 entries
+[INFO] Process event 80
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3198, primary vertex in z = -2.906227 cm
+[INFO] Saved 427 tracks in tree with 81 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 233, primary vertex in z = -2.906227 cm
+[INFO] Saved 3 tracks in tree with 81 entries
+[INFO] Process event 81
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3230, primary vertex in z = -1.7568733 cm
+[INFO] Saved 456 tracks in tree with 82 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 297, primary vertex in z = -1.7568733 cm
+[INFO] Saved 2 tracks in tree with 82 entries
+[INFO] Process event 82
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3384, primary vertex in z = -1.680794 cm
+[INFO] Saved 437 tracks in tree with 83 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 255, primary vertex in z = -1.680794 cm
+[INFO] Saved 2 tracks in tree with 83 entries
+[INFO] Process event 83
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3129, primary vertex in z = -2.8575492 cm
+[INFO] Saved 440 tracks in tree with 84 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 269, primary vertex in z = -2.8575492 cm
+[INFO] Saved 6 tracks in tree with 84 entries
+[INFO] Process event 84
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3268, primary vertex in z = -1.7134051 cm
+[INFO] Saved 415 tracks in tree with 85 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 302, primary vertex in z = -1.7134051 cm
+[INFO] Saved 3 tracks in tree with 85 entries
+[INFO] Process event 85
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3219, primary vertex in z = -4.1419177 cm
+[INFO] Saved 405 tracks in tree with 86 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 156, primary vertex in z = -4.1419177 cm
+[INFO] Saved 3 tracks in tree with 86 entries
+[INFO] Process event 86
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3278, primary vertex in z = -5.3669333 cm
+[INFO] Saved 469 tracks in tree with 87 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 396, primary vertex in z = -5.3669333 cm
+[INFO] Saved 6 tracks in tree with 87 entries
+[INFO] Process event 87
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3233, primary vertex in z = -5.292735 cm
+[INFO] Saved 428 tracks in tree with 88 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 221, primary vertex in z = -5.292735 cm
+[INFO] Saved 1 tracks in tree with 88 entries
+[INFO] Process event 88
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3548, primary vertex in z = -5.268385 cm
+[INFO] Saved 455 tracks in tree with 89 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 295, primary vertex in z = -5.268385 cm
+[INFO] Saved 2 tracks in tree with 89 entries
+[INFO] Process event 89
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3338, primary vertex in z = -0.5301903 cm
+[INFO] Saved 451 tracks in tree with 90 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 297, primary vertex in z = -0.5301903 cm
+[INFO] Saved 3 tracks in tree with 90 entries
+[INFO] Process event 90
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3326, primary vertex in z = -1.7090627 cm
+[INFO] Saved 442 tracks in tree with 91 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 303, primary vertex in z = -1.7090627 cm
+[INFO] Saved 3 tracks in tree with 91 entries
+[INFO] Process event 91
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3194, primary vertex in z = -0.56723726 cm
+[INFO] Saved 429 tracks in tree with 92 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 283, primary vertex in z = -0.56723726 cm
+[INFO] Saved 4 tracks in tree with 92 entries
+[INFO] Process event 92
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3429, primary vertex in z = -2.9546068 cm
+[INFO] Saved 459 tracks in tree with 93 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 252, primary vertex in z = -2.9546068 cm
+[INFO] Saved 4 tracks in tree with 93 entries
+[INFO] Process event 93
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3200, primary vertex in z = -2.9619467 cm
+[INFO] Saved 433 tracks in tree with 94 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 326, primary vertex in z = -2.9619467 cm
+[INFO] Saved 4 tracks in tree with 94 entries
+[INFO] Process event 94
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3313, primary vertex in z = -2.9212353 cm
+[INFO] Saved 432 tracks in tree with 95 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 350, primary vertex in z = -2.9212353 cm
+[INFO] Saved 5 tracks in tree with 95 entries
+[INFO] Process event 95
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3210, primary vertex in z = -5.3138776 cm
+[INFO] Saved 432 tracks in tree with 96 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 361, primary vertex in z = -5.3138776 cm
+[INFO] Saved 3 tracks in tree with 96 entries
+[INFO] Process event 96
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3391, primary vertex in z = -2.9096339 cm
+[INFO] Saved 455 tracks in tree with 97 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 332, primary vertex in z = -2.9096339 cm
+[INFO] Saved 3 tracks in tree with 97 entries
+[INFO] Process event 97
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3320, primary vertex in z = -2.875519 cm
+[INFO] Saved 431 tracks in tree with 98 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 239, primary vertex in z = -2.875519 cm
+[INFO] Saved 2 tracks in tree with 98 entries
+[INFO] Process event 98
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3394, primary vertex in z = -4.0301547 cm
+[INFO] Saved 456 tracks in tree with 99 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 238, primary vertex in z = -4.0301547 cm
+[INFO] Saved 3 tracks in tree with 99 entries
+[INFO] Process event 99
+[INFO] VT reconstruction
+[INFO] Process event with nClusters 3079, primary vertex in z = -5.352846 cm
+[INFO] Saved 411 tracks in tree with 100 entries
+[INFO] MS reconstruction
+[WARN] Covariance matrix of vertex not set. Use default values
+[INFO] Process event with nClusters 312, primary vertex in z = -5.352846 cm
+[INFO] Saved 2 tracks in tree with 100 entries
+[INFO] ------ Tracking time ------
+Real time 0:01:20, CP time 80.400
+[INFO] ------------------------------
+[INFO] Stored configurable params to /home/galocco/NA6PRoot/debug/na6pRecoParam.ini

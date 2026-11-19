@@ -10,6 +10,7 @@ struct NA6PRecoParam : public na6p::conf::ConfigurableParamHelper<NA6PRecoParam>
 
   static constexpr int MaxIterationsTrackerCA = 10;
   float maxPropagationStep = 2.0; // in cm
+  bool caDoInwardSeedExtension = true; // extend CA road seeds towards earlier layers (VT and MS)
   // VerTel reconstruction parameters
   int vtNLayers = 5;
   // tracklet vertexer

@@ -1,0 +1,525 @@
+diff --git a/rec/include/NA6PTrackerCA.h b/rec/include/NA6PTrackerCA.h
+index 38a0034..3b3b9ed 100644
+--- a/rec/include/NA6PTrackerCA.h
++++ b/rec/include/NA6PTrackerCA.h
+@@ -19,6 +19,7 @@
+ #include <Rtypes.h>
+ #include "NA6PFastTrackFitter.h"
+ #include "NA6PTrack.h"
++#include "TH1F.h"
+ 
+ // Cellular Automaton track finder
+ 
+@@ -112,6 +113,8 @@ class NA6PTrackerCA
+   }
+   void configureFromRecoParamVT(const std::string& filename = "");
+   void configureFromRecoParamMS(const std::string& filename = "");
++  void initQAHistograms();
++  void saveQAHistograms(const std::string& filename);
+   void setVerbosity(bool opt = true) { mVerbose = opt; }
+ 
+   void printConfiguration() const;
+@@ -229,6 +232,22 @@ class NA6PTrackerCA
+   float mMaxChi2ndfCellsCA[kMaxIterationsCA] = {100., 500., 999.0, 999.0, 999.0, 999.0, 999.0, 999.0, 999.0, 999.0};
+   float mMaxChi2ndfTracksCA[kMaxIterationsCA] = {100., 500., 999.0, 999.0, 999.0, 999.0, 999.0, 999.0, 999.0, 999.0};
+   int mMinNClusTracksCA[kMaxIterationsCA] = {5, 3, 0, 0, 0, 0, 0, 0, 0, 0};
++  static constexpr int kQATruthCats = 2;
++  static constexpr int kQATrue = 0;
++  static constexpr int kQAFake = 1;
++  static constexpr int kMaxQALayers = 25;
++  int mCurrentIterationQA = -1;
++
++  TH1F* mHistDeltaThetaTracklets[kQATruthCats][kMaxIterationsCA][kMaxQALayers] = {};
++  TH1F* mHistDeltaPhiTracklets[kQATruthCats][kMaxIterationsCA][kMaxQALayers] = {};
++  TH1F* mHistDeltaTanLCells[kQATruthCats][kMaxIterationsCA][kMaxQALayers] = {};
++  TH1F* mHistDeltaPhiCells[kQATruthCats][kMaxIterationsCA][kMaxQALayers] = {};
++  TH1F* mHistDeltaPxPzCells[kQATruthCats][kMaxIterationsCA][kMaxQALayers] = {};
++  TH1F* mHistDeltaPyPzCells[kQATruthCats][kMaxIterationsCA][kMaxQALayers] = {};
++  TH1F* mHistChi2TrClCells[kQATruthCats][kMaxIterationsCA][kMaxQALayers] = {};
++  TH1F* mHistChi2ndfCells[kQATruthCats][kMaxIterationsCA][kMaxQALayers] = {};
++  TH1F* mHistChi2ndfTracks[kMaxIterationsCA] = {};
++  TH1F* mHistNClusTracks[kMaxIterationsCA] = {};
+ 
+   ClassDefNV(NA6PTrackerCA, 1);
+ };
+diff --git a/rec/src/NA6PFastTrackFitter.cxx b/rec/src/NA6PFastTrackFitter.cxx
+index 5a114f8..d16ad51 100644
+--- a/rec/src/NA6PFastTrackFitter.cxx
++++ b/rec/src/NA6PFastTrackFitter.cxx
+@@ -705,10 +705,18 @@ bool NA6PFastTrackFitter::fitTrackPoints(NA6PTrack& trackToFit, int dir, const N
+           else
+             propToNext = false;
+         } else {
+-          if (mClusters[jLay + stepLay])
+-            zNext = mClusters[jLay + stepLay]->getZLab();
+-          else
+-            continue;
++          int nextLayWithClus = -1;
++          for (int kLay = jLay + stepLay; kLay != endLay; kLay += stepLay) {
++            if (mClusters[kLay]) {
++              nextLayWithClus = kLay;
++              break;
++            }
++          }
++          if (nextLayWithClus < 0) {
++            propToNext = false;
++          } else {
++            zNext = mClusters[nextLayWithClus]->getZLab();
++          }
+         }
+       }
+     }
+diff --git a/rec/src/NA6PMatching.cxx b/rec/src/NA6PMatching.cxx
+index 9c0a846..7acd986 100644
+--- a/rec/src/NA6PMatching.cxx
++++ b/rec/src/NA6PMatching.cxx
+@@ -321,23 +321,30 @@ void NA6PMatching::runMCMatching()
+ void NA6PMatching::runDataMatching()
+ {
+   if (mIsZMatchingSet) {
++    //LOGP(info, "Propagating tracks to z = {} cm for matching", mZMatching);
+     propToZMatching(*hVerTelTrackPtr, mZMatching, true);
++    //LOGP(info, "Propagated VT tracks to z = {} cm for matching", mZMatching);
+     propToZMatching(*hMuonSpecTrackPtr, mZMatching);
++    //LOGP(info, "Propagated MS tracks to z = {} cm for matching", mZMatching);
+   }
+ 
+   auto validVerTelIndices = prefilterVerTelTracks();
+ 
+   for (const auto& msTrack : *hMuonSpecTrackPtr) {
++    LOGP(info, "Processing MS track with p = {:.2f} GeV/c, nHits = {}, particle ID = {}", msTrack.getP(), msTrack.getNHits(), msTrack.getParticleID());
+     if (msTrack.getNHits() < mMinMSHits)
+       continue;
+-
++    LOGP(info, "Found MS track with p = {:.2f} GeV/c, nHits = {}, particle ID = {}", msTrack.getP(), msTrack.getNHits(), msTrack.getParticleID());
+     auto [vtIdx, isTrueMatch, bestChi2] = findBestChi2Match(msTrack, validVerTelIndices);
+     if (vtIdx < 0)
+       continue;
+-
++    LOGP(info, "Best match for MS track with p = {:.2f} GeV/c has VT track with p = {:.2f} GeV/c, nHits = {}, particle ID = {}, chi2 = {:.2f}{}",
++         msTrack.getP(), (*hVerTelTrackPtr)[vtIdx].getP(), (*hVerTelTrackPtr)[vtIdx].getNHits(), (*hVerTelTrackPtr)[vtIdx].getParticleID(), bestChi2,
++         isTrueMatch ? " (true match)" : "");
+     const auto& vtTrack = (*hVerTelTrackPtr)[vtIdx];
+     int matchedPartID = isTrueMatch ? msTrack.getParticleID() : -std::abs(msTrack.getParticleID());
+     fitAndStoreMatchedTrack(vtTrack, msTrack, matchedPartID, bestChi2);
++    LOGP(info, "Stored matched track with particle ID = {}, match chi2 = {:.2f}", matchedPartID, bestChi2);
+   }
+ }
+ 
+@@ -352,8 +359,10 @@ void NA6PMatching::runMatching()
+   LOGP(info, "Process event with nVTTracks {} nMSTracks {}, primary vertex in z = {} cm", hVerTelTrackPtr->size(), hMuonSpecTrackPtr->size(), mPrimaryVertex->getZ());
+ 
+   if (mMCMatching) {
++    LOGP(info, "Running MC matching");
+     runMCMatching();
+   } else {
++    LOGP(info, "Running data matching");
+     runDataMatching();
+   }
+ 
+diff --git a/rec/src/NA6PMuonSpecReconstruction.cxx b/rec/src/NA6PMuonSpecReconstruction.cxx
+index f6e638a..412662e 100644
+--- a/rec/src/NA6PMuonSpecReconstruction.cxx
++++ b/rec/src/NA6PMuonSpecReconstruction.cxx
+@@ -31,6 +31,7 @@ bool NA6PMuonSpecReconstruction::initTracker()
+   NA6PReconstruction::init(mGeoFilName.c_str(), mGeoObjName.c_str());
+   mMSTracker = new NA6PTrackerCA();
+   mMSTracker->configureFromRecoParamMS();
++  mMSTracker->initQAHistograms();
+   mMSTracker->setParticleHypothesis(13); // muon mass hypothesis
+   mMSTracker->setUseIntegralBForSeed();
+   createTracksOutput();
+@@ -151,6 +152,9 @@ void NA6PMuonSpecReconstruction::closeTracksOutput()
+     mTrackFile->Close();
+     delete mTrackFile;
+     mTrackFile = nullptr;
++    if (mMSTracker) {
++      mMSTracker->saveQAHistograms(fmt::format("QAHistograms{}.root", getName()));
++    }
+   }
+ }
+ 
+diff --git a/rec/src/NA6PTrackerCA.cxx b/rec/src/NA6PTrackerCA.cxx
+index f333467..4342848 100644
+--- a/rec/src/NA6PTrackerCA.cxx
++++ b/rec/src/NA6PTrackerCA.cxx
+@@ -5,6 +5,8 @@
+ #include <fairlogger/Logger.h>
+ #include <TGeoManager.h>
+ #include <TSystem.h>
++#include <TCanvas.h>
++#include <TLine.h>
+ #include "MagneticField.h"
+ #include "NA6PRecoParam.h"
+ #include "NA6PVertex.h"
+@@ -14,7 +16,7 @@
+ 
+ ClassImp(NA6PTrackerCA)
+ 
+-  static constexpr float kThetaMax = M_PI_2 * 0.99f;
++  static constexpr float kThetaMax = M_PI_2 * 0.9999f;
+ 
+ //______________________________________________________________________
+ 
+@@ -40,6 +42,32 @@ NA6PTrackerCA::NA6PTrackerCA() : mLayerStart{0},
+ 
+ NA6PTrackerCA::~NA6PTrackerCA()
+ {
++  for (int it = 0; it < kMaxIterationsCA; ++it) {
++    for (int truth = 0; truth < kQATruthCats; ++truth) {
++      for (int iLayer = 0; iLayer < kMaxQALayers; ++iLayer) {
++        delete mHistDeltaThetaTracklets[truth][it][iLayer];
++        mHistDeltaThetaTracklets[truth][it][iLayer] = nullptr;
++        delete mHistDeltaPhiTracklets[truth][it][iLayer];
++        mHistDeltaPhiTracklets[truth][it][iLayer] = nullptr;
++        delete mHistDeltaTanLCells[truth][it][iLayer];
++        mHistDeltaTanLCells[truth][it][iLayer] = nullptr;
++        delete mHistDeltaPhiCells[truth][it][iLayer];
++        mHistDeltaPhiCells[truth][it][iLayer] = nullptr;
++        delete mHistDeltaPxPzCells[truth][it][iLayer];
++        mHistDeltaPxPzCells[truth][it][iLayer] = nullptr;
++        delete mHistDeltaPyPzCells[truth][it][iLayer];
++        mHistDeltaPyPzCells[truth][it][iLayer] = nullptr;
++        delete mHistChi2TrClCells[truth][it][iLayer];
++        mHistChi2TrClCells[truth][it][iLayer] = nullptr;
++        delete mHistChi2ndfCells[truth][it][iLayer];
++        mHistChi2ndfCells[truth][it][iLayer] = nullptr;
++      }
++    }
++    delete mHistChi2ndfTracks[it];
++    mHistChi2ndfTracks[it] = nullptr;
++    delete mHistNClusTracks[it];
++    mHistNClusTracks[it] = nullptr;
++  }
+   if (mTrackFitter)
+     delete mTrackFitter;
+   mTrackFitter = nullptr;
+@@ -94,6 +122,153 @@ void NA6PTrackerCA::setParticleHypothesis(int pdg)
+   }
+ }
+ 
++void NA6PTrackerCA::initQAHistograms()
++{
++  //init the QA histograms for the variable used by the CA track to cat the tracklets and cells in the different iterations. The histograms are stored as member variables of the class and filled during the tracking. They can be saved to a file at the end of the tracking using the saveQAHistograms method.
++
++  static const char* truthLabel[kQATruthCats] = {"True", "Fake"};
++  for(int it = 0; it < mNIterationsCA; ++it) {
++    for (int truth = 0; truth < kQATruthCats; ++truth) {
++      for (int iLayer = 0; iLayer < kMaxQALayers; ++iLayer) {
++        delete mHistDeltaThetaTracklets[truth][it][iLayer];
++        mHistDeltaThetaTracklets[truth][it][iLayer] = nullptr;
++        delete mHistDeltaPhiTracklets[truth][it][iLayer];
++        mHistDeltaPhiTracklets[truth][it][iLayer] = nullptr;
++        delete mHistDeltaTanLCells[truth][it][iLayer];
++        mHistDeltaTanLCells[truth][it][iLayer] = nullptr;
++        delete mHistDeltaPhiCells[truth][it][iLayer];
++        mHistDeltaPhiCells[truth][it][iLayer] = nullptr;
++        delete mHistDeltaPxPzCells[truth][it][iLayer];
++        mHistDeltaPxPzCells[truth][it][iLayer] = nullptr;
++        delete mHistDeltaPyPzCells[truth][it][iLayer];
++        mHistDeltaPyPzCells[truth][it][iLayer] = nullptr;
++        delete mHistChi2TrClCells[truth][it][iLayer];
++        mHistChi2TrClCells[truth][it][iLayer] = nullptr;
++        delete mHistChi2ndfCells[truth][it][iLayer];
++        mHistChi2ndfCells[truth][it][iLayer] = nullptr;
++      }
++    }
++    delete mHistChi2ndfTracks[it];
++    mHistChi2ndfTracks[it] = nullptr;
++    delete mHistNClusTracks[it];
++    mHistNClusTracks[it] = nullptr;
++
++    for (int truth = 0; truth < kQATruthCats; ++truth) {
++      for (int iLayer = 0; iLayer < mNLayers - 1 && iLayer < kMaxQALayers; ++iLayer) {
++        mHistDeltaThetaTracklets[truth][it][iLayer] = new TH1F(Form("hDeltaThetaTracklets%s_It%d_L%d_L%d", truthLabel[truth], it, iLayer, iLayer + 1), Form("Delta Theta between %s tracklets L%d-L%d;#Delta#theta (rad);Entries", truthLabel[truth], iLayer, iLayer + 1), 100, 0, 0.15);
++        mHistDeltaThetaTracklets[truth][it][iLayer]->SetDirectory(nullptr);
++        mHistDeltaPhiTracklets[truth][it][iLayer] = new TH1F(Form("hDeltaPhiTracklets%s_It%d_L%d_L%d", truthLabel[truth], it, iLayer, iLayer + 1), Form("Delta Phi between %s tracklets L%d-L%d;#Delta#phi (rad);Entries", truthLabel[truth], iLayer, iLayer + 1), 100, 0, TMath::Pi()/4.);
++        mHistDeltaPhiTracklets[truth][it][iLayer]->SetDirectory(nullptr);
++      }
++      for (int iLayer = 0; iLayer < mNLayers - 2 && iLayer < kMaxQALayers; ++iLayer) {
++        mHistDeltaTanLCells[truth][it][iLayer] = new TH1F(Form("hDeltaTanLCells%s_It%d_L%d_L%d_L%d", truthLabel[truth], it, iLayer, iLayer + 1, iLayer + 2), Form("Delta TanL between %s cells L%d-L%d-L%d;#Delta#tan#lambda;Entries", truthLabel[truth], iLayer, iLayer + 1, iLayer + 2), 100, 0, 10);
++        mHistDeltaTanLCells[truth][it][iLayer]->SetDirectory(nullptr);
++        mHistDeltaPhiCells[truth][it][iLayer] = new TH1F(Form("hDeltaPhiCells%s_It%d_L%d_L%d_L%d", truthLabel[truth], it, iLayer, iLayer + 1, iLayer + 2), Form("Delta Phi between %s cells L%d-L%d-L%d;#Delta#phi (rad);Entries", truthLabel[truth], iLayer, iLayer + 1, iLayer + 2), 100, 0, TMath::Pi()/4.);
++        mHistDeltaPhiCells[truth][it][iLayer]->SetDirectory(nullptr);
++        mHistDeltaPxPzCells[truth][it][iLayer] = new TH1F(Form("hDeltaPxPzCells%s_It%d_L%d_L%d_L%d", truthLabel[truth], it, iLayer, iLayer + 1, iLayer + 2), Form("Delta Px/Pz between %s cells L%d-L%d-L%d;#Delta(Px/Pz);Entries", truthLabel[truth], iLayer, iLayer + 1, iLayer + 2), 100, 0, 0.1);
++        mHistDeltaPxPzCells[truth][it][iLayer]->SetDirectory(nullptr);
++        mHistDeltaPyPzCells[truth][it][iLayer] = new TH1F(Form("hDeltaPyPzCells%s_It%d_L%d_L%d_L%d", truthLabel[truth], it, iLayer, iLayer + 1, iLayer + 2), Form("Delta Py/Pz between %s cells L%d-L%d-L%d;#Delta(Py/Pz);Entries", truthLabel[truth], iLayer, iLayer + 1, iLayer + 2), 100, 0, 0.1);
++        mHistDeltaPyPzCells[truth][it][iLayer]->SetDirectory(nullptr);
++        mHistChi2TrClCells[truth][it][iLayer] = new TH1F(Form("hChi2TrClCells%s_It%d_L%d_L%d_L%d", truthLabel[truth], it, iLayer, iLayer + 1, iLayer + 2), Form("Track-to-cluster #chi^{2} in %s cells L%d-L%d-L%d;#chi^{2};Entries", truthLabel[truth], iLayer, iLayer + 1, iLayer + 2), 100, 0, 20);
++        mHistChi2TrClCells[truth][it][iLayer]->SetDirectory(nullptr);
++        mHistChi2ndfCells[truth][it][iLayer] = new TH1F(Form("hChi2ndfCells%s_It%d_L%d_L%d_L%d", truthLabel[truth], it, iLayer, iLayer + 1, iLayer + 2), Form("%s cell fit #chi^{2}/ndf L%d-L%d-L%d;#chi^{2}/ndf;Entries", truthLabel[truth], iLayer, iLayer + 1, iLayer + 2), 100, 0, 20);
++        mHistChi2ndfCells[truth][it][iLayer]->SetDirectory(nullptr);
++      }
++    }
++    mHistChi2ndfTracks[it] = new TH1F(Form("hChi2ndfTracks_%d", it), "Track fit #chi^{2}/ndf;#chi^{2}/ndf;Entries", 1000, 0, 500);
++    mHistChi2ndfTracks[it]->SetDirectory(nullptr);
++    mHistNClusTracks[it] = new TH1F(Form("hNClusTracks_%d", it), "Number of clusters per fitted track;N_{clusters};Entries", 20, -0.5, 19.5);
++    mHistNClusTracks[it]->SetDirectory(nullptr);
++  }
++
++}
++
++void NA6PTrackerCA::saveQAHistograms(const std::string& filename)
++{
++  TFile* outFile = TFile::Open(filename.c_str(), "RECREATE");
++  if (!outFile || outFile->IsZombie()) {
++    LOGP(error, "Could not create output file: {}", filename);
++    return;
++  }
++
++  TDirectory* dirTrue = outFile->mkdir("True");
++  TDirectory* dirFake = outFile->mkdir("Fake");
++  TDirectory* dirCommon = outFile->mkdir("Common");
++
++  auto writeCanvasWithCut = [&](TH1F* hist, float cutValue, bool cutIsMin) {
++    if (!hist) {
++      return;
++    }
++    TCanvas canvas(Form("c_%s", hist->GetName()), hist->GetTitle(), 900, 700);
++    hist->SetLineWidth(2);
++    hist->Draw("hist");
++    const double ymax = std::max(1.0, hist->GetMaximum() * 1.1);
++    TLine cutLine(cutValue, 0., cutValue, ymax);
++    cutLine.SetLineColor(cutIsMin ? 4 : 2);
++    cutLine.SetLineWidth(2);
++    cutLine.SetLineStyle(2);
++    cutLine.Draw("same");
++    canvas.Write();
++  };
++
++  for(int it = 0; it < mNIterationsCA; ++it) {
++    for (int truth = 0; truth < kQATruthCats; ++truth) {
++      TDirectory* dirTopTruth = (truth == kQATrue) ? dirTrue : dirFake;
++      if (!dirTopTruth) {
++        continue;
++      }
++      TDirectory* dirIter = dirTopTruth->mkdir(Form("Iter%d", it));
++      if (!dirIter) {
++        continue;
++      }
++      dirIter->cd();
++
++      for (int iLayer = 0; iLayer < mNLayers - 1 && iLayer < kMaxQALayers; ++iLayer) {
++        if (mHistDeltaThetaTracklets[truth][it][iLayer]) {
++          writeCanvasWithCut(mHistDeltaThetaTracklets[truth][it][iLayer], mMaxDeltaThetaTrackletsCA[it], false);
++        }
++        if (mHistDeltaPhiTracklets[truth][it][iLayer]) {
++          writeCanvasWithCut(mHistDeltaPhiTracklets[truth][it][iLayer], mMaxDeltaPhiTrackletsCA[it], false);
++        }
++      }
++      for (int iLayer = 0; iLayer < mNLayers - 2 && iLayer < kMaxQALayers; ++iLayer) {
++        if (mHistDeltaTanLCells[truth][it][iLayer]) {
++          writeCanvasWithCut(mHistDeltaTanLCells[truth][it][iLayer], mMaxDeltaTanLCellsCA[it], false);
++        }
++        if (mHistDeltaPhiCells[truth][it][iLayer]) {
++          writeCanvasWithCut(mHistDeltaPhiCells[truth][it][iLayer], mMaxDeltaPhiCellsCA[it], false);
++        }
++        if (mHistDeltaPxPzCells[truth][it][iLayer]) {
++          writeCanvasWithCut(mHistDeltaPxPzCells[truth][it][iLayer], mMaxDeltaPxPzCellsCA[it], false);
++        }
++        if (mHistDeltaPyPzCells[truth][it][iLayer]) {
++          writeCanvasWithCut(mHistDeltaPyPzCells[truth][it][iLayer], mMaxDeltaPyPzCellsCA[it], false);
++        }
++        if (mHistChi2TrClCells[truth][it][iLayer]) {
++          writeCanvasWithCut(mHistChi2TrClCells[truth][it][iLayer], mMaxChi2TrClCellsCA[it], false);
++        }
++        if (mHistChi2ndfCells[truth][it][iLayer]) {
++          writeCanvasWithCut(mHistChi2ndfCells[truth][it][iLayer], mMaxChi2ndfCellsCA[it], false);
++        }
++      }
++    }
++
++    if (dirCommon) {
++      TDirectory* dirIterCommon = dirCommon->mkdir(Form("Iter%d", it));
++      if (dirIterCommon) {
++        dirIterCommon->cd();
++      }
++    }
++    if (mHistChi2ndfTracks[it]) {
++      writeCanvasWithCut(mHistChi2ndfTracks[it], mMaxChi2ndfTracksCA[it], false);
++    }
++    if (mHistNClusTracks[it]) {
++      writeCanvasWithCut(mHistNClusTracks[it], static_cast<float>(mMinNClusTracksCA[it]), true);
++    }
++  }
++  outFile->Close();
++}
++
+ void NA6PTrackerCA::configureFromRecoParamVT(const std::string& filename)
+ {
+   if (filename != "") {
+@@ -358,6 +533,8 @@ void NA6PTrackerCA::computeLayerTracklets(const std::vector<ClusterType>& cluArr
+ {
+ 
+   tracklets.clear();
++  const int qaIt = mCurrentIterationQA;
++  const bool fillQA = (qaIt >= 0 && qaIt < mNIterationsCA);
+   const float pvx = mPrimVertPos[0];
+   const float pvy = mPrimVertPos[1];
+   const float pvz = mPrimVertPos[2];
+@@ -413,7 +590,19 @@ void NA6PTrackerCA::computeLayerTracklets(const std::vector<ClusterType>& cluArr
+           dphi -= 2 * M_PI;
+         else if (dphi < -M_PI)
+           dphi += 2 * M_PI;
+-        if (std::abs(theta2 - theta1) < deltaThetaMax && std::abs(dphi) < deltaPhiMax) {
++        const float dThetaAbs = std::abs(theta2 - theta1);
++        const float dPhiAbs = std::abs(dphi);
++        if (fillQA) {
++          const bool isTrueTracklet = clu1.getParticleID() > 0 && clu1.getParticleID() == clu2.getParticleID();
++          const int truth = isTrueTracklet ? kQATrue : kQAFake;
++          if (iLayer >= 0 && iLayer < kMaxQALayers) {
++            if (mHistDeltaThetaTracklets[truth][qaIt][iLayer])
++              mHistDeltaThetaTracklets[truth][qaIt][iLayer]->Fill(dThetaAbs);
++            if (mHistDeltaPhiTracklets[truth][qaIt][iLayer])
++              mHistDeltaPhiTracklets[truth][qaIt][iLayer]->Fill(dPhiAbs);
++          }
++        }
++        if (dThetaAbs < deltaThetaMax && dPhiAbs < deltaPhiMax) {
+           float phi = std::atan2(y2 - y1, x2 - x1);
+           float tanL = (z2 - z1) / (r2 - r1);
+           float pxpz = (x2 - x1) / (z2 - z1);
+@@ -445,6 +634,8 @@ void NA6PTrackerCA::computeLayerCells(const std::vector<TrackletCandidate>& trac
+ {
+ 
+   cells.clear();
++  const int qaIt = mCurrentIterationQA;
++  const bool fillQA = (qaIt >= 0 && qaIt < mNIterationsCA);
+   for (int iLayer = 0; iLayer < mNLayers - 2; ++iLayer) {
+     auto layerBegin = tracklets.begin() + firstIndex[iLayer + 1];
+     auto layerEnd = tracklets.begin() + lastIndex[iLayer + 1];
+@@ -472,11 +663,42 @@ void NA6PTrackerCA::computeLayerCells(const std::vector<TrackletCandidate>& trac
+           dphi += 2 * M_PI;
+         float deltapxpz = std::abs(trkl2.pxpz - trkl1.pxpz);
+         float deltapypz = std::abs(trkl2.pypz - trkl1.pypz);
+-        if (deltapypz < deltaPyPzMax && deltapxpz < deltaPxPzMax && deltaTanLambda < deltaTanLMax && std::abs(dphi) < deltaPhiMax) {
+-          std::array<int, 3> cluIDs = {trkl1.firstClusterIndex, trkl2.firstClusterIndex, trkl2.secondClusterIndex};
++        const float dPhiAbs = std::abs(dphi);
++        std::array<int, 3> cluIDs = {trkl1.firstClusterIndex, trkl2.firstClusterIndex, trkl2.secondClusterIndex};
++        const int idPart0 = cluArr[cluIDs[0]].getParticleID();
++        const int idPart1 = cluArr[cluIDs[1]].getParticleID();
++        const int idPart2 = cluArr[cluIDs[2]].getParticleID();
++        const bool isTrueCell = idPart0 > 0 && idPart0 == idPart1 && idPart0 == idPart2;
++        const int truth = isTrueCell ? kQATrue : kQAFake;
++        if (fillQA) {
++          if (iLayer >= 0 && iLayer < kMaxQALayers) {
++            if (mHistDeltaTanLCells[truth][qaIt][iLayer])
++              mHistDeltaTanLCells[truth][qaIt][iLayer]->Fill(deltaTanLambda);
++            if (mHistDeltaPhiCells[truth][qaIt][iLayer])
++              mHistDeltaPhiCells[truth][qaIt][iLayer]->Fill(dPhiAbs);
++            if (mHistDeltaPxPzCells[truth][qaIt][iLayer])
++              mHistDeltaPxPzCells[truth][qaIt][iLayer]->Fill(deltapxpz);
++            if (mHistDeltaPyPzCells[truth][qaIt][iLayer])
++              mHistDeltaPyPzCells[truth][qaIt][iLayer]->Fill(deltapypz);
++          }
++        }
++        if (deltapypz < deltaPyPzMax && deltapxpz < deltaPxPzMax && deltaTanLambda < deltaTanLMax && dPhiAbs < deltaPhiMax) {
+           NA6PTrack fitTrackFast;
+           //	  genfit::Track fitTrack;
+           if (fitTrackPointsFast(std::vector<int>(cluIDs.begin(), cluIDs.end()), cluArr, fitTrackFast, maxChi2TrClu, maxChi2NDF)) {
++            if (fillQA) {
++              if (iLayer >= 0 && iLayer < kMaxQALayers) {
++                if (mHistChi2ndfCells[truth][qaIt][iLayer])
++                  mHistChi2ndfCells[truth][qaIt][iLayer]->Fill(fitTrackFast.getNormChi2());
++              }
++              if (iLayer >= 0 && iLayer < kMaxQALayers && mHistChi2TrClCells[truth][qaIt][iLayer]) {
++                float maxTrClChi2 = 0.f;
++                for (const auto cluID : cluIDs) {
++                  maxTrClChi2 = std::max(maxTrClChi2, computeTrackToClusterChi2(fitTrackFast, cluArr[cluID]));
++                }
++                mHistChi2TrClCells[truth][qaIt][iLayer]->Fill(maxTrClChi2);
++              }
++            }
+             cells.emplace_back(iLayer, jTrkl1, jTrkl2, std::move(cluIDs), fitTrackFast);
+           }
+         }
+@@ -770,6 +992,8 @@ void NA6PTrackerCA::fitAndSelectTracks(const std::vector<TrackCandidate>& trackC
+ 
+   std::vector<TrackFitted> fittedTracks;
+   fittedTracks.reserve(trackCands.size());
++  const int qaIt = mCurrentIterationQA;
++  const bool fillQA = (qaIt >= 0 && qaIt < mNIterationsCA);
+ 
+   // fit all track candidates
+   for (const auto& cand : trackCands) {
+@@ -789,13 +1013,19 @@ void NA6PTrackerCA::fitAndSelectTracks(const std::vector<TrackCandidate>& trackC
+     if (!fitSuccess)
+       continue;                      // skip if fit failed
+     nClus = fitTrackFast.getNHits(); // some clusters could have been rejected in the fit
++    float chi2ndf = fitTrackFast.getNormChi2();
++    if (fillQA) {
++      if (mHistChi2ndfTracks[qaIt])
++        mHistChi2ndfTracks[qaIt]->Fill(chi2ndf);
++      if (mHistNClusTracks[qaIt])
++        mHistNClusTracks[qaIt]->Fill(nClus);
++    }
+     if (nClus < minNClu)
+       continue;
+     // const genfit::AbsTrackRep* rep = fitTrack.getTrackRep(0);
+     // float chi2 = fitTrack.getFitStatus(rep)->getChi2();
+     // float ndf = fitTrack.getFitStatus(rep)->getNdf();
+     // float chi2ndf = (ndf > 0) ? chi2 / ndf : 9999.0;
+-    float chi2ndf = fitTrackFast.getNormChi2();
+     if (mDoOutwardPropagation) {
+       // outward fit (needed in VT for matching to Muon Spectrometer)
+       NA6PTrack outwRefit;
+@@ -936,6 +1166,7 @@ void NA6PTrackerCA::findTracks(std::vector<ClusterType>& cluArr, const NA6PVerte
+   std::vector<TrackCandidate> trackCandidates;
+   std::vector<TrackFitted> iterationTracks;
+   for (int jIteration = 0; jIteration < mNIterationsCA; ++jIteration) {
++    mCurrentIterationQA = jIteration;
+     if (mVerbose)
+       LOGP(info, " -> Iteration {} <-", jIteration);
+     foundTracklets.clear();
+@@ -976,6 +1207,7 @@ void NA6PTrackerCA::findTracks(std::vector<ClusterType>& cluArr, const NA6PVerte
+     }
+     mFinalTracks.insert(mFinalTracks.end(), iterationTracks.begin(), iterationTracks.end());
+   }
++  mCurrentIterationQA = -1;
+ }
+ 
+ //______________________________________________________________________
+diff --git a/rec/src/NA6PVerTelReconstruction.cxx b/rec/src/NA6PVerTelReconstruction.cxx
+index 51cb640..70250e2 100644
+--- a/rec/src/NA6PVerTelReconstruction.cxx
++++ b/rec/src/NA6PVerTelReconstruction.cxx
+@@ -59,6 +59,7 @@ bool NA6PVerTelReconstruction::initTracker()
+     LOGP(info, "Initializing tracker from file {}", mRecoParFilName.c_str());
+   mVTTracker->configureFromRecoParamVT(mRecoParFilName.c_str());
+   createTracksOutput();
++  mVTTracker->initQAHistograms();
+   return true;
+ }
+ 
+@@ -212,6 +213,7 @@ void NA6PVerTelReconstruction::closeTracksOutput()
+     mTrackFile->Close();
+     delete mTrackFile;
+     mTrackFile = nullptr;
++    mVTTracker->saveQAHistograms(fmt::format("QAHistograms{}.root", getName()));
+   }
+ }
+ 
+diff --git a/sim/src/NA6PMuonSpecModular.cxx b/sim/src/NA6PMuonSpecModular.cxx
+index ab4872f..5815ca3 100644
+--- a/sim/src/NA6PMuonSpecModular.cxx
++++ b/sim/src/NA6PMuonSpecModular.cxx
+@@ -24,7 +24,7 @@ void NA6PMuonSpecModular::placeSensors(float sideX, float sideY, float chipDX, f
+     
+     std::vector<float> moduleCenterX, moduleCenterY;
+     int modulesPerSideX = static_cast<int>(sideX / chipDX);
+-    int modulesPerSideY = static_cast<int>(sideX / chipDX);
++    int modulesPerSideY = static_cast<int>(sideY / chipDY);
+ 
+     // Generate positions for n x n grid
+     float baseStartX = -(modulesPerSideX - 1) * chipDX / 2.0f;
+diff --git a/sim/src/NA6PTarget.cxx b/sim/src/NA6PTarget.cxx
+index c929a27..b7379f0 100644
+--- a/sim/src/NA6PTarget.cxx
++++ b/sim/src/NA6PTarget.cxx
+@@ -7,7 +7,6 @@
+ #include "NA6PBeamParam.h"
+ #include "NA6PBeam.h"
+ 
+-#include <TGeoVolume.h>
+ #include <TGeoVolume.h>
+ #include <TGeoBBox.h>
+ #include <TGeoTube.h>

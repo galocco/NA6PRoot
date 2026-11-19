@@ -91,6 +91,7 @@ void NA6PTrackerCA::configureFromRecoParamVT()
   mRecoType = RecoType::VT;
   setPID(PID::Pion);
   const auto& param = NA6PRecoParam::Instance();
+  setDoInwardSeedExtension(param.caDoInwardSeedExtension);
   setDoOutwardPropagation(param.vtDoOutwardPropagation);
   setZForOutwardPropagation(param.vtZOutProp);
   setDoInwardRefit(param.vtDoInwardRefit);
@@ -126,6 +127,7 @@ void NA6PTrackerCA::configureFromRecoParamMS()
   mRecoType = RecoType::MS;
   setPID(PID::Muon);
   const auto& param = NA6PRecoParam::Instance();
+  setDoInwardSeedExtension(param.caDoInwardSeedExtension);
   setNumberOfIterations(param.msNIterationsTrackerCA);
   setNLayers(param.msNLayers);
   setStartLayer(param.vtNLayers);
@@ -157,7 +159,8 @@ void NA6PTrackerCA::configureFromRecoParamMS()
 void NA6PTrackerCA::printConfiguration() const
 {
   std::cout << "=== Tracker CA Configuration ===\n";
-  std::cout << "Number of iterations: " << mNIterationsCA << "\n\n";
+  std::cout << "Number of iterations: " << mNIterationsCA << "\n";
+  std::cout << "Inward seed extension: " << (mDoInwardSeedExtension ? "enabled" : "disabled") << "\n\n";
 
   std::cout << std::setw(5) << "Iter"
             << std::setw(10) << "dThetaTrk"
@@ -819,7 +822,9 @@ void NA6PTrackerCA::findRoads(const std::vector<std::pair<int, int>>& cneigh,
       continue;
     }
     TrackCandidate seed{innerLay, innerIndex, outerLay, outerIndex, cluIDsFull};
-    auto inwardTracks = prolongSeed(seed, cells, layers, firstIndex, lastIndex, cluArr, maxChi2TrClu, ExtendDirection::kInward);
+    auto inwardTracks = mDoInwardSeedExtension ?
+      prolongSeed(seed, cells, layers, firstIndex, lastIndex, cluArr, maxChi2TrClu, ExtendDirection::kInward) :
+      std::vector<TrackCandidate>{seed};
     for (const auto& track : inwardTracks) {
       auto fullTracks = prolongSeed(track, cells, layers, firstIndex, lastIndex, cluArr, maxChi2TrClu, ExtendDirection::kOutward);
       for (auto& finalTrack : fullTracks) {
