@@ -989,10 +989,35 @@ void NA6PTrackerCA::doIteration(int jIteration,
     printStats(mTrackCandidates, cluArr, mFoundCells, "track candidates");
   //
   fitAndSelectTracks(mTrackCandidates, cluArr, mIterationTracks, primVert, mMaxChi2TrClCellsCA[jIteration], mMinNClusTracksCA[jIteration], mMaxChi2ndfTracksCA[jIteration]);
+  if (mMinNClusTracksCA[jIteration] == 3) {
+    // A neighbouring cell pair needs at least four hits. Recover individual
+    // three-hit cells only after selecting the longer roads, so their clusters
+    // cannot be taken by a shorter candidate with a smaller chi2.
+    mTrackCandidates.clear();
+    for (size_t jCell = 0; jCell < mFoundCells.size(); ++jCell) {
+      const auto& cell = mFoundCells[jCell];
+      int nShared = 0;
+      for (int cluID : cell.cluIDs) {
+        nShared += mIsClusterUsed[cluID];
+      }
+      if (nShared > mMaxSharedClusters) {
+        continue;
+      }
+      std::vector<int> cluIDsFull(mNLayers, -1);
+      for (int cluID : cell.cluIDs) {
+        cluIDsFull[cluArr[cluID].getLayer() - mLayerStart] = cluID;
+      }
+      mTrackCandidates.push_back({cell.innerLayer, static_cast<int>(jCell),
+                                  cell.outerLayer, static_cast<int>(jCell), std::move(cluIDsFull)});
+    }
+    fitAndSelectTracks(mTrackCandidates, cluArr, mIterationTracks, primVert,
+                       mMaxChi2TrClCellsCA[jIteration], 3, mMaxChi2ndfTracksCA[jIteration]);
+  }
   if (mVerbose) {
     printStats(mIterationTracks, cluArr, mFoundCells, "selected tracks");
     printStats(mIterationTracks, cluArr, mFoundCells, "selected tracks", 5);
     printStats(mIterationTracks, cluArr, mFoundCells, "selected tracks", 4);
+    printStats(mIterationTracks, cluArr, mFoundCells, "selected tracks", 3);
   }
   for (auto& track : mIterationTracks) {
     track.trackFitFast.setCAIteration(iterationIdToSave);
