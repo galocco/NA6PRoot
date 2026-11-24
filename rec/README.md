@@ -16,7 +16,7 @@ na6prec <options> --configKeyValues "<semicolon-separated configurable params>"
 The detector layout is defined by the `ConfigurableParam`-based [NA6PRecoParam](../rec/include/NA6PRecoParam.h) class. Any parameter defined in this class can be modified from the command line:
 
 ```
-na6prec <options> --configKeyValues "rec.msNIterationsTrackerCA=3;rec.zMatching=170;<other settings>"
+na6prec <options> --configKeyValues "reco.msNIterationsTrackerCA=3;reco.mtZMatching=170;<other settings>"
 ```
 
 After execution,  a `na6pRecoParam.ini` file will be created containing the reconstruction settings.

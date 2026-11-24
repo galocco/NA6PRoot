@@ -89,8 +89,6 @@ struct NA6PRecoParam : public na6p::conf::ConfigurableParamHelper<NA6PRecoParam>
   bool mtDoOutwardInwardFit = true;
   bool mtPropagateMatchedTracksToPV = true;
   float mtZMatching = 40;
-  bool mtIsZMatchingSet = false;
-  bool mtMCMatching = true;
   int mtMinVTHits = 5;
   int mtMinMSHits = 6;
   float mtMaxChi2TrCl = 12.;
