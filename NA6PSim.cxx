@@ -42,7 +42,6 @@ int main(int argc, char** argv)
     add_option("user-hooks,u", bpo::value<std::string>()->default_value(""), "root macro C macro with user hooks for initialization");
     add_option("user-vertex,V", bpo::value<std::string>()->default_value(""), "root macro C macro with user method for vertex generation");
     add_option("rnd-seed,r", bpo::value<int64_t>()->default_value(-1), "random number seed, <0: generate from time + processID");
-    add_option("save-bfield,b", bpo::value<bool>()->default_value(false)->implicit_value(true), "Save magnetic field to file");
     add_option("doDigitization,dig", bpo::value<bool>()->default_value(true), "run hits->digits");
     add_option("digitize-only", bpo::value<bool>()->default_value(false)->implicit_value(true), "only run hits->digits using existing output files");
     add_option("event-offset", bpo::value<uint32_t>()->default_value(0), "global event ID offset for this job");
@@ -128,10 +127,6 @@ int main(int argc, char** argv)
   auto magField = new MagneticField();
   magField->loadField();
   magField->setAsGlobalField();
-  if (vm["save-bfield"].as<bool>()) {
-    LOGP(info, "Dumping the magnetic field map");
-    magField->dumpMagFieldFromConfig();
-  }
 
   auto runConfig = new TG4RunConfiguration("geomRoot", "FTFP_BERT");
   auto geant4 = new TGeant4("TGeant4", "Geant4 Monte Carlo Engine", runConfig, argc, argv);
