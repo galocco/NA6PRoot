@@ -90,6 +90,7 @@ int main(int argc, char** argv)
     add_option("lastevent,l", bpo::value<int32_t>()->default_value(-1), "last event (inclusive; -1 means end of file)");
     add_option("readMC", bpo::value<bool>()->default_value(true)->implicit_value(true), "read MC truth info");
     add_option("doHitsToRecPoints,hitcl", bpo::value<bool>()->default_value(true), "run hits->clusters");
+    add_option("doVTHitsToRecPoints", bpo::value<bool>()->default_value(true), "include VT in hits->clusters");
     add_option("doDigitsToRecPoints,cl", bpo::value<bool>()->default_value(false), "run digits->clusters");
     add_option("doTrackletVertex,vert", bpo::value<bool>()->default_value(true), "run tracklet vertexer");
     add_option("doVTTracking,vt", bpo::value<bool>()->default_value(true), "run VT tracker");
@@ -138,6 +139,7 @@ int main(int argc, char** argv)
 
   const bool doHitsToRecPoints = vm["doHitsToRecPoints"].as<bool>();
   const bool doDigitsToRecPoints = vm["doDigitsToRecPoints"].as<bool>();
+  const bool doVTHitsToRecPoints = doHitsToRecPoints && !doDigitsToRecPoints && vm["doVTHitsToRecPoints"].as<bool>();
   const bool doTrackletVertex = vm["doTrackletVertex"].as<bool>();
   const bool doVTTracking = vm["doVTTracking"].as<bool>();
   const bool doMSTracking = vm["doMSTracking"].as<bool>();
@@ -164,7 +166,7 @@ int main(int argc, char** argv)
   }
 
   std::unique_ptr<NA6PVerTelReconstruction> vtrec;
-  if (doHitsToRecPoints || doDigitsToRecPoints || doTrackletVertex || doVTTracking) {
+  if (doVTHitsToRecPoints || doDigitsToRecPoints || doTrackletVertex || doVTTracking) {
     vtrec = std::make_unique<NA6PVerTelReconstruction>(false);
     vtrec->setReadMCTruth(readMC);
     vtrec->setEnableTracksWithHoles(skipVTlays);
@@ -186,7 +188,7 @@ int main(int argc, char** argv)
 
   if (doHitsToRecPoints) {
     { // VTHits
-      if (!doDigitsToRecPoints) {
+      if (doVTHitsToRecPoints) {
         TreeFromFile tfVT("HitsVerTel.root", "hitsVerTel");
         std::vector<NA6PVerTelHit> vtHits, *vtHitsPtr = &vtHits;
         tfVT.getTree()->SetBranchAddress("VerTel", &vtHitsPtr);

@@ -46,6 +46,7 @@ int main(int argc, char** argv)
     add_option("digitize-only", bpo::value<bool>()->default_value(false)->implicit_value(true), "only run hits->digits using existing output files");
     add_option("event-offset", bpo::value<uint32_t>()->default_value(0), "global event ID offset for this job");
     add_option("skip-events", bpo::value<int64_t>()->default_value(0), "events to skip in the input generator before simulating");
+    add_option("record-muon-plug-length", bpo::bool_switch(), "save muon path lengths in the tungsten plug in MCKine");
     opt_all.add(opt_general).add(opt_hidden);
     bpo::store(bpo::command_line_parser(argc, argv).options(opt_all).positional(opt_pos).run(), vm);
     if (vm.count("help")) {
@@ -116,6 +117,7 @@ int main(int argc, char** argv)
   auto mc = new NA6PMC("NA6PMCApp", "NA6P Virtual Monte Carlo Application");
   mc->setVerbosity(vm["verbosity"].as<int>());
   mc->setEventOffset(vm["event-offset"].as<uint32_t>());
+  mc->setRecordMuonPlugLength(vm["record-muon-plug-length"].as<bool>());
   mc->setRandomSeed(vm["rnd-seed"].as<int64_t>());
   if (!vm["user-hooks"].as<std::string>().empty()) {
     mc->setupUserHooks(vm["user-hooks"].as<std::string>());

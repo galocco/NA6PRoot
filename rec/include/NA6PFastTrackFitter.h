@@ -50,6 +50,7 @@ class NA6PFastTrackFitter
 
   void enableMaterialCorrections() { mPropOpt.matCorr = Propagator::MatCorrType::USEMatCorrTGeo; }
   void disableMaterialCorrections() { mPropOpt.matCorr = Propagator::MatCorrType::USEMatCorrNONE; }
+  void setMuonRadiativeLoss(bool enabled) { mPropOpt.muonRadiativeLoss = enabled; }
   void setMaxPropagationStep(float v) { mPropOpt.maxStep = std::max(0.1f, std::abs(v)); }
   void setUseByPropagation(bool v = true) { mPropOpt.byOnly = v; }
 

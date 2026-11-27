@@ -169,13 +169,13 @@ void NA6PAbsorber::createGeometry(TGeoVolume* world)
         // place inside air
         airVol->AddNode(
           plugVol,
-          composeNonSensorVolID(isl + 200),
+          composeNonSensorVolID(isl + PlugCopyOffset),
           new TGeoTranslation(0.0, 0.0, 0.0));
       } else {
         // place directly in world
         world->AddNode(
           plugVol,
-          composeNonSensorVolID(isl + 200),
+          composeNonSensorVolID(isl + PlugCopyOffset),
           new TGeoTranslation(0.0, 0.0, zpos));
       }
     }

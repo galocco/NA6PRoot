@@ -1,6 +1,7 @@
 // NA6PCCopyright
 
 #include "NA6PMC.h"
+#include "NA6PAbsorber.h"
 #include "NA6PSimMisc.h"
 #include "NA6PDetector.h"
 #include "NA6PModule.h"
@@ -203,6 +204,9 @@ void NA6PMC::BeginEvent()
   mStack->clear();
   clearHits();
   mMCTracks.clear();
+  if (mRecordMuonPlugLength) {
+    mMuonPlugLengthByStackID.clear();
+  }
   if (mGenerator) {
     mGenerator->clear();
   }
@@ -248,8 +252,18 @@ void NA6PMC::Stepping()
   TVirtualMC::GetMC()->CurrentVolID(volCopy);
   if (NA6PModule::isSensor(volCopy)) {
     NA6PDetector::instance().getModule(NA6PModule::volID2ModuleID(volCopy))->stepManager(volCopy);
-  } else {
-    // non-sensitive volumes treatment
+  } else if (mRecordMuonPlugLength && volCopy >= mPlugCopyBase) {
+    const auto& layout = NA6PLayoutParam::Instance();
+    const int slice = volCopy - mPlugCopyBase;
+    auto* mc = TVirtualMC::GetMC();
+    if (slice < layout.nAbsorberSlices && layout.medAbsorberPlug[slice] == "Tungsten" &&
+        std::abs(mc->TrackPid()) == 13) {
+      // VMC reports a zero TrackStep for the synthetic boundary-entry callback.
+      const auto length = mc->TrackStep();
+      if (length > 0.) {
+        mMuonPlugLengthByStackID[mStack->GetCurrentTrackNumber()] += length;
+      }
+    }
   }
   const auto& cuts = NA6PGenCutParam::Instance();
   if (cuts.transportMaxAbsZ > 0 || cuts.transportMaxR) {
@@ -427,6 +441,11 @@ void NA6PMC::createKineOutput(const std::string& outDir)
   static NA6PMCEventHeader* mchPtr = mStack->getEventHeader();
   mKineTree->Branch("header", &mchPtr);
   mKineTree->Branch("tracks", &mMCTracksPtr);
+  if (mRecordMuonPlugLength) {
+    const auto* absorber = NA6PDetector::instance().getModule("Absorber");
+    mPlugCopyBase = absorber->composeNonSensorVolID(NA6PAbsorber::PlugCopyOffset);
+    mKineTree->Branch("muonPlugLengthCm", &mMuonPlugLengthCm);
+  }
   LOGP(info, "Will store MC Kinematics in {}", nm);
 }
 
@@ -446,6 +465,14 @@ void NA6PMC::closeKineOutput()
 void NA6PMC::writeKine()
 {
   if (mKineTree) {
+    if (mRecordMuonPlugLength) {
+      mMuonPlugLengthCm.assign(mMCTracks.size(), 0.f);
+      for (const auto& [stackID, length] : mMuonPlugLengthByStackID) {
+        if (stackID >= 0 && stackID < mRemap.size() && mRemap[stackID] >= 0) {
+          mMuonPlugLengthCm[mRemap[stackID]] = length;
+        }
+      }
+    }
     mKineTree->Fill();
   }
 }

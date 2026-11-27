@@ -175,7 +175,7 @@ class NA6PTrackPar
   bool propagateParamToZ(float z, float by); // Propagation in dipole field B=(0,By,0)
   bool propagateParamToZ(float z, const float* bxyz);
   bool propagateParamToZ(float z, const std::array<float, 3>& bxyz) { return propagateParamToZ(z, bxyz.data()); }
-  bool correctForELoss(float xrho, float density, float atomicZ, float zOverA, bool anglecorr = false);
+  bool correctForELoss(float xrho, float density, float atomicZ, float zOverA, bool anglecorr = false, float radiativeDEDX = 0.f);
   bool getZPCAToLine(float XL, float YL, float by, float& zca) const;
   std::string asString() const;
 

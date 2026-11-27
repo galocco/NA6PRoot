@@ -1,6 +1,7 @@
 // NA6PCCopyright
 
 #include "NA6PMatching.h"
+#include <algorithm>
 #include <TFile.h>
 #include <TTree.h>
 #include <TH1D.h>
@@ -35,6 +36,7 @@ bool NA6PMatching::initMatching()
   mRecoParam = &NA6PRecoParam::Instance();
   mTrackFitter = std::make_unique<NA6PFastTrackFitter>();
   mTrackFitter->enableMaterialCorrections();
+  mTrackFitter->setMuonRadiativeLoss(mRecoParam->mtMuonRadiativeLoss);
   mTrackFitter->setPropagateToPrimaryVertex(false);
   mTrackFitter->setMaxPropagationStep(mRecoParam->maxPropagationStep);
 
@@ -142,8 +144,7 @@ void NA6PMatching::buildMatchingCandidates(int iMS)
   auto lower = std::partition_point(mSelIDVT.begin(), mSelIDVT.end(), [&](size_t id) { return (*hVerTelTrackPtr)[id].getOuterParam().getQ2Pxz() < curv - err; });
   auto upper = std::partition_point(lower, mSelIDVT.end(), [&](size_t id) { return (*hVerTelTrackPtr)[id].getOuterParam().getQ2Pxz() < curv + err; });
 
-  float chi2Worst = -999.f;
-  int idWorst = -1, nCand = 0;
+  const auto firstCandidate = mMatchRecords.size();
   for (auto it = lower; it != upper; ++it) {
     const auto& vtTrackOut = (*hVerTelTrackPtr)[*it].getOuterParam();
     // crude check in diagonals only
@@ -163,15 +164,15 @@ void NA6PMatching::buildMatchingCandidates(int iMS)
     }
     chi2Match = msTrack.getPredictedChi2(vtTrackOut);
     if (chi2Match < mRecoParam->mtMaxChi2Match) {
-      if (chi2Match > chi2Worst) {
-        chi2Worst = chi2Match;
-        idWorst = mMatchRecords.size();
-      }
-      if (nCand < mRecoParam->mtMaxMatchesPerTrack) {
-        mMatchRecords.emplace_back(MatchRecord{.vtID = int(std::distance(mSelIDVT.begin(), it)), .msID = iMS, .chi2Match = chi2Match});
-        nCand++;
-      } else if (idWorst >= (int)mMatchRecords.size()) { // substitute the old worst match
-        mMatchRecords[idWorst] = MatchRecord{.vtID = int(std::distance(mSelIDVT.begin(), it)), .msID = iMS, .chi2Match = chi2Match};
+      const MatchRecord candidate{.vtID = int(std::distance(mSelIDVT.begin(), it)), .msID = iMS, .chi2Match = chi2Match};
+      if (mMatchRecords.size() - firstCandidate < mRecoParam->mtMaxMatchesPerTrack) {
+        mMatchRecords.push_back(candidate);
+      } else if (mMatchRecords.size() > firstCandidate) {
+        const auto worst = std::max_element(mMatchRecords.begin() + firstCandidate, mMatchRecords.end(),
+                                            [](const auto& a, const auto& b) { return a.chi2Match < b.chi2Match; });
+        if (candidate.chi2Match < worst->chi2Match) {
+          *worst = candidate;
+        }
       }
     }
 #ifdef _CHI2_TUNING_MODE_

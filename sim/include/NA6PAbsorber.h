@@ -10,6 +10,8 @@ class TGeoVolume;
 class NA6PAbsorber : public NA6PModule
 {
  public:
+  static constexpr int PlugCopyOffset = 200;
+
   NA6PAbsorber() : NA6PModule("Absorber") {}
   ~NA6PAbsorber() override = default;
   void createMaterials() override;

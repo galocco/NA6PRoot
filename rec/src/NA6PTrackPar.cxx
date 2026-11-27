@@ -190,7 +190,7 @@ bool NA6PTrackPar::getPosDirGlo(std::array<float, 7>& posdirp) const
   return true;
 }
 
-bool NA6PTrackPar::correctForELoss(float xrho, float density, float atomicZ, float zOverA, bool anglecorr)
+bool NA6PTrackPar::correctForELoss(float xrho, float density, float atomicZ, float zOverA, bool anglecorr, float radiativeDEDX)
 {
   //------------------------------------------------------------------
   // This function corrects the track parameters for the energy loss in crossed material.
@@ -200,6 +200,7 @@ bool NA6PTrackPar::correctForELoss(float xrho, float density, float atomicZ, flo
   // "density" - mean density (g/cm^3)
   // "atomicZ" - mean Z
   // "zOverA" - mean Z/A
+  // "radiativeDEDX" - mean radiative stopping power in GeV/(g/cm^2).
   // "anglecorr" - switch for the angular correction
   //------------------------------------------------------------------
   constexpr float kMinP = 0.01f; // kill below this momentum
@@ -224,7 +225,7 @@ bool NA6PTrackPar::correctForELoss(float xrho, float density, float atomicZ, flo
       dedx *= charge2;
     }
     float dE = dedx * xrho;
-    int na = 1 + int(std::abs(dE) / ekin * ELoss2EKinThreshInv);
+    int na = 1 + int(std::abs(dE + radiativeDEDX * xrho) / ekin * ELoss2EKinThreshInv);
     if (na > MaxELossIter) {
       na = MaxELossIter;
     }
@@ -238,6 +239,7 @@ bool NA6PTrackPar::correctForELoss(float xrho, float density, float atomicZ, flo
       }
 #endif
     }
+    const float dERad = radiativeDEDX * xrho;
     while (na--) {
 #ifdef _BB_NONCONST_CORR_
       if (dedxDer != 0.) { // correction for non-constantness of dedx vs beta*gamma (in linear approximation): for a single step dE -> dE * [(exp(dedxDer) - 1)/dedxDer]
@@ -248,7 +250,7 @@ bool NA6PTrackPar::correctForELoss(float xrho, float density, float atomicZ, flo
         dE *= corrC;
       }
 #endif
-      e += dE;
+      e += dE + dERad;
       if (e > m) { // stopped
         p = std::sqrt(e * e - getPID().getMass2());
       } else {

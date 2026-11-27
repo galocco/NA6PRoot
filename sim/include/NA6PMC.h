@@ -4,6 +4,8 @@
 
 #include <TVirtualMCApplication.h>
 #include <TParticle.h>
+#include <unordered_map>
+#include <vector>
 
 class NA6PMCStack;
 class NA6PGenerator;
@@ -48,6 +50,7 @@ class NA6PMC : public TVirtualMCApplication
 
   void setEventOffset(size_t offset) { mEventOffset = offset; }
   auto getEventOffset() const { return mEventOffset; }
+  void setRecordMuonPlugLength(bool value) { mRecordMuonPlugLength = value; }
 
   void init();
 
@@ -77,6 +80,10 @@ class NA6PMC : public TVirtualMCApplication
   std::vector<int> mRemap; // tmp vector for selected tracks remapping
   std::vector<int> mSavID; // tmp vector for selected tracks original indices
   std::vector<std::pair<int, int>> mDtList;
+  std::unordered_map<int, double> mMuonPlugLengthByStackID;
+  std::vector<float> mMuonPlugLengthCm; ///< aligned with tracks in MCKine
+  int mPlugCopyBase = -1;
+  bool mRecordMuonPlugLength = false;
   int mVerbosity = 0;
   ULong64_t mRandomSeed = 0;
   size_t mEventOffset = 0;

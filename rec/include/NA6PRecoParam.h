@@ -86,6 +86,7 @@ struct NA6PRecoParam : public na6p::conf::ConfigurableParamHelper<NA6PRecoParam>
   float msMaxChi2VertexConstrain = 30.;
 
   // Matching parameters
+  bool mtMuonRadiativeLoss = false;
   bool mtDoOutwardInwardFit = true;
   bool mtPropagateMatchedTracksToPV = true;
   float mtZMatching = 40;

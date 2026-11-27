@@ -726,7 +726,8 @@ bool NA6PTrackParCov::correctForMaterial(float x2x0, float xrho, float density, 
   return true;
 }
 
-bool NA6PTrackParCov::correctForMaterial(float x2x0, float xrho, float density, float atomicZ, float zOverA, NA6PTrackPar& linRef, bool anglecorr)
+bool NA6PTrackParCov::correctForMaterial(float x2x0, float xrho, float density, float atomicZ, float zOverA,
+                                       NA6PTrackPar& linRef, bool anglecorr, float radiativeDEDX)
 {
   //------------------------------------------------------------------
   // This function corrects the track parameters for the crossed material.
@@ -734,7 +735,7 @@ bool NA6PTrackParCov::correctForMaterial(float x2x0, float xrho, float density, 
   // "xrho" - is the product length*density (g/cm^2).
   //     It should be passed as negative when propagating tracks
   //     from the intreaction point to the outside of the central barrel.
-  // "dedx" - mean enery loss (GeV/(g/cm^2), if <=kCalcdEdxAuto : calculate on the fly
+  // "radiativeDEDX" - mean radiative stopping power in GeV/(g/cm^2).
   // "anglecorr" - switch for the angular correction
   //------------------------------------------------------------------
 #ifdef _SAVE_TRACK_FOR_DEBUG_
@@ -765,7 +766,8 @@ bool NA6PTrackParCov::correctForMaterial(float x2x0, float xrho, float density, 
       dedx *= charge2;
     }
     float dE = dedx * xrho;
-    int na = 1 + int(std::abs(dE) / ekin * ELoss2EKinThreshInv);
+    const float dERadTotal = radiativeDEDX * xrho;
+    int na = 1 + int(std::abs(dE + dERadTotal) / ekin * ELoss2EKinThreshInv);
     if (na > MaxELossIter) {
       na = MaxELossIter;
     }
@@ -779,6 +781,7 @@ bool NA6PTrackParCov::correctForMaterial(float x2x0, float xrho, float density, 
       }
 #endif
     }
+    const float dERad = radiativeDEDX * xrho;
     while (na--) {
 #ifdef _BB_NONCONST_CORR_
       if (dedxDer != 0.) { // correction for non-constantness of dedx vs beta*gamma (in linear approximation): for a single step dE -> dE * [(exp(dedxDer) - 1)/dedxDer]
@@ -789,7 +792,7 @@ bool NA6PTrackParCov::correctForMaterial(float x2x0, float xrho, float density, 
         dE *= corrC;
       }
 #endif
-      e += dE;
+      e += dE + dERad;
       if (e > m) { // stopped
         p = std::sqrt(e * e - getPID().getMass2());
       } else {
@@ -814,7 +817,7 @@ bool NA6PTrackParCov::correctForMaterial(float x2x0, float xrho, float density, 
     if (p < kMinP) {
       return false;
     }
-    dETot = e - e0;
+    dETot = e - e0 - dERadTotal; // Keep the existing fluctuation estimate tied to ionization.
   } // end of e.loss correction
 
   // Calculating the multiple scattering corrections******************

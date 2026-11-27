@@ -45,7 +45,8 @@ class Propagator
     float maxStep{2.0f};
     MatCorrType matCorr{MatCorrType::USEMatCorrTGeo};
     bool byOnly{false};
-    ClassDefNV(PropOpt, 1);
+    bool muonRadiativeLoss{false}; ///< add mean radiative stopping power for muons
+    ClassDefNV(PropOpt, 2);
   };
 
   bool propagateToZ(NA6PTrackParCov& track, float z) const;
@@ -126,7 +127,8 @@ class Propagator
   ~Propagator() = default;
 
   template <typename T = float>
-  MatBudget getMeanMaterialBudgetFromGeom(const T* start, const T* end) const;
+  MatBudget getMeanMaterialBudgetFromGeom(const T* start, const T* end, float muonEnergy = 0.f,
+                                         float* radiativeDEDX = nullptr) const;
   template <typename T = float>
   MatBudget getMeanMaterialBudgetFromGeom(const std::array<T, 3>& start, const std::array<T, 3>& end) const
   {
